@@ -210,7 +210,7 @@ export default function BatchDetailsPage() {
         <DashboardLayout>
             <div className="space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <Button
                             variant="ghost"
@@ -219,10 +219,10 @@ export default function BatchDetailsPage() {
                             <ArrowLeft className="w-4 h-4 ml-2" />
                             العودة للدفعات
                         </Button>
-                        <h1 className="text-3xl font-bold">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">
                             دفعة {batch.name} - {batch.year}
                         </h1>
-                        <p className="text-muted-foreground mt-1">
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                             {batch.department?.nameAr || "غير محدد"} •{" "}
                             {batch.curriculum.name} ({batch.curriculum.version})
                         </p>
@@ -230,7 +230,7 @@ export default function BatchDetailsPage() {
                 </div>
 
                 {/* Statistics Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
@@ -316,7 +316,7 @@ export default function BatchDetailsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                             <div className="text-center">
                                 <div className="text-3xl font-bold text-green-600">
                                     {statistics.performance.excellent}
@@ -386,6 +386,7 @@ export default function BatchDetailsPage() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
+                            <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -439,6 +440,7 @@ export default function BatchDetailsPage() {
                                     })}
                                 </TableBody>
                             </Table>
+                            </div>
                         </CardContent>
                     </Card>
                 )}
@@ -453,8 +455,8 @@ export default function BatchDetailsPage() {
                     </CardHeader>
                     <CardContent>
                         {/* Filters */}
-                        <div className="flex gap-4 mb-4 flex-wrap">
-                            <div className="flex-1 min-w-[200px]">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4">
+                            <div className="flex-1 min-w-0">
                                 <input
                                     type="text"
                                     placeholder="بحث بالاسم أو الرقم الجامعي..."
@@ -470,7 +472,7 @@ export default function BatchDetailsPage() {
                                 onChange={(e) =>
                                     setStatusFilter(e.target.value)
                                 }
-                                className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                className="flex h-10 w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm">
                                 <option value="ALL">جميع الحالات</option>
                                 <option value="ACTIVE">نشط</option>
                                 <option value="GRADUATED">متخرج</option>
@@ -487,7 +489,7 @@ export default function BatchDetailsPage() {
                                             | "credits"
                                     )
                                 }
-                                className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                className="flex h-10 w-full sm:w-auto rounded-md border border-input bg-background px-3 py-2 text-sm">
                                 <option value="name">الترتيب حسب الاسم</option>
                                 <option value="gpa">الترتيب حسب المعدل</option>
                                 <option value="credits">
@@ -497,6 +499,7 @@ export default function BatchDetailsPage() {
                             <Button
                                 variant="outline"
                                 size="sm"
+                                className="w-full sm:w-auto"
                                 onClick={() =>
                                     setSortOrder(
                                         sortOrder === "asc" ? "desc" : "asc"
