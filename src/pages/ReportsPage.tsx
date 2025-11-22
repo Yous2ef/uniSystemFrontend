@@ -340,7 +340,7 @@ export default function ReportsPage() {
                                 </div>
                             ) : (
                                 <>
-                                    <div className="grid grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                                         <Card>
                                             <CardContent className="pt-6">
                                                 <div className="flex items-center gap-3">
@@ -415,7 +415,7 @@ export default function ReportsPage() {
                                         </Card>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                         <Card>
                                             <CardHeader>
                                                 <CardTitle>
@@ -530,7 +530,7 @@ export default function ReportsPage() {
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <p className="text-sm text-gray-500">
                                                         الرقم الجامعي
@@ -612,6 +612,7 @@ export default function ReportsPage() {
                                                     </div>
                                                 </CardHeader>
                                                 <CardContent>
+                                                    <div className="overflow-x-auto">
                                                     <Table>
                                                         <TableHeader>
                                                             <TableRow>
@@ -674,6 +675,7 @@ export default function ReportsPage() {
                                                             )}
                                                         </TableBody>
                                                     </Table>
+                                                    </div>
                                                 </CardContent>
                                             </Card>
                                         )
@@ -737,6 +739,7 @@ export default function ReportsPage() {
                                                 </span>
                                             </p>
                                         </div>
+                                        <div className="overflow-x-auto">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow>
@@ -790,6 +793,7 @@ export default function ReportsPage() {
                                                 )}
                                             </TableBody>
                                         </Table>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ) : selectedTerm && loadingGrades ? (
@@ -898,6 +902,7 @@ export default function ReportsPage() {
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
+                                            <div className="overflow-x-auto">
                                             <Table>
                                                 <TableHeader>
                                                     <TableRow>
@@ -972,6 +977,7 @@ export default function ReportsPage() {
                                                     )}
                                                 </TableBody>
                                             </Table>
+                                            </div>
                                         </CardContent>
                                     </Card>
                                 </>
