@@ -88,7 +88,7 @@ export default function SectionsPage() {
             fetchSections();
         } catch (error) {
             console.error("Error deleting section:", error);
-            alert("فشل حذف الشعبة");
+            alert(t("pages.sections.deleteFailed"));
         }
     };
 
@@ -135,7 +135,7 @@ export default function SectionsPage() {
                             {t("sections.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الشعب الدراسية
+                            {t("pages.sections.subtitle")}
                         </p>
                     </div>
                     <Button

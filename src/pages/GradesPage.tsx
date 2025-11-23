@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Save, Eye } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ interface Student {
 }
 
 export default function GradesPage() {
+    const { t } = useTranslation();
     const [terms, setTerms] = useState<{ id: string; name: string }[]>([]);
     const [sections, setSections] = useState<
         { id: string; code: string; course: { nameAr: string } }[]
@@ -132,11 +134,11 @@ export default function GradesPage() {
             });
 
             await Promise.all(updates);
-            alert("تم حفظ الدرجات بنجاح");
+            alert(t("pages.grades.saveSuccess"));
             setGrades({});
         } catch (error) {
             console.error("Error saving grades:", error);
-            alert("حدث خطأ أثناء حفظ الدرجات");
+            alert(t("pages.grades.saveFailed"));
         } finally {
             setLoading(false);
         }
@@ -145,7 +147,7 @@ export default function GradesPage() {
     const handlePublishGrades = async () => {
         if (
             !confirm(
-                "هل أنت متأكد من نشر الدرجات؟ لن تتمكن من التعديل بعد النشر"
+                t("pages.grades.publishConfirm")
             )
         )
             return;
@@ -153,10 +155,10 @@ export default function GradesPage() {
         try {
             setLoading(true);
             await gradesService.publishFinalGrades(selectedSection);
-            alert("تم نشر الدرجات بنجاح");
+            alert(t("pages.grades.publishSuccess"));
         } catch (error) {
             console.error("Error publishing grades:", error);
-            alert("حدث خطأ أثناء نشر الدرجات");
+            alert(t("pages.grades.publishFailed"));
         } finally {
             setLoading(false);
         }
@@ -183,10 +185,10 @@ export default function GradesPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            إدارة الدرجات
+                            {t("pages.grades.title")}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            إدخال ونشر درجات الطلاب
+                            {t("pages.grades.subtitle")}
                         </p>
                     </div>
                     {selectedSection && (
@@ -197,7 +199,7 @@ export default function GradesPage() {
                                     Object.keys(grades).length === 0 || loading
                                 }>
                                 <Save className="w-4 h-4 me-2" />
-                                حفظ الدرجات
+                                {t("pages.grades.saveGrades")}
                             </Button>
                             <Button
                                 variant="default"

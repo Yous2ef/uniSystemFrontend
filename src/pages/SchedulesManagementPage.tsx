@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, Calendar, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,17 +41,8 @@ interface Section {
     }[];
 }
 
-const daysMap: Record<string, string> = {
-    "0": "الأحد",
-    "1": "الاثنين",
-    "2": "الثلاثاء",
-    "3": "الأربعاء",
-    "4": "الخميس",
-    "5": "الجمعة",
-    "6": "السبت",
-};
-
 export default function SchedulesManagementPage() {
+    const { t } = useTranslation();
     const [sections, setSections] = useState<Section[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -58,6 +50,16 @@ export default function SchedulesManagementPage() {
     const [selectedSection, setSelectedSection] = useState<Section | null>(
         null
     );
+
+    const daysMap: Record<string, string> = {
+        "0": t("schedules.days.sunday"),
+        "1": t("schedules.days.monday"),
+        "2": t("schedules.days.tuesday"),
+        "3": t("schedules.days.wednesday"),
+        "4": t("schedules.days.thursday"),
+        "5": t("schedules.days.friday"),
+        "6": t("schedules.days.saturday"),
+    };
 
     useEffect(() => {
         fetchSections();
@@ -81,14 +83,14 @@ export default function SchedulesManagementPage() {
         sectionId: string,
         scheduleId: string
     ) => {
-        if (!confirm("هل أنت متأكد من حذف هذا الموعد؟")) return;
+        if (!confirm(t("schedules.deleteConfirm"))) return;
 
         try {
             await sectionsService.deleteSchedule(sectionId, scheduleId);
             await fetchSections();
         } catch (error) {
             console.error("Error deleting schedule:", error);
-            alert("فشل حذف الموعد");
+            alert(t("schedules.deleteFailed"));
         }
     };
 
@@ -114,10 +116,10 @@ export default function SchedulesManagementPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                            إدارة المواعيد
+                            {t("schedules.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إضافة وإدارة مواعيد الشعب الدراسية
+                            {t("schedules.subtitle")}
                         </p>
                     </div>
                 </div>
@@ -127,7 +129,7 @@ export default function SchedulesManagementPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                إجمالي الشعب
+                                {t("schedules.totalSections")}
                             </CardTitle>
                             <Calendar className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
@@ -136,7 +138,7 @@ export default function SchedulesManagementPage() {
                                 {filteredSections.length}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                في الفصل الدراسي
+                                {t("schedules.inTerm")}
                             </p>
                         </CardContent>
                     </Card>
@@ -144,7 +146,7 @@ export default function SchedulesManagementPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                لها مواعيد
+                                {t("schedules.withSchedules")}
                             </CardTitle>
                             <CheckCircle className="h-4 w-4 text-green-600" />
                         </CardHeader>
@@ -154,12 +156,14 @@ export default function SchedulesManagementPage() {
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
                                 {sectionsWithSchedules.length > 0
-                                    ? `${(
-                                          (sectionsWithSchedules.length /
-                                              filteredSections.length) *
-                                          100
-                                      ).toFixed(0)}% من الشعب`
-                                    : "لا توجد شعب بمواعيد"}
+                                    ? t("schedules.percentOfSections", {
+                                          percent: (
+                                              (sectionsWithSchedules.length /
+                                                  filteredSections.length) *
+                                              100
+                                          ).toFixed(0)
+                                      })
+                                    : t("schedules.noScheduledSections")}
                             </p>
                         </CardContent>
                     </Card>
@@ -167,7 +171,7 @@ export default function SchedulesManagementPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                بدون مواعيد
+                                {t("schedules.withoutSchedules")}
                             </CardTitle>
                             <XCircle className="h-4 w-4 text-red-600" />
                         </CardHeader>
@@ -176,7 +180,7 @@ export default function SchedulesManagementPage() {
                                 {sectionsWithoutSchedules.length}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                تحتاج إلى إضافة مواعيد
+                                {t("schedules.needSchedules")}
                             </p>
                         </CardContent>
                     </Card>
@@ -185,11 +189,11 @@ export default function SchedulesManagementPage() {
                 {/* Search */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>البحث والتصفية</CardTitle>
+                        <CardTitle>{t("schedules.searchAndFilter")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Input
-                            placeholder="ابحث عن شعبة أو مادة..."
+                            placeholder={t("schedules.searchPlaceholder")}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full"
@@ -200,30 +204,30 @@ export default function SchedulesManagementPage() {
                 {/* Sections Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>الشعب والمواعيد</CardTitle>
+                        <CardTitle>{t("schedules.sectionsAndSchedules")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {loading ? (
                             <div className="text-center py-8 text-gray-500">
-                                جاري التحميل...
+                                {t("common.loading")}
                             </div>
                         ) : filteredSections.length === 0 ? (
                             <div className="text-center py-8 text-gray-500">
-                                لا توجد شعب
+                                {t("schedules.noSections")}
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>رمز الشعبة</TableHead>
-                                        <TableHead>المادة</TableHead>
-                                        <TableHead>الفصل الدراسي</TableHead>
-                                        <TableHead>المدرس</TableHead>
-                                        <TableHead>المواعيد</TableHead>
-                                        <TableHead>الحالة</TableHead>
+                                        <TableHead>{t("sections.code")}</TableHead>
+                                        <TableHead>{t("schedules.course")}</TableHead>
+                                        <TableHead>{t("schedules.term")}</TableHead>
+                                        <TableHead>{t("schedules.instructor")}</TableHead>
+                                        <TableHead>{t("schedules.schedules")}</TableHead>
+                                        <TableHead>{t("common.status")}</TableHead>
                                         <TableHead className="text-end">
-                                            إجراءات
+                                            {t("common.actions")}
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -248,7 +252,7 @@ export default function SchedulesManagementPage() {
                                             </TableCell>
                                             <TableCell>
                                                 {section.faculty?.nameAr ||
-                                                    "غير محدد"}
+                                                    t("schedules.notSpecified")}
                                             </TableCell>
                                             <TableCell>
                                                 {section.schedules &&
@@ -307,7 +311,7 @@ export default function SchedulesManagementPage() {
                                                     </div>
                                                 ) : (
                                                     <span className="text-sm text-muted-foreground">
-                                                        لا توجد مواعيد
+                                                        {t("schedules.noSchedules")}
                                                     </span>
                                                 )}
                                             </TableCell>
@@ -316,12 +320,12 @@ export default function SchedulesManagementPage() {
                                                 section.schedules.length > 0 ? (
                                                     <Badge className="bg-green-100 text-green-800 border-green-200">
                                                         <CheckCircle className="w-3 h-3 ml-1" />
-                                                        مكتمل
+                                                        {t("schedules.complete")}
                                                     </Badge>
                                                 ) : (
                                                     <Badge className="bg-red-100 text-red-800 border-red-200">
                                                         <XCircle className="w-3 h-3 ml-1" />
-                                                        ناقص
+                                                        {t("schedules.incomplete")}
                                                     </Badge>
                                                 )}
                                             </TableCell>
@@ -337,7 +341,7 @@ export default function SchedulesManagementPage() {
                                                         setModalOpen(true);
                                                     }}>
                                                     <Plus className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                                                    إضافة موعد
+                                                    {t("schedules.addSchedule")}
                                                 </Button>
                                             </TableCell>
                                         </TableRow>

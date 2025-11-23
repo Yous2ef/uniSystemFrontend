@@ -78,62 +78,62 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
         // Faculty-only pages
         {
             icon: LayoutDashboard,
-            label: "لوحة التحكم",
+            label: t("nav.dashboard"),
             path: "/faculty/dashboard",
             roles: ["FACULTY", "TA"],
         },
         // Student-only pages
         {
             icon: LayoutDashboard,
-            label: "لوحة التحكم",
+            label: t("nav.dashboard"),
             path: "/student/dashboard",
             roles: ["STUDENT"],
         },
         {
             icon: Calendar,
-            label: "التسجيل",
+            label: t("nav.registration"),
             path: "/student/registration",
             roles: ["STUDENT"],
         },
         {
             icon: BookOpen,
-            label: "موادي الدراسية",
+            label: t("nav.mySubjects"),
             path: "/student/subjects",
             roles: ["STUDENT"],
         },
         {
             icon: GraduationCap,
-            label: "الدرجات",
+            label: t("nav.grades"),
             path: "/student/grades",
             roles: ["STUDENT"],
         },
         {
             icon: CalendarDays,
-            label: "جدولي الدراسي",
+            label: t("nav.mySchedule"),
             path: "/student/schedule",
             roles: ["STUDENT"],
         },
         {
             icon: Eye,
-            label: "الحضور والغياب",
+            label: t("nav.attendance"),
             path: "/student/attendance",
             roles: ["STUDENT"],
         },
         {
             icon: FolderOpen,
-            label: "طلباتي",
+            label: t("nav.myRequests"),
             path: "/student/requests",
             roles: ["STUDENT"],
         },
         {
             icon: School,
-            label: "اختيار التخصص",
+            label: t("nav.departmentSelection"),
             path: "/student/department-selection",
             roles: ["STUDENT"],
         },
         {
             icon: Settings,
-            label: "الإعدادات",
+            label: t("nav.settings"),
             path: "/student/settings",
             roles: ["STUDENT"],
         },
@@ -146,7 +146,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
         },
         {
             icon: ClipboardList,
-            label: "طلبات التخصصات",
+            label: t("nav.departmentApplications"),
             path: "/department-applications",
             roles: ["SUPER_ADMIN", "ADMIN"],
         },
@@ -195,7 +195,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
         },
         {
             icon: Clock,
-            label: "إدارة المواعيد",
+            label: t("nav.schedules"),
             path: "/schedules",
             roles: ["SUPER_ADMIN", "ADMIN"],
         },
@@ -240,7 +240,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                 {/* Logo */}
                 <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     <h1 className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                        جامعتي
+                        {t("common.appName")}
                     </h1>
                 </div>
 
@@ -277,7 +277,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                             >
                                 <span className="flex items-center gap-2">
                                     <BookOpen className="w-4 h-4" />
-                                    موادي الدراسية
+                                    {t("nav.myCourses")}
                                 </span>
                                 {showCourses ? (
                                     <ChevronUp className="w-4 h-4" />

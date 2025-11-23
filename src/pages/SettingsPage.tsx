@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -84,6 +85,7 @@ interface SystemSettings {
 }
 
 export default function SettingsPage() {
+    const { t } = useTranslation();
     const [settings, setSettings] = useState<SystemSettings>({
         universityName: "جامعة الملك سعود",
         universityNameEn: "King Saud University",
@@ -127,7 +129,7 @@ export default function SettingsPage() {
         totalCourses: 0,
         activeTerms: 0,
         databaseSize: "0 MB",
-        lastBackup: "لم يتم عمل نسخة احتياطية",
+        lastBackup: "",
     });
 
     useEffect(() => {
@@ -176,10 +178,10 @@ export default function SettingsPage() {
             // TODO: Replace with actual API call
             // await api.put("/settings", settings);
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            setSaveMessage({ type: "success", text: "تم حفظ الإعدادات بنجاح" });
+            setSaveMessage({ type: "success", text: t("pages.settings.saveSuccess") });
         } catch (error) {
             console.error("Error saving settings:", error);
-            setSaveMessage({ type: "error", text: "فشل حفظ الإعدادات" });
+            setSaveMessage({ type: "error", text: t("pages.settings.saveFailed") });
         } finally {
             setIsSaving(false);
         }
@@ -208,13 +210,13 @@ export default function SettingsPage() {
                 document.body.removeChild(a);
 
                 alert(
-                    `تم إنشاء النسخة الاحتياطية وتحميلها بنجاح: ${result.data.filename}`
+                    t("pages.settings.backupSuccess") + ": " + result.data.filename
                 );
                 loadStats();
             }
         } catch (error) {
             console.error("Error backing up database:", error);
-            alert("فشل إنشاء النسخة الاحتياطية");
+            alert(t("pages.settings.backupFailed"));
         }
     };
 
@@ -234,7 +236,7 @@ export default function SettingsPage() {
 
             if (
                 !confirm(
-                    `هل أنت متأكد من استعادة قاعدة البيانات من الملف: ${file.name}؟ سيتم استبدال جميع البيانات الحالية.`
+                    t("pages.settings.restoreConfirm", { filename: file.name })
                 )
             ) {
                 return;
@@ -247,12 +249,12 @@ export default function SettingsPage() {
                 const response = await backupService.uploadAndRestore(formData);
 
                 if (response.success) {
-                    alert("تم استعادة قاعدة البيانات بنجاح");
+                    alert(t("pages.settings.restoreSuccess"));
                     loadStats();
                 }
             } catch (error) {
                 console.error("Error restoring database:", error);
-                alert("فشلت عملية الاستعادة");
+                alert(t("pages.settings.restoreFailed"));
             }
         };
 
@@ -263,11 +265,11 @@ export default function SettingsPage() {
         try {
             const result = await backupService.clearCache();
             if (result.success) {
-                alert(result.message || "تم مسح ذاكرة التخزين المؤقت بنجاح");
+                alert(result.message || t("pages.settings.cacheCleared"));
             }
         } catch (error) {
             console.error("Error clearing cache:", error);
-            alert("فشل مسح ذاكرة التخزين المؤقت");
+            alert(t("pages.settings.cacheClearFailed"));
         }
     };
 
@@ -288,37 +290,37 @@ export default function SettingsPage() {
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
 
-            alert(`تم تصدير ${type} بنجاح`);
+            alert(t("pages.settings.exportSuccess", { type }));
         } catch (error) {
             console.error("Error exporting data:", error);
-            alert("فشل تصدير البيانات");
+            alert(t("pages.settings.exportFailed"));
         }
     };
 
     const handleDeleteAllData = async () => {
         const confirmation = prompt(
-            'هذا الإجراء خطير جداً! سيتم حذف جميع البيانات ماعدا حساب الأدمن.\n\nاكتب "حذف" للتأكيد:'
+            t("pages.settings.deleteAllDataPrompt")
         );
 
-        if (confirmation !== "حذف") {
-            alert("تم إلغاء العملية");
+        if (confirmation !== t("pages.settings.deleteKeyword")) {
+            alert(t("pages.settings.operationCancelled"));
             return;
         }
 
-        if (!confirm("هل أنت متأكد تماماً؟ لا يمكن التراجع عن هذا الإجراء!")) {
-            alert("تم إلغاء العملية");
+        if (!confirm(t("pages.settings.deleteAllDataConfirm"))) {
+            alert(t("pages.settings.operationCancelled"));
             return;
         }
 
         try {
             const result = await backupService.deleteAllData();
             if (result.success) {
-                alert("تم حذف جميع البيانات بنجاح (ماعدا حساب الأدمن)");
+                alert(t("pages.settings.deleteAllDataSuccess"));
                 loadStats();
             }
         } catch (error) {
             console.error("Error deleting all data:", error);
-            alert("فشل حذف البيانات");
+            alert(t("pages.settings.deleteAllDataFailed"));
         }
     };
 
@@ -329,10 +331,10 @@ export default function SettingsPage() {
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
                             <Settings className="h-6 w-6 sm:h-8 sm:w-8" />
-                            إعدادات النوظام
+                            {t("pages.settings.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-muted-foreground mt-2">
-                            إدارة إعدادات النظام والتفضيلات
+                            {t("pages.settings.subtitle")}
                         </p>
                     </div>
                     <Button
@@ -340,8 +342,8 @@ export default function SettingsPage() {
                         disabled={isSaving}
                         size="lg"
                         className="w-full sm:w-auto">
-                        <Save className="h-4 w-4 ml-2" />
-                        {isSaving ? "جاري الحفظ..." : "حفظ التغييرات"}
+                        <Save className="h-4 w-4 mr-2" />
+                        {isSaving ? t("pages.settings.saving") : t("pages.settings.saveSettings")}
                     </Button>
                 </div>
 
@@ -363,29 +365,29 @@ export default function SettingsPage() {
 
                 <Tabs defaultValue="general" className="space-y-6">
                     <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                        <TabsTrigger value="general" className="text-xs sm:text-sm">
-                            <Globe className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                            عام
+                        <TabsTrigger value="general" className="text-xs sm:text-sm flex items-center justify-center">
+                            <Globe className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            {t("pages.settings.tabs.general")}
                         </TabsTrigger>
-                        <TabsTrigger value="academic" className="text-xs sm:text-sm">
-                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                            أكاديمي
+                        <TabsTrigger value="academic" className="text-xs sm:text-sm flex items-center justify-center">
+                            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            {t("pages.settings.tabs.academic")}
                         </TabsTrigger>
-                        <TabsTrigger value="security" className="text-xs sm:text-sm">
-                            <Shield className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                            الأمان
+                        <TabsTrigger value="security" className="text-xs sm:text-sm flex items-center justify-center">
+                            <Shield className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            {t("pages.settings.tabs.security")}
                         </TabsTrigger>
-                        <TabsTrigger value="notifications" className="text-xs sm:text-sm">
-                            <Bell className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                            الإشعارات
+                        <TabsTrigger value="notifications" className="text-xs sm:text-sm flex items-center justify-center">
+                            <Bell className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            {t("pages.settings.tabs.notifications")}
                         </TabsTrigger>
-                        <TabsTrigger value="database" className="text-xs sm:text-sm">
-                            <Database className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                            قاعدة البيانات
+                        <TabsTrigger value="database" className="text-xs sm:text-sm flex items-center justify-center">
+                            <Database className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            {t("pages.settings.tabs.database")}
                         </TabsTrigger>
-                        <TabsTrigger value="system" className="text-xs sm:text-sm">
-                            <Settings className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-2" />
-                            النظام
+                        <TabsTrigger value="system" className="text-xs sm:text-sm flex items-center justify-center">
+                            <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                            {t("pages.settings.tabs.system")}
                         </TabsTrigger>
                     </TabsList>
 
@@ -393,16 +395,16 @@ export default function SettingsPage() {
                     <TabsContent value="general" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>الإعدادات العامة</CardTitle>
+                                <CardTitle>{t("pages.settings.generalSettings")}</CardTitle>
                                 <CardDescription>
-                                    إعدادات الجامعة الأساسية والواجهة
+                                    {t("pages.settings.generalSettingsDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="universityName">
-                                            اسم الجامعة (عربي)
+                                            {t("pages.settings.universityName")}
                                         </Label>
                                         <Input
                                             id="universityName"
@@ -418,7 +420,7 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="universityNameEn">
-                                            اسم الجامعة (English)
+                                            {t("pages.settings.universityNameEn")}
                                         </Label>
                                         <Input
                                             id="universityNameEn"
@@ -437,7 +439,7 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="academicYear">
-                                            السنة الأكاديمية
+                                            {t("pages.settings.academicYear")}
                                         </Label>
                                         <Input
                                             id="academicYear"
@@ -453,7 +455,7 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="defaultLanguage">
-                                            اللغة الافتراضية
+                                            {t("pages.settings.defaultLanguage")}
                                         </Label>
                                         <Select
                                             value={settings.defaultLanguage}
@@ -468,10 +470,10 @@ export default function SettingsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="ar">
-                                                    العربية
+                                                    {t("pages.settings.languages.arabic")}
                                                 </SelectItem>
                                                 <SelectItem value="en">
-                                                    English
+                                                    {t("pages.settings.languages.english")}
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -480,7 +482,7 @@ export default function SettingsPage() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="timezone">
-                                        المنطقة الزمنية
+                                        {t("pages.settings.timezone")}
                                     </Label>
                                     <Select
                                         value={settings.timezone}
@@ -495,16 +497,16 @@ export default function SettingsPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="Asia/Riyadh">
-                                                الرياض (GMT+3)
+                                                {t("pages.settings.timezones.riyadh")}
                                             </SelectItem>
                                             <SelectItem value="Asia/Dubai">
-                                                دبي (GMT+4)
+                                                {t("pages.settings.timezones.dubai")}
                                             </SelectItem>
                                             <SelectItem value="Asia/Cairo">
-                                                القاهرة (GMT+2)
+                                                {t("pages.settings.timezones.cairo")}
                                             </SelectItem>
                                             <SelectItem value="UTC">
-                                                UTC (GMT+0)
+                                                {t("pages.settings.timezones.utc")}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -514,9 +516,9 @@ export default function SettingsPage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>إحصائيات النظام</CardTitle>
+                                <CardTitle>{t("pages.settings.systemStats")}</CardTitle>
                                 <CardDescription>
-                                    معلومات عامة عن النظام
+                                    {t("pages.settings.systemStatsDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -527,7 +529,7 @@ export default function SettingsPage() {
                                             {stats.totalUsers}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            إجمالي المستخدمين
+                                            {t("pages.settings.stats.totalUsers")}
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-center p-4 border rounded-lg">
@@ -536,7 +538,7 @@ export default function SettingsPage() {
                                             {stats.totalStudents}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            الطلاب
+                                            {t("pages.settings.stats.students")}
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-center p-4 border rounded-lg">
@@ -545,7 +547,7 @@ export default function SettingsPage() {
                                             {stats.totalFaculty}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            أعضاء هيئة التدريس
+                                            {t("pages.settings.stats.faculty")}
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-center p-4 border rounded-lg">
@@ -554,7 +556,7 @@ export default function SettingsPage() {
                                             {stats.totalCourses}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            المقررات
+                                            {t("pages.settings.stats.courses")}
                                         </div>
                                     </div>
                                 </div>
@@ -566,16 +568,16 @@ export default function SettingsPage() {
                     <TabsContent value="academic" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>الإعدادات الأكاديمية</CardTitle>
+                                <CardTitle>{t("pages.settings.academicSettings")}</CardTitle>
                                 <CardDescription>
-                                    إعدادات التسجيل والساعات المعتمدة والتقديرات
+                                    {t("pages.settings.academicSettingsDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="maxCredits">
-                                            الحد الأقصى للساعات المعتمدة
+                                            {t("pages.settings.maxCreditsPerTerm")}
                                         </Label>
                                         <Input
                                             id="maxCredits"
@@ -593,7 +595,7 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="minCredits">
-                                            الحد الأدنى للتفرغ الكامل
+                                            {t("pages.settings.minCreditsFullTime")}
                                         </Label>
                                         <Input
                                             id="minCredits"
@@ -617,7 +619,7 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="passingGrade">
-                                            درجة النجاح
+                                            {t("pages.settings.passingGrade")}
                                         </Label>
                                         <Input
                                             id="passingGrade"
@@ -635,7 +637,7 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="gradingScale">
-                                            نظام التقدير
+                                            {t("pages.settings.gradingScale")}
                                         </Label>
                                         <Select
                                             value={settings.gradingScale}
@@ -650,13 +652,13 @@ export default function SettingsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="percentage">
-                                                    نسبة مئوية (0-100)
+                                                    {t("pages.settings.gradingScales.percentage")}
                                                 </SelectItem>
                                                 <SelectItem value="gpa">
-                                                    GPA (0-4)
+                                                    {t("pages.settings.gradingScales.gpa")}
                                                 </SelectItem>
                                                 <SelectItem value="letters">
-                                                    حروف (A-F)
+                                                    {t("pages.settings.gradingScales.letters")}
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -668,9 +670,9 @@ export default function SettingsPage() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
-                                            <Label>الحضور إلزامي</Label>
+                                            <Label>{t("pages.settings.attendanceRequired")}</Label>
                                             <p className="text-sm text-muted-foreground">
-                                                تفعيل متطلبات الحضور للطلاب
+                                                {t("pages.settings.attendanceRequiredDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -689,7 +691,7 @@ export default function SettingsPage() {
                                     {settings.attendanceRequired && (
                                         <div className="space-y-2 mr-6">
                                             <Label htmlFor="minAttendance">
-                                                الحد الأدنى لنسبة الحضور (%)
+                                                {t("pages.settings.minAttendancePercentage")}
                                             </Label>
                                             <Input
                                                 id="minAttendance"
@@ -718,9 +720,9 @@ export default function SettingsPage() {
                     <TabsContent value="security" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>إعدادات الأمان</CardTitle>
+                                <CardTitle>{t("pages.settings.securitySettings")}</CardTitle>
                                 <CardDescription>
-                                    إدارة الأمان والمصادقة والجلسات
+                                    {t("pages.settings.securitySettingsDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -728,11 +730,10 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                السماح بالتسجيل الذاتي
+                                                {t("pages.settings.allowSelfRegistration")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                السماح للمستخدمين بإنشاء حسابات
-                                                جديدة
+                                                {t("pages.settings.allowSelfRegistrationDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -752,11 +753,10 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                التحقق من البريد الإلكتروني
+                                                {t("pages.settings.requireEmailVerification")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                طلب التحقق من البريد الإلكتروني
-                                                للحسابات الجديدة
+                                                {t("pages.settings.requireEmailVerificationDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -779,7 +779,7 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="minPassword">
-                                            الحد الأدنى لطول كلمة المرور
+                                            {t("pages.settings.minPasswordLength")}
                                         </Label>
                                         <Input
                                             id="minPassword"
@@ -797,7 +797,7 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="maxAttempts">
-                                            الحد الأقصى لمحاولات تسجيل الدخول
+                                            {t("pages.settings.maxLoginAttempts")}
                                         </Label>
                                         <Input
                                             id="maxAttempts"
@@ -817,7 +817,7 @@ export default function SettingsPage() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="sessionTimeout">
-                                        مهلة الجلسة (بالدقائق)
+                                        {t("pages.settings.sessionTimeout")}
                                     </Label>
                                     <Input
                                         id="sessionTimeout"
@@ -833,8 +833,7 @@ export default function SettingsPage() {
                                         }
                                     />
                                     <p className="text-sm text-muted-foreground">
-                                        سيتم تسجيل خروج المستخدمين تلقائيًا بعد
-                                        هذه المدة من عدم النشاط
+                                        {t("pages.settings.sessionTimeoutDesc")}
                                     </p>
                                 </div>
 
@@ -842,9 +841,9 @@ export default function SettingsPage() {
 
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label>تفعيل سجل التدقيق</Label>
+                                        <Label>{t("pages.settings.enableAuditLog")}</Label>
                                         <p className="text-sm text-muted-foreground">
-                                            تسجيل جميع العمليات المهمة في النظام
+                                            {t("pages.settings.enableAuditLogDesc")}
                                         </p>
                                     </div>
                                     <Switch
@@ -865,9 +864,9 @@ export default function SettingsPage() {
                     <TabsContent value="notifications" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>إعدادات الإشعارات</CardTitle>
+                                <CardTitle>{t("pages.settings.notificationsSettings")}</CardTitle>
                                 <CardDescription>
-                                    إدارة إشعارات النظام وتنبيهات المستخدمين
+                                    {t("pages.settings.notificationsSettingsDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -876,11 +875,10 @@ export default function SettingsPage() {
                                         <div className="space-y-0.5">
                                             <Label className="flex items-center gap-2">
                                                 <Mail className="h-4 w-4" />
-                                                إشعارات البريد الإلكتروني
+                                                {t("pages.settings.emailNotifications")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                إرسال إشعارات عبر البريد
-                                                الإلكتروني
+                                                {t("pages.settings.emailNotificationsDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -899,10 +897,10 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                إشعارات الرسائل النصية
+                                                {t("pages.settings.smsNotifications")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                إرسال إشعارات عبر SMS
+                                                {t("pages.settings.smsNotificationsDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -918,9 +916,9 @@ export default function SettingsPage() {
 
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
-                                            <Label>إشعارات الدفع</Label>
+                                            <Label>{t("pages.settings.pushNotifications")}</Label>
                                             <p className="text-sm text-muted-foreground">
-                                                إرسال إشعارات فورية في المتصفح
+                                                {t("pages.settings.pushNotificationsDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -939,17 +937,16 @@ export default function SettingsPage() {
 
                                 <div className="space-y-2">
                                     <h3 className="font-semibold">
-                                        أنواع الإشعارات
+                                        {t("pages.settings.notificationTypes")}
                                     </h3>
                                     <p className="text-sm text-muted-foreground">
-                                        اختر الأحداث التي سيتم إرسال إشعارات
-                                        بشأنها
+                                        {t("pages.settings.notificationTypesDesc")}
                                     </p>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <Label>إشعار عند التسجيل في مادة</Label>
+                                        <Label>{t("pages.settings.notifyOnEnrollment")}</Label>
                                         <Switch
                                             checked={
                                                 settings.notifyOnEnrollment
@@ -964,7 +961,7 @@ export default function SettingsPage() {
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <Label>إشعار عند نشر الدرجات</Label>
+                                        <Label>{t("pages.settings.notifyOnGradePosted")}</Label>
                                         <Switch
                                             checked={
                                                 settings.notifyOnGradePosted
@@ -981,7 +978,7 @@ export default function SettingsPage() {
 
                                     <div className="flex items-center justify-between">
                                         <Label>
-                                            إشعار قبل انتهاء فترة الحذف
+                                            {t("pages.settings.notifyOnDropDeadline")}
                                         </Label>
                                         <Switch
                                             checked={
@@ -1005,16 +1002,16 @@ export default function SettingsPage() {
                     <TabsContent value="database" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>معلومات قاعدة البيانات</CardTitle>
+                                <CardTitle>{t("pages.settings.databaseInfo")}</CardTitle>
                                 <CardDescription>
-                                    حالة قاعدة البيانات والنسخ الاحتياطية
+                                    {t("pages.settings.databaseInfoDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <div className="grid grid-cols-3 gap-4">
                                     <div className="p-4 border rounded-lg">
                                         <div className="text-sm text-muted-foreground mb-1">
-                                            حجم قاعدة البيانات
+                                            {t("pages.settings.databaseSize")}
                                         </div>
                                         <div className="text-2xl font-bold">
                                             {stats.databaseSize}
@@ -1022,7 +1019,7 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="p-4 border rounded-lg">
                                         <div className="text-sm text-muted-foreground mb-1">
-                                            الفصول النشطة
+                                            {t("pages.settings.activeTerms")}
                                         </div>
                                         <div className="text-2xl font-bold">
                                             {stats.activeTerms}
@@ -1030,10 +1027,10 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="p-4 border rounded-lg">
                                         <div className="text-sm text-muted-foreground mb-1">
-                                            آخر نسخة احتياطية
+                                            {t("pages.settings.lastBackup")}
                                         </div>
                                         <div className="text-sm font-medium">
-                                            {stats.lastBackup}
+                                            {stats.lastBackup || t("pages.settings.noBackup")}
                                         </div>
                                     </div>
                                 </div>
@@ -1044,11 +1041,10 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                النسخ الاحتياطي التلقائي
+                                                {t("pages.settings.autoBackup")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                إنشاء نسخ احتياطية تلقائية من
-                                                قاعدة البيانات
+                                                {t("pages.settings.autoBackupDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -1065,7 +1061,7 @@ export default function SettingsPage() {
                                     {settings.autoBackup && (
                                         <div className="space-y-2 mr-6">
                                             <Label htmlFor="backupFrequency">
-                                                تكرار النسخ الاحتياطي
+                                                {t("pages.settings.backupFrequency")}
                                             </Label>
                                             <Select
                                                 value={settings.backupFrequency}
@@ -1080,16 +1076,16 @@ export default function SettingsPage() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="hourly">
-                                                        كل ساعة
+                                                        {t("pages.settings.frequencies.hourly")}
                                                     </SelectItem>
                                                     <SelectItem value="daily">
-                                                        يومي
+                                                        {t("pages.settings.frequencies.daily")}
                                                     </SelectItem>
                                                     <SelectItem value="weekly">
-                                                        أسبوعي
+                                                        {t("pages.settings.frequencies.weekly")}
                                                     </SelectItem>
                                                     <SelectItem value="monthly">
-                                                        شهري
+                                                        {t("pages.settings.frequencies.monthly")}
                                                     </SelectItem>
                                                 </SelectContent>
                                             </Select>
@@ -1101,26 +1097,26 @@ export default function SettingsPage() {
 
                                 <div className="space-y-3">
                                     <h3 className="font-semibold">
-                                        العمليات على قاعدة البيانات
+                                        {t("pages.settings.databaseOperations")}
                                     </h3>
                                     <div className="flex flex-wrap gap-2">
                                         <Button
                                             onClick={handleBackupDatabase}
                                             variant="outline">
-                                            <Download className="h-4 w-4 ml-2" />
-                                            إنشاء نسخة احتياطية
+                                            <Download className="h-4 w-4 mr-2" />
+                                            {t("pages.settings.createBackup")}
                                         </Button>
                                         <Button
                                             onClick={handleRestoreDatabase}
                                             variant="outline">
-                                            <Upload className="h-4 w-4 ml-2" />
-                                            استعادة نسخة احتياطية
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            {t("pages.settings.restoreBackup")}
                                         </Button>
                                         <Button
                                             onClick={handleClearCache}
                                             variant="outline">
-                                            <RefreshCw className="h-4 w-4 ml-2" />
-                                            مسح ذاكرة التخزين المؤقت
+                                            <RefreshCw className="h-4 w-4 mr-2" />
+                                            {t("pages.settings.clearCache")}
                                         </Button>
                                     </div>
                                 </div>
@@ -1129,18 +1125,17 @@ export default function SettingsPage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>تصدير البيانات</CardTitle>
+                                <CardTitle>{t("pages.settings.exportData")}</CardTitle>
                                 <CardDescription>
-                                    تصدير البيانات بتنسيقات مختلفة
+                                    {t("pages.settings.exportDataDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="space-y-0.5">
-                                        <Label>السماح بتصدير البيانات</Label>
+                                        <Label>{t("pages.settings.allowDataExport")}</Label>
                                         <p className="text-sm text-muted-foreground">
-                                            تمكين تصدير البيانات للمستخدمين
-                                            المصرح لهم
+                                            {t("pages.settings.allowDataExportDesc")}
                                         </p>
                                     </div>
                                     <Switch
@@ -1159,7 +1154,7 @@ export default function SettingsPage() {
                                         <Separator className="my-4" />
                                         <div className="space-y-3">
                                             <h4 className="font-medium">
-                                                تصدير التقارير
+                                                {t("pages.settings.exportReports")}
                                             </h4>
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
@@ -1170,8 +1165,8 @@ export default function SettingsPage() {
                                                     }
                                                     variant="outline"
                                                     size="sm">
-                                                    <Download className="h-4 w-4 ml-2" />
-                                                    تصدير الطلاب
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    {t("pages.settings.exportStudents")}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1181,8 +1176,8 @@ export default function SettingsPage() {
                                                     }
                                                     variant="outline"
                                                     size="sm">
-                                                    <Download className="h-4 w-4 ml-2" />
-                                                    تصدير أعضاء هيئة التدريس
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    {t("pages.settings.exportFaculty")}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1192,8 +1187,8 @@ export default function SettingsPage() {
                                                     }
                                                     variant="outline"
                                                     size="sm">
-                                                    <Download className="h-4 w-4 ml-2" />
-                                                    تصدير المقررات
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    {t("pages.settings.exportCourses")}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1203,8 +1198,8 @@ export default function SettingsPage() {
                                                     }
                                                     variant="outline"
                                                     size="sm">
-                                                    <Download className="h-4 w-4 ml-2" />
-                                                    تصدير الدرجات
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    {t("pages.settings.exportGrades")}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1214,8 +1209,8 @@ export default function SettingsPage() {
                                                     }
                                                     variant="outline"
                                                     size="sm">
-                                                    <Download className="h-4 w-4 ml-2" />
-                                                    تصدير سجلات الحضور
+                                                    <Download className="h-4 w-4 mr-2" />
+                                                    {t("pages.settings.exportAttendance")}
                                                 </Button>
                                             </div>
                                         </div>
@@ -1229,17 +1224,16 @@ export default function SettingsPage() {
                     <TabsContent value="system" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>إعدادات النظام المتقدمة</CardTitle>
+                                <CardTitle>{t("pages.settings.advancedSystemSettings")}</CardTitle>
                                 <CardDescription>
-                                    إدارة حالة النظام والصيانة
+                                    {t("pages.settings.advancedSystemSettingsDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
                                 <Alert variant="destructive">
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertDescription>
-                                        تحذير: الإعدادات في هذا القسم قد تؤثر
-                                        على عمل النظام بالكامل. استخدمها بحذر.
+                                        {t("pages.settings.systemWarning")}
                                     </AlertDescription>
                                 </Alert>
 
@@ -1248,11 +1242,10 @@ export default function SettingsPage() {
                                         <div className="space-y-0.5">
                                             <Label className="flex items-center gap-2">
                                                 <Lock className="h-4 w-4" />
-                                                وضع الصيانة
+                                                {t("pages.settings.maintenanceMode")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                تعطيل الوصول إلى النظام مؤقتًا
-                                                للصيانة
+                                                {t("pages.settings.maintenanceModeDesc")}
                                             </p>
                                         </div>
                                         <Switch
@@ -1270,9 +1263,7 @@ export default function SettingsPage() {
                                         <Alert>
                                             <AlertCircle className="h-4 w-4" />
                                             <AlertDescription>
-                                                وضع الصيانة مفعل. المستخدمون
-                                                العاديون لا يمكنهم الوصول إلى
-                                                النظام حاليًا.
+                                                {t("pages.settings.maintenanceModeActive")}
                                             </AlertDescription>
                                         </Alert>
                                     )}
@@ -1282,12 +1273,12 @@ export default function SettingsPage() {
 
                                 <div className="space-y-3">
                                     <h3 className="font-semibold">
-                                        معلومات النظام
+                                        {t("pages.settings.systemInfo")}
                                     </h3>
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                إصدار النظام:
+                                                {t("pages.settings.systemVersion")}
                                             </span>
                                             <Badge variant="outline">
                                                 v2.0.0
@@ -1295,25 +1286,25 @@ export default function SettingsPage() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                تاريخ آخر تحديث:
+                                                {t("pages.settings.lastUpdateDate")}
                                             </span>
                                             <span>2025-11-15</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                حالة النظام:
+                                                {t("pages.settings.systemStatus")}
                                             </span>
                                             <Badge
                                                 variant="default"
                                                 className="bg-green-500">
-                                                نشط
+                                                {t("pages.settings.statusActive")}
                                             </Badge>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                وقت التشغيل:
+                                                {t("pages.settings.uptime")}
                                             </span>
-                                            <span>45 يوم، 12 ساعة</span>
+                                            <span>{t("pages.settings.uptimeValue")}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1323,11 +1314,10 @@ export default function SettingsPage() {
                         <Card className="border-destructive">
                             <CardHeader>
                                 <CardTitle className="text-destructive">
-                                    منطقة الخطر
+                                    {t("pages.settings.dangerZone")}
                                 </CardTitle>
                                 <CardDescription>
-                                    عمليات لا يمكن التراجع عنها. تأكد من معرفتك
-                                    بما تفعله.
+                                    {t("pages.settings.dangerZoneDesc")}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-3">
@@ -1335,12 +1325,11 @@ export default function SettingsPage() {
                                     variant="destructive"
                                     className="w-full"
                                     onClick={handleDeleteAllData}>
-                                    <Trash2 className="h-4 w-4 ml-2" />
-                                    حذف جميع البيانات
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    {t("pages.settings.deleteAllData")}
                                 </Button>
                                 <p className="text-xs text-muted-foreground text-center">
-                                    سيتم حذف جميع البيانات من قاعدة البيانات
-                                    بشكل دائم (ماعدا حساب الأدمن)
+                                    {t("pages.settings.deleteAllDataWarning")}
                                 </p>
                             </CardContent>
                         </Card>

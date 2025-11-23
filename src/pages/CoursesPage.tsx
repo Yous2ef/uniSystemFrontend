@@ -72,7 +72,7 @@ export default function CoursesPage() {
             fetchCourses();
         } catch (error) {
             console.error("Error deleting course:", error);
-            alert("فشل حذف المادة");
+            alert(t("pages.courses.deleteFailed"));
         }
     };
 
@@ -103,7 +103,7 @@ export default function CoursesPage() {
                 error.response?.data?.message ||
                 error.message ||
                 "حدث خطأ غير متوقع";
-            alert(`فشل حفظ المادة: ${errorMessage}`);
+            alert(`${t("pages.courses.deleteFailed")}: ${errorMessage}`);
             // Don't throw - let modal handle it
         }
     };
@@ -117,7 +117,7 @@ export default function CoursesPage() {
                             {t("courses.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة المواد الدراسية
+                            {t("pages.courses.subtitle")}
                         </p>
                     </div>
                     <Button onClick={handleCreate} className="w-full sm:w-auto">

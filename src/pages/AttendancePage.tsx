@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Calendar, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,6 +28,7 @@ interface Student {
 }
 
 export default function AttendancePage() {
+    const { t } = useTranslation();
     const [terms, setTerms] = useState<{ id: string; name: string }[]>([]);
     const [sections, setSections] = useState<
         { id: string; code: string; course: { nameAr: string } }[]
@@ -131,11 +133,11 @@ export default function AttendancePage() {
             );
 
             await Promise.all(updates);
-            alert("تم حفظ الحضور بنجاح");
+            alert(t("pages.attendance.saveSuccess"));
             setAttendance({});
         } catch (error) {
             console.error("Error saving attendance:", error);
-            alert("حدث خطأ أثناء حفظ الحضور");
+            alert(t("pages.attendance.saveFailed"));
         } finally {
             setLoading(false);
         }
@@ -162,10 +164,10 @@ export default function AttendancePage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            تسجيل الحضور
+                            {t("pages.attendance.title")}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            تسجيل حضور وغياب الطلاب
+                            {t("pages.attendance.subtitle")}
                         </p>
                     </div>
                     {selectedSection && (
@@ -175,7 +177,7 @@ export default function AttendancePage() {
                                 Object.keys(attendance).length === 0 || loading
                             }>
                             <Calendar className="w-4 h-4 me-2" />
-                            حفظ الحضور
+                            {t("pages.attendance.saveAttendance")}
                         </Button>
                     )}
                 </div>

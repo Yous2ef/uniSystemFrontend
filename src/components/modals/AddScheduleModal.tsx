@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -22,61 +23,47 @@ import {
 } from "@/components/ui/select";
 import { sectionsService } from "@/services/api";
 
-const scheduleSchema = z
-    .object({
-        day: z.string().min(1, "اليوم مطلوب"),
-        startTime: z
-            .string()
-            .regex(
-                /^([01]\d|2[0-3]):([0-5]\d)$/,
-                "صيغة الوقت غير صحيحة (HH:MM)"
-            ),
-        endTime: z
-            .string()
-            .regex(
-                /^([01]\d|2[0-3]):([0-5]\d)$/,
-                "صيغة الوقت غير صحيحة (HH:MM)"
-            ),
-        room: z.string().optional(),
-    })
-    .refine((data) => data.startTime < data.endTime, {
-        message: "وقت البداية يجب أن يكون قبل وقت النهاية",
-        path: ["endTime"],
-    });
-
-type ScheduleFormData = z.infer<typeof scheduleSchema>;
-
-interface AddScheduleModalProps {
-    open: boolean;
-    onClose: () => void;
-    onSuccess: () => void;
-    section: {
-        id: string;
-        code: string;
-        course: {
-            code: string;
-            nameAr: string;
-        };
-    } | null;
-}
-
-const daysOptions = [
-    { value: "0", label: "الأحد" },
-    { value: "1", label: "الاثنين" },
-    { value: "2", label: "الثلاثاء" },
-    { value: "3", label: "الأربعاء" },
-    { value: "4", label: "الخميس" },
-    { value: "5", label: "الجمعة" },
-    { value: "6", label: "السبت" },
-];
-
 export default function AddScheduleModal({
     open,
     onClose,
     onSuccess,
     section,
 }: AddScheduleModalProps) {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
+    
+    const scheduleSchema = z
+        .object({
+            day: z.string().min(1, t("schedules.modal.dayRequired")),
+            startTime: z
+                .string()
+                .regex(
+                    /^([01]\d|2[0-3]):([0-5]\d)$/,
+                    t("schedules.modal.invalidTimeFormat")
+                ),
+            endTime: z
+                .string()
+                .regex(
+                    /^([01]\d|2[0-3]):([0-5]\d)$/,
+                    t("schedules.modal.invalidTimeFormat")
+                ),
+            room: z.string().optional(),
+        })
+        .refine((data) => data.startTime < data.endTime, {
+            message: t("schedules.modal.startBeforeEnd"),
+            path: ["endTime"],
+        });
+    
+    const daysOptions = [
+        { value: "0", label: t("schedules.days.sunday") },
+        { value: "1", label: t("schedules.days.monday") },
+        { value: "2", label: t("schedules.days.tuesday") },
+        { value: "3", label: t("schedules.days.wednesday") },
+        { value: "4", label: t("schedules.days.thursday") },
+        { value: "5", label: t("schedules.days.friday") },
+        { value: "6", label: t("schedules.days.saturday") },
+    ];
+    
     const {
         register,
         handleSubmit,
@@ -106,7 +93,7 @@ export default function AddScheduleModal({
             onClose();
         } catch (error) {
             console.error("Error adding schedule:", error);
-            alert("فشل إضافة الموعد");
+            alert(t("schedules.modal.addFailed"));
         } finally {
             setLoading(false);
         }
@@ -118,7 +105,7 @@ export default function AddScheduleModal({
         <Dialog open={open} onOpenChange={onClose}>
             <DialogContent className="max-w-md">
                 <DialogHeader>
-                    <DialogTitle>إضافة موعد جديد</DialogTitle>
+                    <DialogTitle>{t("schedules.modal.title")}</DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit(onSubmit)}>
@@ -126,7 +113,7 @@ export default function AddScheduleModal({
                         {/* Section Info */}
                         <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                             <p className="text-sm text-muted-foreground">
-                                الشعبة
+                                {t("sections.title")}
                             </p>
                             <p className="font-bold">{section.code}</p>
                             <p className="text-sm">{section.course.nameAr}</p>
@@ -134,14 +121,14 @@ export default function AddScheduleModal({
 
                         {/* Day */}
                         <div>
-                            <Label htmlFor="day">اليوم *</Label>
+                            <Label htmlFor="day">{t("schedules.modal.day")} *</Label>
                             <Select
                                 value={selectedDay}
                                 onValueChange={(value) =>
                                     setValue("day", value)
                                 }>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="اختر اليوم" />
+                                    <SelectValue placeholder={t("schedules.modal.selectDay")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {daysOptions.map((day) => (
@@ -162,7 +149,7 @@ export default function AddScheduleModal({
 
                         {/* Start Time */}
                         <div>
-                            <Label htmlFor="startTime">وقت البداية *</Label>
+                            <Label htmlFor="startTime">{t("schedules.modal.startTime")} *</Label>
                             <Input
                                 id="startTime"
                                 type="time"
@@ -178,7 +165,7 @@ export default function AddScheduleModal({
 
                         {/* End Time */}
                         <div>
-                            <Label htmlFor="endTime">وقت النهاية *</Label>
+                            <Label htmlFor="endTime">{t("schedules.modal.endTime")} *</Label>
                             <Input
                                 id="endTime"
                                 type="time"
@@ -194,11 +181,11 @@ export default function AddScheduleModal({
 
                         {/* Room */}
                         <div>
-                            <Label htmlFor="room">القاعة (اختياري)</Label>
+                            <Label htmlFor="room">{t("schedules.modal.room")}</Label>
                             <Input
                                 id="room"
                                 {...register("room")}
-                                placeholder="مثلاً: A101"
+                                placeholder={t("schedules.modal.roomPlaceholder")}
                             />
                             {errors.room && (
                                 <p className="text-sm text-red-600 mt-1">
@@ -214,10 +201,10 @@ export default function AddScheduleModal({
                             variant="outline"
                             onClick={onClose}
                             disabled={loading}>
-                            إلغاء
+                            {t("common.cancel")}
                         </Button>
                         <Button type="submit" disabled={loading}>
-                            {loading ? "جاري الحفظ..." : "حفظ"}
+                            {loading ? t("schedules.modal.saving") : t("common.save")}
                         </Button>
                     </DialogFooter>
                 </form>

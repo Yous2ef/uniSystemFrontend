@@ -78,7 +78,7 @@ export default function BatchesPage() {
             fetchBatches();
         } catch (error) {
             console.error("Error deleting batch:", error);
-            alert("فشل حذف الدفعة");
+            alert(t("pages.batches.deleteFailed"));
         }
     };
 
@@ -95,7 +95,7 @@ export default function BatchesPage() {
                             {t("batches.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الدفعات الدراسية
+                            {t("pages.batches.subtitle")}
                         </p>
                     </div>
                     <Button

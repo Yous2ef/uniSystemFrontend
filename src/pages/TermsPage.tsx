@@ -66,19 +66,19 @@ export default function TermsPage() {
             fetchTerms();
         } catch (error) {
             console.error("Error deleting term:", error);
-            alert("فشل حذف الفصل الدراسي");
+            alert(t("pages.terms.deleteFailed"));
         }
     };
 
     const handleActivate = async (term: AcademicTerm) => {
         if (term.status === "ACTIVE") {
-            alert("هذا الفصل مفعل بالفعل");
+            alert(t("pages.terms.alreadyActive"));
             return;
         }
 
         if (
             !confirm(
-                `هل تريد تفعيل ${term.name}؟ سيتم إلغاء تفعيل أي فصل آخر لنفس الدفعة.`
+                t("pages.terms.activateConfirm").replace("{name}", term.name)
             )
         )
             return;
@@ -88,7 +88,7 @@ export default function TermsPage() {
             fetchTerms();
         } catch (error) {
             console.error("Error activating term:", error);
-            alert("فشل تفعيل الفصل الدراسي");
+            alert(t("pages.terms.activateFailed"));
         }
     };
 
@@ -117,14 +117,9 @@ export default function TermsPage() {
             COMPLETED:
                 "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
         };
-        const statusText: Record<string, string> = {
-            ACTIVE: "فعال",
-            INACTIVE: "غير فعال",
-            COMPLETED: "مكتمل",
-        };
         return (
             <Badge className={statusStyles[status] || ""}>
-                {statusText[status] || status}
+                {t(`pages.terms.statuses.${status}`)}
             </Badge>
         );
     };
@@ -146,7 +141,7 @@ export default function TermsPage() {
                             {t("terms.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الفصول الدراسية
+                            {t("pages.terms.subtitle")}
                         </p>
                     </div>
                     <Button
@@ -180,7 +175,7 @@ export default function TermsPage() {
                                     <TableRow>
                                         <TableHead>{t("terms.name")}</TableHead>
                                         <TableHead>{t("terms.type")}</TableHead>
-                                        <TableHead>الحالة</TableHead>
+                                        <TableHead>{t("common.status")}</TableHead>
                                         <TableHead>
                                             {t("terms.startDate")}
                                         </TableHead>
@@ -259,8 +254,8 @@ export default function TermsPage() {
                                                         title={
                                                             term.status ===
                                                             "ACTIVE"
-                                                                ? "الفصل مفعل"
-                                                                : "تفعيل الفصل"
+                                                                ? t("pages.terms.alreadyActive")
+                                                                : t("pages.terms.activate")
                                                         }>
                                                         <Power
                                                             className={`w-4 h-4 ${

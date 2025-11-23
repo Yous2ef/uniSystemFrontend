@@ -78,7 +78,7 @@ export default function DepartmentsPage() {
             fetchDepartments();
         } catch (error) {
             console.error("Error deleting department:", error);
-            alert("فشل حذف القسم");
+            alert(t("pages.departments.deleteFailed"));
         }
     };
 
@@ -102,7 +102,7 @@ export default function DepartmentsPage() {
             console.error("Error saving department:", error);
             console.error("Error response:", error.response?.data);
             alert(
-                `فشل حفظ القسم: ${
+                `${t("pages.departments.saveFailed")}: ${
                     error.response?.data?.message || error.message
                 }`
             );
@@ -128,7 +128,7 @@ export default function DepartmentsPage() {
                             {t("departments.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الأقسام في النظام
+                            {t("pages.departments.subtitle")}
                         </p>
                     </div>
                     <Button onClick={handleCreate} className="w-full sm:w-auto">

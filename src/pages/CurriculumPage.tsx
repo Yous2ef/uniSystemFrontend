@@ -82,7 +82,7 @@ export default function CurriculumPage() {
         } catch (error: any) {
             console.error("Error deleting curriculum:", error);
             const message =
-                error?.response?.data?.message || "فشل حذف الخطة الدراسية";
+                error?.response?.data?.message || t("pages.curriculum.deleteFailed");
             alert(message);
         }
     };
@@ -126,7 +126,7 @@ export default function CurriculumPage() {
             console.error("Error saving curriculum:", error);
             console.error("Error response:", error.response?.data);
             alert(
-                `فشل حفظ الخطة الدراسية: ${
+                `${t("pages.curriculum.saveFailed")}: ${
                     error.response?.data?.message || error.message
                 }`
             );
@@ -143,7 +143,7 @@ export default function CurriculumPage() {
                             {t("curriculum.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الخطط الدراسية
+                            {t("pages.curriculum.subtitle")}
                         </p>
                     </div>
                     <Button onClick={handleCreate} className="w-full sm:w-auto">

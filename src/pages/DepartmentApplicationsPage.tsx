@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ interface Statistics {
 }
 
 export default function DepartmentApplicationsPage() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [processing, setProcessing] = useState(false);
     const [applications, setApplications] = useState<ApplicationData[]>([]);
@@ -128,7 +130,7 @@ export default function DepartmentApplicationsPage() {
         if (!selectedApplication) return;
 
         if (processAction === "REJECTED" && !rejectionReason.trim()) {
-            alert("❌ يجب كتابة سبب الرفض");
+            alert(t("pages.departmentApplications.rejectionReasonRequired"));
             return;
         }
 
@@ -153,8 +155,8 @@ export default function DepartmentApplicationsPage() {
             if (response.success) {
                 alert(
                     processAction === "APPROVED"
-                        ? "✅ تمت الموافقة على الطلب بنجاح"
-                        : "✅ تم رفض الطلب بنجاح"
+                        ? t("pages.departmentApplications.approvalSuccess")
+                        : t("pages.departmentApplications.rejectionSuccess")
                 );
                 setIsProcessDialogOpen(false);
                 setSelectedApplication(null);
@@ -167,7 +169,7 @@ export default function DepartmentApplicationsPage() {
                 response?: { data?: { message?: string } };
             };
             const message =
-                errorObj?.response?.data?.message || "فشل معالجة الطلب";
+                errorObj?.response?.data?.message || t("pages.departmentApplications.processingFailed");
             alert("❌ " + message);
         } finally {
             setProcessing(false);
@@ -180,14 +182,14 @@ export default function DepartmentApplicationsPage() {
                 return (
                     <Badge className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                         <CheckCircle className="w-3 h-3 ml-1" />
-                        موافق عليه
+                        {t("pages.departmentApplications.statusBadges.APPROVED")}
                     </Badge>
                 );
             case "REJECTED":
                 return (
                     <Badge variant="destructive">
                         <XCircle className="w-3 h-3 ml-1" />
-                        مرفوض
+                        {t("pages.departmentApplications.statusBadges.REJECTED")}
                     </Badge>
                 );
             case "PENDING":
@@ -196,7 +198,7 @@ export default function DepartmentApplicationsPage() {
                         variant="outline"
                         className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800">
                         <Clock className="w-3 h-3 ml-1" />
-                        قيد المراجعة
+                        {t("pages.departmentApplications.statusBadges.PENDING")}
                     </Badge>
                 );
             case "WITHDRAWN":
@@ -204,7 +206,7 @@ export default function DepartmentApplicationsPage() {
                     <Badge
                         variant="outline"
                         className="bg-gray-100 dark:bg-gray-800">
-                        تم السحب
+                        {t("pages.departmentApplications.withdrawn")}
                     </Badge>
                 );
             default:
@@ -232,7 +234,7 @@ export default function DepartmentApplicationsPage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل الطلبات...
+                            {t("common.loading")}
                         </p>
                     </div>
                 </div>
@@ -246,10 +248,10 @@ export default function DepartmentApplicationsPage() {
                 {/* Header */}
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
-                        📋 طلبات اختيار التخصصات
+                        📋 {t("pages.departmentApplications.title")}
                     </h1>
                     <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                        إدارة ومراجعة طلبات الطلاب لاختيار التخصصات
+                        {t("pages.departmentApplications.subtitle")}
                     </p>
                 </div>
 
@@ -260,7 +262,7 @@ export default function DepartmentApplicationsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        إجمالي الطلبات
+                                        {t("pages.departmentApplications.totalApplications")}
                                     </p>
                                     <p className="text-2xl font-bold mt-1">
                                         {statistics.total}
@@ -278,7 +280,7 @@ export default function DepartmentApplicationsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        قيد المراجعة
+                                        {t("pages.departmentApplications.pendingReview")}
                                     </p>
                                     <p className="text-2xl font-bold mt-1 text-yellow-600">
                                         {statistics.pending}
@@ -296,7 +298,7 @@ export default function DepartmentApplicationsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        موافق عليها
+                                        {t("pages.departmentApplications.approved")}
                                     </p>
                                     <p className="text-2xl font-bold mt-1 text-green-600">
                                         {statistics.approved}
@@ -314,7 +316,7 @@ export default function DepartmentApplicationsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        مرفوضة
+                                        {t("pages.departmentApplications.rejected")}
                                     </p>
                                     <p className="text-2xl font-bold mt-1 text-red-600">
                                         {statistics.rejected}
@@ -336,7 +338,7 @@ export default function DepartmentApplicationsPage() {
                                 <div className="relative">
                                     <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                                     <Input
-                                        placeholder="ابحث بالاسم أو الرقم الجامعي أو القسم..."
+                                        placeholder={t("pages.departmentApplications.searchPlaceholder")}
                                         value={searchQuery}
                                         onChange={(e) =>
                                             setSearchQuery(e.target.value)
@@ -353,15 +355,15 @@ export default function DepartmentApplicationsPage() {
                                         setStatusFilter(e.target.value)
                                     }
                                     className="flex h-10 items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring">
-                                    <option value="all">جميع الحالات</option>
+                                    <option value="all">{t("pages.departmentApplications.allApplications")}</option>
                                     <option value="PENDING">
-                                        قيد المراجعة
+                                        {t("pages.departmentApplications.pending")}
                                     </option>
                                     <option value="APPROVED">
-                                        موافق عليها
+                                        {t("pages.departmentApplications.approved")}
                                     </option>
-                                    <option value="REJECTED">مرفوضة</option>
-                                    <option value="WITHDRAWN">تم السحب</option>
+                                    <option value="REJECTED">{t("pages.departmentApplications.rejected")}</option>
+                                    <option value="WITHDRAWN">{t("pages.departmentApplications.withdrawn")}</option>
                                 </select>
                             </div>
                         </div>
@@ -372,14 +374,14 @@ export default function DepartmentApplicationsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle>
-                            الطلبات ({filteredApplications.length})
+                            {t("pages.departmentApplications.title")} ({filteredApplications.length})
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         {filteredApplications.length === 0 ? (
                             <div className="text-center py-12">
                                 <FileText className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                                <p className="text-gray-500">لا توجد طلبات</p>
+                                <p className="text-gray-500">{t("pages.departmentApplications.noApplications")}</p>
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
@@ -387,25 +389,25 @@ export default function DepartmentApplicationsPage() {
                                     <thead className="bg-gray-50 dark:bg-gray-800">
                                         <tr>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                الرقم الجامعي
+                                                {t("pages.departmentApplications.studentCode")}
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                اسم الطالب
+                                                {t("pages.departmentApplications.studentName")}
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                القسم المطلوب
+                                                {t("pages.departmentApplications.department")}
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                المعدل
+                                                {t("pages.departmentApplications.gpa")}
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                الحالة
+                                                {t("pages.departmentApplications.status")}
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                تاريخ التقديم
+                                                {t("pages.departmentApplications.submittedAt")}
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-medium">
-                                                الإجراءات
+                                                {t("pages.departmentApplications.actions")}
                                             </th>
                                         </tr>
                                     </thead>
@@ -455,7 +457,7 @@ export default function DepartmentApplicationsPage() {
                                                                 )
                                                             }>
                                                             <Eye className="w-3 h-3 ml-1" />
-                                                            عرض
+                                                            {t("pages.departmentApplications.viewDetails")}
                                                         </Button>
                                                         {app.status ===
                                                             "PENDING" && (
@@ -470,7 +472,7 @@ export default function DepartmentApplicationsPage() {
                                                                         )
                                                                     }>
                                                                     <CheckCircle className="w-3 h-3 ml-1" />
-                                                                    موافقة
+                                                                    {t("pages.departmentApplications.approve")}
                                                                 </Button>
                                                                 <Button
                                                                     size="sm"
@@ -482,7 +484,7 @@ export default function DepartmentApplicationsPage() {
                                                                         )
                                                                     }>
                                                                     <XCircle className="w-3 h-3 ml-1" />
-                                                                    رفض
+                                                                    {t("pages.departmentApplications.reject")}
                                                                 </Button>
                                                             </>
                                                         )}
@@ -504,14 +506,14 @@ export default function DepartmentApplicationsPage() {
                 onOpenChange={setIsDetailDialogOpen}>
                 <DialogContent className="sm:max-w-[600px]">
                     <DialogHeader>
-                        <DialogTitle>تفاصيل الطلب</DialogTitle>
+                        <DialogTitle>{t("pages.departmentApplications.applicationDetails")}</DialogTitle>
                     </DialogHeader>
                     {selectedApplication && (
                         <div className="space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <Label className="text-gray-600">
-                                        الرقم الجامعي
+                                        {t("students.studentCode")}
                                     </Label>
                                     <p className="font-medium">
                                         {selectedApplication.studentCode}
@@ -519,7 +521,7 @@ export default function DepartmentApplicationsPage() {
                                 </div>
                                 <div>
                                     <Label className="text-gray-600">
-                                        المعدل التراكمي
+                                        {t("students.gpa")}
                                     </Label>
                                     <p className="font-medium">
                                         {selectedApplication.studentGpa.toFixed(
@@ -532,7 +534,7 @@ export default function DepartmentApplicationsPage() {
 
                             <div>
                                 <Label className="text-gray-600">
-                                    اسم الطالب
+                                    {t("students.nameAr")}
                                 </Label>
                                 <p className="font-medium">
                                     {selectedApplication.studentNameAr}
@@ -544,7 +546,7 @@ export default function DepartmentApplicationsPage() {
 
                             <div>
                                 <Label className="text-gray-600">
-                                    القسم المطلوب
+                                    {t("pages.departmentApplications.requestedDepartment")}
                                 </Label>
                                 <p className="font-medium">
                                     {selectedApplication.departmentNameAr} (
@@ -553,7 +555,7 @@ export default function DepartmentApplicationsPage() {
                             </div>
 
                             <div>
-                                <Label className="text-gray-600">الحالة</Label>
+                                <Label className="text-gray-600">{t("pages.departmentApplications.status")}</Label>
                                 <div className="mt-1">
                                     {getStatusBadge(selectedApplication.status)}
                                 </div>
@@ -561,7 +563,7 @@ export default function DepartmentApplicationsPage() {
 
                             <div>
                                 <Label className="text-gray-600">
-                                    تاريخ التقديم
+                                    {t("pages.departmentApplications.submittedAt")}
                                 </Label>
                                 <p className="font-medium">
                                     {new Date(
@@ -577,7 +579,7 @@ export default function DepartmentApplicationsPage() {
                             {selectedApplication.statement && (
                                 <div>
                                     <Label className="text-gray-600">
-                                        سبب اختيار القسم
+                                        {t("pages.departmentApplications.statementLabel")}
                                     </Label>
                                     <p className="mt-1 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm">
                                         {selectedApplication.statement}
@@ -588,7 +590,7 @@ export default function DepartmentApplicationsPage() {
                             {selectedApplication.processedAt && (
                                 <div>
                                     <Label className="text-gray-600">
-                                        تاريخ المعالجة
+                                        {t("pages.departmentApplications.processedDate")}
                                     </Label>
                                     <p className="font-medium">
                                         {new Date(
@@ -605,7 +607,7 @@ export default function DepartmentApplicationsPage() {
                             {selectedApplication.rejectionReason && (
                                 <div>
                                     <Label className="text-red-600">
-                                        سبب الرفض
+                                        {t("pages.departmentApplications.rejectionReason")}
                                     </Label>
                                     <p className="mt-1 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-sm text-red-600">
                                         {selectedApplication.rejectionReason}
@@ -618,7 +620,7 @@ export default function DepartmentApplicationsPage() {
                         <Button
                             variant="outline"
                             onClick={() => setIsDetailDialogOpen(false)}>
-                            إغلاق
+                            {t("common.cancel")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -632,8 +634,8 @@ export default function DepartmentApplicationsPage() {
                     <DialogHeader>
                         <DialogTitle>
                             {processAction === "APPROVED"
-                                ? "الموافقة على الطلب"
-                                : "رفض الطلب"}
+                                ? t("pages.departmentApplications.approveApplication")
+                                : t("pages.departmentApplications.rejectApplication")}
                         </DialogTitle>
                         <DialogDescription>
                             {selectedApplication?.studentNameAr} -{" "}
@@ -644,22 +646,20 @@ export default function DepartmentApplicationsPage() {
                         {processAction === "APPROVED" ? (
                             <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                                 <p className="text-sm text-green-800 dark:text-green-300">
-                                    ⚠️ عند الموافقة، سيتم تعيين الطالب في قسم{" "}
-                                    <strong>
-                                        {selectedApplication?.departmentNameAr}
-                                    </strong>{" "}
-                                    ولن يتمكن من التقديم لقسم آخر.
+                                    {t("pages.departmentApplications.approvalWarning", {
+                                        department: selectedApplication?.departmentNameAr
+                                    })}
                                 </p>
                             </div>
                         ) : (
                             <div className="space-y-2">
                                 <Label htmlFor="rejectionReason">
-                                    سبب الرفض{" "}
+                                    {t("pages.departmentApplications.rejectionReason")}{" "}
                                     <span className="text-red-500">*</span>
                                 </Label>
                                 <Textarea
                                     id="rejectionReason"
-                                    placeholder="اكتب سبب رفض الطلب (على الأقل 10 أحرف)..."
+                                    placeholder={t("pages.departmentApplications.rejectionReasonPlaceholder")}
                                     value={rejectionReason}
                                     onChange={(e) =>
                                         setRejectionReason(e.target.value)
@@ -675,7 +675,7 @@ export default function DepartmentApplicationsPage() {
                                 {rejectionReason &&
                                     rejectionReason.length < 10 && (
                                         <p className="text-xs text-red-500">
-                                            يجب أن يكون السبب 10 أحرف على الأقل
+                                            {t("pages.departmentApplications.minReasonLength")}
                                         </p>
                                     )}
                             </div>
@@ -686,7 +686,7 @@ export default function DepartmentApplicationsPage() {
                             variant="outline"
                             onClick={() => setIsProcessDialogOpen(false)}
                             disabled={processing}>
-                            إلغاء
+                            {t("common.cancel")}
                         </Button>
                         <Button
                             onClick={handleProcessApplication}
@@ -701,10 +701,10 @@ export default function DepartmentApplicationsPage() {
                                     : "bg-red-600 hover:bg-red-700"
                             }>
                             {processing
-                                ? "جاري المعالجة..."
+                                ? t("pages.departmentApplications.processing")
                                 : processAction === "APPROVED"
-                                ? "تأكيد الموافقة"
-                                : "تأكيد الرفض"}
+                                ? t("pages.departmentApplications.confirmApproval")
+                                : t("pages.departmentApplications.confirmRejection")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

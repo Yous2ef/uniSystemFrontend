@@ -227,10 +227,10 @@ export default function DashboardPage() {
                         {t("dashboard.title")}
                     </h1>
                     <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                        مرحباً، {user?.email}
+                        {t("dashboard.welcome")} {user?.email}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-400 dark:text-gray-500 mt-1">
-                        كلية علوم الحاسب - College of Computer Science
+                        {t("dashboard.collegeName")}
                     </p>
                 </div>
 
@@ -239,7 +239,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                الأقسام
+                                {t("dashboard.departments")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                المواد
+                                {t("dashboard.courses")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -265,7 +265,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                الطلاب
+                                {t("dashboard.students")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -278,7 +278,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                الدفعات
+                                {t("dashboard.batches")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -291,7 +291,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                                الفصول الدراسية
+                                {t("dashboard.terms")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -311,10 +311,10 @@ export default function DashboardPage() {
                                 <CardTitle className="flex items-center justify-between">
                                     <span className="flex items-center gap-2">
                                         <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full"></div>
-                                        الطلاب حسب الأقسام
+                                        {t("dashboard.studentsByDepartment")}
                                     </span>
                                     <span className="text-xs font-normal text-gray-500 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
-                                        {chartData.studentsByDepartment.length} قسم
+                                        {chartData.studentsByDepartment.length} {t("dashboard.department")}
                                     </span>
                                 </CardTitle>
                             </CardHeader>
@@ -361,7 +361,7 @@ export default function DashboardPage() {
                                             <Bar 
                                                 dataKey="students" 
                                                 fill="url(#barGradient)" 
-                                                name="عدد الطلاب" 
+                                                name={t("dashboard.studentCount")} 
                                                 radius={[10, 10, 0, 0]}
                                                 maxBarSize={50}
                                                 animationDuration={1500}
@@ -373,8 +373,8 @@ export default function DashboardPage() {
                                         <svg className="w-16 h-16 mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                         </svg>
-                                        <p className="text-sm font-medium">لا توجد بيانات لعرضها</p>
-                                        <p className="text-xs mt-1">أضف أقسام وطلاب لعرض الإحصائيات</p>
+                                        <p className="text-sm font-medium">{t("dashboard.noData")}</p>
+                                        <p className="text-xs mt-1">{t("dashboard.addDepartmentsAndStudents")}</p>
                                     </div>
                                 )}
                             </CardContent>
@@ -386,10 +386,10 @@ export default function DashboardPage() {
                                 <CardTitle className="flex items-center justify-between">
                                     <span className="flex items-center gap-2">
                                         <div className="w-2 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full"></div>
-                                        توزيع المواد حسب الأقسام
+                                        {t("dashboard.courseDistribution")}
                                     </span>
                                     <span className="text-xs font-normal text-gray-500 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
-                                        {chartData.coursesByDepartment.reduce((sum: number, d: any) => sum + d.courses, 0)} مادة
+                                        {chartData.coursesByDepartment.reduce((sum: number, d: any) => sum + d.courses, 0)} {t("dashboard.course")}
                                     </span>
                                 </CardTitle>
                             </CardHeader>
@@ -453,8 +453,8 @@ export default function DashboardPage() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
                                         </svg>
-                                        <p className="text-sm font-medium">لا توجد بيانات لعرضها</p>
-                                        <p className="text-xs mt-1">أضف مواد دراسية لعرض التوزيع</p>
+                                        <p className="text-sm font-medium">{t("dashboard.noData")}</p>
+                                        <p className="text-xs mt-1">{t("dashboard.addCourses")}</p>
                                     </div>
                                 )}
                             </CardContent>
@@ -466,10 +466,10 @@ export default function DashboardPage() {
                                 <CardTitle className="flex items-center justify-between">
                                     <span className="flex items-center gap-2">
                                         <div className="w-2 h-6 bg-gradient-to-b from-violet-500 to-purple-500 rounded-full"></div>
-                                        اتجاهات التسجيل عبر الفصول
+                                        {t("dashboard.enrollmentTrends")}
                                     </span>
                                     <span className="text-xs font-normal text-gray-500 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
-                                        آخر {chartData.enrollmentTrends.length} فصول
+                                        {t("dashboard.lastTerms", { count: chartData.enrollmentTrends.length })}
                                     </span>
                                 </CardTitle>
                             </CardHeader>
@@ -525,7 +525,7 @@ export default function DashboardPage() {
                                                 dataKey="enrollments" 
                                                 stroke="#8b5cf6" 
                                                 strokeWidth={3}
-                                                name="عدد التسجيلات"
+                                                name={t("dashboard.enrollmentCount")}
                                                 dot={{ fill: '#8b5cf6', r: 6, strokeWidth: 3, stroke: '#fff' }}
                                                 activeDot={{ r: 8, strokeWidth: 3, fill: '#7c3aed' }}
                                                 animationDuration={1500}
@@ -537,8 +537,8 @@ export default function DashboardPage() {
                                         <svg className="w-16 h-16 mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
                                         </svg>
-                                        <p className="text-sm font-medium">لا توجد بيانات لعرضها</p>
-                                        <p className="text-xs mt-1">أضف فصول دراسية لعرض الاتجاهات</p>
+                                        <p className="text-sm font-medium">{t("dashboard.noData")}</p>
+                                        <p className="text-xs mt-1">{t("dashboard.addTerms")}</p>
                                     </div>
                                 )}
                             </CardContent>
@@ -550,10 +550,10 @@ export default function DashboardPage() {
                                 <CardTitle className="flex items-center justify-between">
                                     <span className="flex items-center gap-2">
                                         <div className="w-2 h-6 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
-                                        نمو الطلاب عبر الدفعات
+                                        {t("dashboard.studentGrowth")}
                                     </span>
                                     <span className="text-xs font-normal text-gray-500 bg-white dark:bg-gray-800 px-3 py-1 rounded-full">
-                                        {chartData.studentGrowth.length} دفعة
+                                        {chartData.studentGrowth.length} {t("dashboard.batch")}
                                     </span>
                                 </CardTitle>
                             </CardHeader>
@@ -603,7 +603,7 @@ export default function DashboardPage() {
                                                 stroke="#10b981" 
                                                 strokeWidth={3}
                                                 fill="url(#colorStudentsNew)"
-                                                name="عدد الطلاب"
+                                                name={t("dashboard.studentCount")}
                                                 dot={{ fill: '#10b981', r: 6, strokeWidth: 3, stroke: '#fff' }}
                                                 activeDot={{ r: 8, strokeWidth: 3, fill: '#059669' }}
                                                 animationDuration={1500}
@@ -615,8 +615,8 @@ export default function DashboardPage() {
                                         <svg className="w-16 h-16 mb-3 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                                         </svg>
-                                        <p className="text-sm font-medium">لا توجد بيانات لعرضها</p>
-                                        <p className="text-xs mt-1">أضف دفعات دراسية لعرض النمو</p>
+                                        <p className="text-sm font-medium">{t("dashboard.noData")}</p>
+                                        <p className="text-xs mt-1">{t("dashboard.addBatches")}</p>
                                     </div>
                                 )}
                             </CardContent>

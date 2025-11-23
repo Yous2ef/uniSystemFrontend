@@ -57,7 +57,7 @@ export default function CollegesPage() {
             fetchColleges();
         } catch (error) {
             console.error("Error deleting college:", error);
-            alert("فشل حذف الكلية");
+            alert(t("pages.colleges.deleteFailed"));
         }
     };
 
@@ -84,7 +84,7 @@ export default function CollegesPage() {
         } catch (error: any) {
             console.error("Error saving college:", error);
             console.error("Error response:", error.response?.data);
-            alert(`فشل حفظ الكلية: ${error.response?.data?.message || error.message}`);
+            alert(`${t("pages.colleges.deleteFailed")}: ${error.response?.data?.message || error.message}`);
             throw error;
         }
     };
@@ -99,7 +99,7 @@ export default function CollegesPage() {
                             {t("colleges.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الكليات في النظام
+                            {t("pages.colleges.subtitle")}
                         </p>
                     </div>
                     <Button onClick={handleCreate} className="w-full sm:w-auto">

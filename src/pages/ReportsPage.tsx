@@ -189,11 +189,59 @@ export default function ReportsPage() {
     }, [selectedTerm, reportType]);
 
     const handleExportPDF = () => {
-        alert("سيتم تصدير التقرير كملف PDF");
+        // Use browser's print functionality to generate PDF
+        window.print();
     };
 
     const handleExportExcel = () => {
-        alert("سيتم تصدير التقرير كملف Excel");
+        // Simple CSV export
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Add BOM for proper Arabic support
+        
+        if (reportType === "statistics" && statistics) {
+            csvContent += t("reports.General Statistics") + "\n\n";
+            csvContent += t("reports.Total students") + "," + statistics.totalStudents + "\n";
+            csvContent += t("reports.Active students") + "," + statistics.activeStudents + "\n";
+            csvContent += t("reports.Overall GPA") + "," + statistics.averageGPA.toFixed(2) + "\n";
+            csvContent += t("reports.Enrollment Rate") + "," + statistics.enrollmentRate.toFixed(1) + "%\n";
+        } else if (reportType === "transcript" && studentTranscript) {
+            csvContent += t("reports.Grade sheet") + "\n\n";
+            csvContent += t("students.studentCode") + "," + studentTranscript.studentCode + "\n";
+            csvContent += t("students.nameAr") + "," + studentTranscript.nameAr + "\n";
+            csvContent += t("students.specialization") + "," + studentTranscript.specialization + "\n";
+            csvContent += t("students.gpa") + "," + studentTranscript.currentGPA.toFixed(2) + "\n\n";
+            
+            studentTranscript.terms.forEach((term: any) => {
+                csvContent += term.name + " - " + t("grades.termGPA") + ": " + term.gpa.toFixed(2) + "\n";
+                csvContent += t("courses.code") + "," + t("courses.name") + "," + t("courses.credits") + "," + t("grades.grade") + "," + t("grades.points") + "\n";
+                term.courses.forEach((course: any) => {
+                    csvContent += `${course.code},${course.name},${course.credits},${course.grade},${course.points}\n`;
+                });
+                csvContent += "\n";
+            });
+        } else if (reportType === "grades" && gradesReport) {
+            csvContent += t("reports.Grades Report") + " - " + gradesReport.termName + "\n\n";
+            csvContent += t("students.studentCode") + "," + t("students.nameAr") + "," + t("reports.Number of courses") + "," + t("grades.termGPA") + "\n";
+            gradesReport.students.forEach((student: any) => {
+                csvContent += `${student.studentCode},${student.nameAr},${student.courses.length},${student.termGPA ? student.termGPA.toFixed(2) : t("grades.notCalculated")}\n`;
+            });
+        } else if (reportType === "attendance" && attendanceReport) {
+            csvContent += t("reports.Attendance Statistics") + " - " + attendanceReport.termName + "\n\n";
+            csvContent += t("reports.Overall Attendance Rate") + "," + attendanceReport.overallAttendanceRate.toFixed(1) + "%\n";
+            csvContent += t("reports.Regular Students") + "," + attendanceReport.regularStudents + "\n";
+            csvContent += t("reports.Poor Attendance Students") + "," + attendanceReport.poorStudents + "\n\n";
+            csvContent += t("students.studentCode") + "," + t("students.nameAr") + "," + t("reports.Total Sessions") + "," + t("attendance.present") + "," + t("attendance.absent") + "," + t("reports.Rate") + "\n";
+            attendanceReport.students.forEach((student: any) => {
+                csvContent += `${student.studentCode},${student.nameAr},${student.totalSessions},${student.presentCount},${student.absentCount},${student.attendanceRate.toFixed(1)}%\n`;
+            });
+        }
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `report_${reportType}_${new Date().toLocaleDateString()}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return (
@@ -203,13 +251,13 @@ export default function ReportsPage() {
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                             {user?.role === "FACULTY" || user?.role === "TA"
-                                ? "تقارير المواد"
-                                : "التقارير والتحليلات"}
+                                ? t("faculty.course.materials")
+                                : t("reports.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
                             {user?.role === "FACULTY" || user?.role === "TA"
-                                ? "تقارير وإحصائيات للمواد التي تدرسها"
-                                : "تقارير شاملة وتحليلات إحصائية للنظام الأكاديمي"}
+                                ? t("faculty.dashboard.myCourses")
+                                : t("pages.reports.subtitle")}
                         </p>
                     </div>
                     {(user?.role === "ADMIN" ||
@@ -236,11 +284,11 @@ export default function ReportsPage() {
                 {(user?.role === "FACULTY" || user?.role === "TA") && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>المواد الخاصة بك</CardTitle>
+                            <CardTitle>{t("faculty.dashboard.myCourses")}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <p className="text-gray-500 text-center py-8">
-                                سيتم عرض المواد والأقسام التي تدرسها هنا
+                                {t("pages.reports.noData")}
                             </p>
                             {/* TODO: Add faculty sections and grade reports */}
                         </CardContent>
@@ -257,19 +305,19 @@ export default function ReportsPage() {
                         <TabsList>
                             <TabsTrigger value="statistics">
                                 <BarChart3 className="w-4 h-4 me-2" />
-                                الإحصائيات العامة
+                                {t("reports.General Statistics")}
                             </TabsTrigger>
                             <TabsTrigger value="transcript">
                                 <FileText className="w-4 h-4 me-2" />
-                                كشف الدرجات
+                                {t("reports.Grade sheet")}
                             </TabsTrigger>
                             <TabsTrigger value="grades">
                                 <GraduationCap className="w-4 h-4 me-2" />
-                                تقرير الدرجات
+                                {t("reports.Grade report")}
                             </TabsTrigger>
                             <TabsTrigger value="attendance">
                                 <Users className="w-4 h-4 me-2" />
-                                تقرير الحضور
+                                {t("reports.attendance report")}
                             </TabsTrigger>
                         </TabsList>
 
@@ -279,7 +327,7 @@ export default function ReportsPage() {
                                 <div className="text-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                                     <p className="text-gray-600 dark:text-gray-400">
-                                        جاري تحميل الإحصائيات...
+                                        {t("pages.reports.loading")}
                                     </p>
                                 </div>
                             ) : (
@@ -316,7 +364,7 @@ export default function ReportsPage() {
                                                             }
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            طلاب نشطون
+                                                            {t("reports.Active students")}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -334,7 +382,7 @@ export default function ReportsPage() {
                                                             )}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            المعدل العام
+                                                            {t("reports.Overall GPA")}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -353,7 +401,7 @@ export default function ReportsPage() {
                                                             %
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            نسبة التسجيل
+                                                            {t("reports.Enrollment Rate")}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -365,7 +413,7 @@ export default function ReportsPage() {
                                         <Card>
                                             <CardHeader>
                                                 <CardTitle>
-                                                    التخصصات الأكثر طلباً
+                                                    {t("reports.Most Requested Specializations")}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
@@ -380,7 +428,7 @@ export default function ReportsPage() {
                                                                 </span>
                                                                 <Badge variant="secondary">
                                                                     {spec.count}{" "}
-                                                                    طالب
+                                                                    {t("students.title")}
                                                                 </Badge>
                                                             </div>
                                                         )
@@ -392,7 +440,7 @@ export default function ReportsPage() {
                                         <Card>
                                             <CardHeader>
                                                 <CardTitle>
-                                                    توزيع الدرجات
+                                                    {t("reports.Grade Distribution")}
                                                 </CardTitle>
                                             </CardHeader>
                                             <CardContent>
@@ -437,7 +485,7 @@ export default function ReportsPage() {
                         <TabsContent value="transcript" className="space-y-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>اختيار الطالب</CardTitle>
+                                    <CardTitle>{t("reports.Student Selection")}</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <select
@@ -446,7 +494,7 @@ export default function ReportsPage() {
                                             setSelectedStudent(e.target.value)
                                         }
                                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                        <option value="">اختر طالباً</option>
+                                        <option value="">{t("reports.Select a Student")}</option>
                                         {students &&
                                             students.map((student) => (
                                                 <option
@@ -464,7 +512,7 @@ export default function ReportsPage() {
                                 <div className="text-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                                     <p className="text-gray-600 dark:text-gray-400">
-                                        جاري تحميل كشف الدرجات...
+                                        {t("pages.reports.loading")}
                                     </p>
                                 </div>
                             ) : studentTranscript ? (
@@ -472,14 +520,14 @@ export default function ReportsPage() {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>
-                                                معلومات الطالب
+                                                {t("students.title")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <p className="text-sm text-gray-500">
-                                                        الرقم الجامعي
+                                                        {t("students.studentCode")}
                                                     </p>
                                                     <p className="text-lg font-semibold">
                                                         {
@@ -489,7 +537,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500">
-                                                        الاسم
+                                                        {t("students.nameAr")}
                                                     </p>
                                                     <p className="text-lg font-semibold">
                                                         {
@@ -499,7 +547,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500">
-                                                        التخصص
+                                                        {t("students.specialization")}
                                                     </p>
                                                     <p className="text-lg font-semibold">
                                                         {
@@ -509,7 +557,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500">
-                                                        الدفعة
+                                                        {t("students.batch")}
                                                     </p>
                                                     <p className="text-lg font-semibold">
                                                         {
@@ -519,7 +567,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500">
-                                                        المعدل التراكمي
+                                                        {t("students.gpa")}
                                                     </p>
                                                     <p className="text-lg font-semibold text-green-600">
                                                         {studentTranscript.currentGPA.toFixed(
@@ -529,7 +577,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div>
                                                     <p className="text-sm text-gray-500">
-                                                        الساعات المنجزة
+                                                        {t("courses.credits")}
                                                     </p>
                                                     <p className="text-lg font-semibold">
                                                         {
@@ -550,7 +598,7 @@ export default function ReportsPage() {
                                                             {term.name}
                                                         </CardTitle>
                                                         <Badge>
-                                                            المعدل الفصلي:{" "}
+                                                            {t("grades.termGPA")}:{" "}
                                                             {term.gpa.toFixed(
                                                                 2
                                                             )}
@@ -563,20 +611,19 @@ export default function ReportsPage() {
                                                             <TableHeader>
                                                                 <TableRow>
                                                                     <TableHead>
-                                                                        الرمز
+                                                                        {t("courses.code")}
                                                                     </TableHead>
                                                                     <TableHead>
-                                                                        اسم
-                                                                        المقرر
+                                                                        {t("courses.name")}
                                                                     </TableHead>
                                                                     <TableHead>
-                                                                        الساعات
+                                                                        {t("courses.credits")}
                                                                     </TableHead>
                                                                     <TableHead>
-                                                                        الدرجة
+                                                                        {t("grades.grade")}
                                                                     </TableHead>
                                                                     <TableHead>
-                                                                        النقاط
+                                                                        {t("grades.points")}
                                                                     </TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
@@ -631,7 +678,7 @@ export default function ReportsPage() {
                             ) : selectedStudent ? (
                                 <div className="text-center py-12">
                                     <p className="text-gray-600 dark:text-gray-400">
-                                        لم يتم العثور على بيانات لهذا الطالب
+                                        {t("pages.reports.noData")}
                                     </p>
                                 </div>
                             ) : null}
@@ -643,7 +690,7 @@ export default function ReportsPage() {
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>
-                                            اختيار الفصل الدراسي
+                                            {t("terms.selectTerm")}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -671,14 +718,14 @@ export default function ReportsPage() {
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>
-                                            تقرير الدرجات -{" "}
+                                            {t("reports.Grades Report")} -{" "}
                                             {gradesReport.termName}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                معدل الفصل الدراسي:{" "}
+                                                {t("grades.termAverage")}:{" "}
                                                 <span className="font-bold text-lg">
                                                     {gradesReport.averageGPA.toFixed(
                                                         2
@@ -691,16 +738,16 @@ export default function ReportsPage() {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead>
-                                                            الرقم الجامعي
+                                                            {t("students.studentCode")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            اسم الطالب
+                                                            {t("students.nameAr")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            عدد المقررات
+                                                            {t("reports.Number of courses")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            المعدل الفصلي
+                                                            {t("grades.termGPA")}
                                                         </TableHead>
                                                     </TableRow>
                                                 </TableHeader>
@@ -734,7 +781,7 @@ export default function ReportsPage() {
                                                                             ? student.termGPA.toFixed(
                                                                                   2
                                                                               )
-                                                                            : "غير محسوب"}
+                                                                            : t("grades.notCalculated")}
                                                                     </Badge>
                                                                 </TableCell>
                                                             </TableRow>
@@ -749,17 +796,17 @@ export default function ReportsPage() {
                                 <div className="text-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                                     <p className="mt-4 text-gray-600 dark:text-gray-400">
-                                        جاري تحميل تقرير الدرجات...
+                                        {t("pages.reports.loading")}
                                     </p>
                                 </div>
                             ) : selectedTerm ? (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>تقرير الدرجات</CardTitle>
+                                        <CardTitle>{t("reports.Grades Report")}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-center text-gray-500 py-8">
-                                            لا توجد بيانات لهذا الفصل الدراسي
+                                            {t("pages.reports.noData")}
                                         </p>
                                     </CardContent>
                                 </Card>
@@ -772,7 +819,7 @@ export default function ReportsPage() {
                                 <Card>
                                     <CardHeader>
                                         <CardTitle>
-                                            اختيار الفصل الدراسي
+                                            {t("terms.selectTerm")}
                                         </CardTitle>
                                     </CardHeader>
                                     <CardContent>
@@ -782,7 +829,7 @@ export default function ReportsPage() {
                                                 setSelectedTerm(e.target.value)
                                             }
                                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                            <option value="">اختر الفصل</option>
+                                            <option value="">{t("terms.selectTerm")}</option>
                                             {terms &&
                                                 terms.map((term) => (
                                                     <option
@@ -801,7 +848,7 @@ export default function ReportsPage() {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>
-                                                إحصائيات الحضور -{" "}
+                                                {t("reports.Attendance Statistics")} -{" "}
                                                 {attendanceReport.termName}
                                             </CardTitle>
                                         </CardHeader>
@@ -809,7 +856,7 @@ export default function ReportsPage() {
                                             <div className="grid grid-cols-3 gap-4">
                                                 <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                                     <p className="text-sm text-gray-500 mb-1">
-                                                        معدل الحضور العام
+                                                        {t("reports.Overall Attendance Rate")}
                                                     </p>
                                                     <p className="text-3xl font-bold text-green-600">
                                                         {attendanceReport.overallAttendanceRate.toFixed(
@@ -820,8 +867,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                                     <p className="text-sm text-gray-500 mb-1">
-                                                        طلاب بحضور منتظم
-                                                        (&gt;=75%)
+                                                        {t("reports.Regular Students")} (&gt;=75%)
                                                     </p>
                                                     <p className="text-3xl font-bold text-blue-600">
                                                         {
@@ -831,8 +877,7 @@ export default function ReportsPage() {
                                                 </div>
                                                 <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                                                     <p className="text-sm text-gray-500 mb-1">
-                                                        طلاب بحضور ضعيف
-                                                        (&lt;75%)
+                                                        {t("reports.Poor Attendance Students")} (&lt;75%)
                                                     </p>
                                                     <p className="text-3xl font-bold text-red-600">
                                                         {
@@ -847,7 +892,7 @@ export default function ReportsPage() {
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>
-                                                تفاصيل حضور الطلاب
+                                                {t("reports.Student Attendance Details")}
                                             </CardTitle>
                                         </CardHeader>
                                         <CardContent>
@@ -856,22 +901,22 @@ export default function ReportsPage() {
                                                     <TableHeader>
                                                         <TableRow>
                                                             <TableHead>
-                                                                الرقم الجامعي
+                                                                {t("students.studentCode")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                اسم الطالب
+                                                                {t("students.nameAr")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                إجمالي الجلسات
+                                                                {t("reports.Total Sessions")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                الحضور
+                                                                {t("attendance.present")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                الغياب
+                                                                {t("attendance.absent")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                النسبة
+                                                                {t("reports.Rate")}
                                                             </TableHead>
                                                         </TableRow>
                                                     </TableHeader>
@@ -934,17 +979,17 @@ export default function ReportsPage() {
                                 <div className="text-center py-12">
                                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
                                     <p className="mt-4 text-gray-600 dark:text-gray-400">
-                                        جاري تحميل تقرير الحضور...
+                                        {t("pages.reports.loading")}
                                     </p>
                                 </div>
                             ) : selectedTerm ? (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>إحصائيات الحضور</CardTitle>
+                                        <CardTitle>{t("reports.Attendance Statistics")}</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <p className="text-center text-gray-500 py-8">
-                                            لا توجد بيانات لهذا الفصل الدراسي
+                                            {t("pages.reports.noData")}
                                         </p>
                                     </CardContent>
                                 </Card>

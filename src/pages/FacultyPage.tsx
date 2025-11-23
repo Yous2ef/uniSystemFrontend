@@ -65,14 +65,14 @@ export default function FacultyPage() {
             fetchFaculty();
         } catch (error) {
             console.error("Error deleting faculty:", error);
-            alert("فشل حذف عضو هيئة التدريس");
+            alert(t("pages.faculty.deleteFailed"));
         }
     };
 
     const getTypeBadge = (type: string) => {
         return (
             <Badge variant={type === "FACULTY" ? "default" : "secondary"}>
-                {type === "FACULTY" ? "عضو هيئة تدريس" : "معيد"}
+                {type === "FACULTY" ? t("pages.faculty.facultyMember") : t("pages.faculty.teachingAssistant")}
             </Badge>
         );
     };
@@ -94,7 +94,7 @@ export default function FacultyPage() {
                             {t("faculty.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة أعضاء هيئة التدريس والمعيدين
+                            {t("pages.faculty.subtitle")}
                         </p>
                     </div>
                     <Button
@@ -135,12 +135,12 @@ export default function FacultyPage() {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>الرقم الوظيفي</TableHead>
-                                        <TableHead>الاسم بالعربية</TableHead>
-                                        <TableHead>الاسم بالإنجليزية</TableHead>
-                                        <TableHead>البريد الإلكتروني</TableHead>
-                                        <TableHead>الهاتف</TableHead>
-                                        <TableHead>النوع</TableHead>
+                                        <TableHead>{t("pages.faculty.staffCode")}</TableHead>
+                                        <TableHead>{t("pages.faculty.nameAr")}</TableHead>
+                                        <TableHead>{t("pages.faculty.nameEn")}</TableHead>
+                                        <TableHead>{t("pages.faculty.email")}</TableHead>
+                                        <TableHead>{t("pages.faculty.phone")}</TableHead>
+                                        <TableHead>{t("pages.faculty.type")}</TableHead>
                                         <TableHead className="text-end">
                                             {t("common.actions")}
                                         </TableHead>

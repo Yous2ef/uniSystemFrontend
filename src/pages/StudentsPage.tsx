@@ -84,7 +84,7 @@ export default function StudentsPage() {
             fetchStudents();
         } catch (error) {
             console.error("Error deleting student:", error);
-            alert("فشل حذف الطالب");
+            alert(t("pages.students.deleteFailed"));
         }
     };
 
@@ -124,7 +124,7 @@ export default function StudentsPage() {
                             {t("students.title")}
                         </h1>
                         <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 mt-1">
-                            إدارة الطلاب في النظام
+                            {t("pages.students.subtitle")}
                         </p>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
@@ -195,7 +195,7 @@ export default function StudentsPage() {
                                         <TableHead>
                                             {t("students.gpa")}
                                         </TableHead>
-                                        <TableHead>الساعات المكتسبة</TableHead>
+                                        <TableHead>{t("students.earnedCredits")}</TableHead>
                                         <TableHead>
                                             {t("students.status")}
                                         </TableHead>
