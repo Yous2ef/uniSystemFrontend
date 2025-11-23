@@ -64,6 +64,11 @@ export default function DashboardPage() {
         return <Navigate to="/student/dashboard" replace />;
     }
 
+    // Redirect faculty to their specific dashboard
+    if (user?.role === "FACULTY" || user?.role === "TA") {
+        return <Navigate to="/faculty/dashboard" replace />;
+    }
+
     useEffect(() => {
         fetchStats();
     }, []);

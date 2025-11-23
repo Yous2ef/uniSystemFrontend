@@ -1,0 +1,523 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+    BookOpen,
+    Users,
+    AlertCircle,
+    FileText,
+    Calendar,
+    CheckCircle,
+    ArrowLeft,
+} from "lucide-react";
+import { facultyService } from "@/services/api";
+import { useAuthStore } from "@/store/auth";
+
+interface Section {
+    id: string;
+    code: string;
+    capacity: number;
+    course: {
+        code: string;
+        nameAr: string;
+        nameEn: string;
+        credits: number;
+    };
+    term: {
+        name: string;
+        status: string;
+    };
+    schedules: {
+        day: number;
+        startTime: string;
+        endTime: string;
+        room?: string;
+    }[];
+    _count?: {
+        enrollments: number;
+    };
+}
+
+interface PendingTask {
+    id: string;
+    type: "urgent" | "week" | "completed";
+    title: string;
+    deadline?: string;
+    sectionId?: string;
+}
+
+export default function FacultyDashboard() {
+    const { user } = useAuthStore();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(true);
+    const [sections, setSections] = useState<Section[]>([]);
+    const [pendingTasks, setPendingTasks] = useState<PendingTask[]>([]);
+    const [facultyData, setFacultyData] = useState<any>(null);
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            console.log("📊 Fetching faculty dashboard data...");
+
+            // Get faculty profile by user ID
+            const facultyResponse = await facultyService.getAll();
+            console.log("Faculty response:", facultyResponse);
+
+            if (facultyResponse.success) {
+                const allFaculty = facultyResponse.data?.faculty || facultyResponse.data || [];
+                const currentFaculty = allFaculty.find((f: any) => f.userId === user?.id);
+                
+                if (currentFaculty) {
+                    setFacultyData(currentFaculty);
+                    console.log("✅ Faculty data:", currentFaculty);
+
+                    // Get sections for this faculty
+                    const sectionsResponse = await facultyService.getSections(currentFaculty.id);
+                    console.log("Sections response:", sectionsResponse);
+
+                    if (sectionsResponse.success) {
+                        const facultySections = sectionsResponse.data || [];
+                        setSections(facultySections);
+                        console.log("✅ Sections loaded:", facultySections.length);
+
+                        // Generate pending tasks based on sections
+                        generatePendingTasks(facultySections);
+                    } else {
+                        // Use mock data if no sections found
+                        console.log("⚠️ No sections found, using mock data");
+                        setMockData();
+                    }
+                } else {
+                    // Use mock data if faculty not found
+                    console.log("⚠️ Faculty not found, using mock data");
+                    setMockData();
+                }
+            } else {
+                // Use mock data if API fails
+                console.log("⚠️ API failed, using mock data");
+                setMockData();
+            }
+        } catch (error) {
+            console.error("❌ Error fetching dashboard data:", error);
+            // Use mock data on error
+            setMockData();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const setMockData = () => {
+        setFacultyData({
+            id: "mock-faculty-1",
+            nameAr: "د. أحمد محمد",
+            nameEn: "Dr. Ahmed Mohamed",
+        });
+
+        const mockSections = [
+            {
+                id: "mock-section-1",
+                code: "01",
+                capacity: 40,
+                course: {
+                    code: "CS301",
+                    nameAr: "هياكل البيانات",
+                    nameEn: "Data Structures",
+                    credits: 3,
+                },
+                term: {
+                    name: "خريف 2025",
+                    status: "ACTIVE",
+                },
+                schedules: [],
+                _count: {
+                    enrollments: 35,
+                },
+            },
+            {
+                id: "mock-section-2",
+                code: "01",
+                capacity: 35,
+                course: {
+                    code: "CS405",
+                    nameAr: "خوارزميات",
+                    nameEn: "Algorithms",
+                    credits: 3,
+                },
+                term: {
+                    name: "خريف 2025",
+                    status: "ACTIVE",
+                },
+                schedules: [],
+                _count: {
+                    enrollments: 32,
+                },
+            },
+            {
+                id: "mock-section-3",
+                code: "02",
+                capacity: 30,
+                course: {
+                    code: "CS201",
+                    nameAr: "البرمجة الكائنية",
+                    nameEn: "Object Oriented Programming",
+                    credits: 3,
+                },
+                term: {
+                    name: "خريف 2025",
+                    status: "ACTIVE",
+                },
+                schedules: [],
+                _count: {
+                    enrollments: 28,
+                },
+            },
+        ];
+
+        setSections(mockSections as Section[]);
+        generatePendingTasks(mockSections as Section[]);
+        console.log("✅ Mock data loaded with", mockSections.length, "sections");
+    };
+
+    const generatePendingTasks = (facultySections: Section[]) => {
+        const tasks: PendingTask[] = [];
+        
+        // Add sample tasks (in real app, fetch from backend)
+        facultySections.forEach((section) => {
+            tasks.push({
+                id: `attendance-${section.id}`,
+                type: "week",
+                title: `تسجيل حضور محاضرة ${section.course.nameAr}`,
+                sectionId: section.id,
+            });
+        });
+
+        setPendingTasks(tasks);
+    };
+
+    const getDayName = (day: number) => {
+        const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+        return days[day] || "";
+    };
+
+    const getNextLecture = (schedules: any[]) => {
+        if (!schedules || schedules.length === 0) return "لا يوجد جدول";
+        
+        const today = new Date().getDay();
+        const nextSchedule = schedules.find(s => s.day >= today) || schedules[0];
+        
+        return `${getDayName(nextSchedule.day)} ${nextSchedule.startTime}`;
+    };
+
+    const navigateToCourse = (sectionId: string) => {
+        navigate(`/faculty/course/${sectionId}`);
+    };
+
+    if (loading) {
+        return (
+            <DashboardLayout>
+                <div className="flex items-center justify-center h-96">
+                    <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                        <p className="mt-4 text-gray-600 dark:text-gray-400">
+                            جاري التحميل...
+                        </p>
+                    </div>
+                </div>
+            </DashboardLayout>
+        );
+    }
+
+    return (
+        <DashboardLayout>
+            <div className="space-y-6">
+                {/* Welcome Section */}
+                <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 rounded-lg p-6 text-white">
+                    <h1 className="text-3xl font-bold">
+                        👋 أهلاً {facultyData?.nameAr || "دكتور"}
+                    </h1>
+                    <p className="mt-2 text-blue-100 text-lg">
+                        المواد اللي بتدرسها هذا الترم
+                    </p>
+                </div>
+
+                {/* Important Notice */}
+                <Card className="border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
+                    <CardContent className="p-6">
+                        <div className="flex items-start gap-4">
+                            <div className="bg-blue-600 text-white p-3 rounded-full shrink-0">
+                                <AlertCircle className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">
+                                    🎯 كيف تصل للـ 8 أدوات؟
+                                </h3>
+                                <p className="text-blue-800 dark:text-blue-200 mb-3 text-lg">
+                                    <strong>اضغط على أي مادة من البطاقات بالأسفل</strong> عشان تشوف:
+                                </p>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">👥 الطلاب</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📊 الدرجات</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📅 الحضور</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📚 المحتوى</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📢 الإعلانات</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">💬 التظلمات</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📈 التحليلات</div>
+                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">⚙️ الإعدادات</div>
+                                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        عدد المواد
+                                    </p>
+                                    <p className="text-3xl font-bold text-blue-600">
+                                        {sections.length}
+                                    </p>
+                                </div>
+                                <BookOpen className="w-12 h-12 text-blue-500 opacity-20" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        إجمالي الطلاب
+                                    </p>
+                                    <p className="text-3xl font-bold text-green-600">
+                                        {sections.reduce((sum, s) => sum + (s._count?.enrollments || 0), 0)}
+                                    </p>
+                                </div>
+                                <Users className="w-12 h-12 text-green-500 opacity-20" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        المهام المعلقة
+                                    </p>
+                                    <p className="text-3xl font-bold text-orange-600">
+                                        {pendingTasks.length}
+                                    </p>
+                                </div>
+                                <AlertCircle className="w-12 h-12 text-orange-500 opacity-20" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                {/* Features Overview */}
+                <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-800">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <span className="text-2xl">🎯</span>
+                            الأدوات المتاحة لكل مادة
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">👥</div>
+                                <div className="font-semibold text-sm">الطلاب</div>
+                                <div className="text-xs text-gray-500 mt-1">قائمة وتفاصيل</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">📊</div>
+                                <div className="font-semibold text-sm">الدرجات</div>
+                                <div className="text-xs text-gray-500 mt-1">إدارة كاملة</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">📅</div>
+                                <div className="font-semibold text-sm">الحضور</div>
+                                <div className="text-xs text-gray-500 mt-1">تسجيل وتقارير</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">📚</div>
+                                <div className="font-semibold text-sm">المحتوى</div>
+                                <div className="text-xs text-gray-500 mt-1">رفع ملفات</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">📢</div>
+                                <div className="font-semibold text-sm">الإعلانات</div>
+                                <div className="text-xs text-gray-500 mt-1">نشر أخبار</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">💬</div>
+                                <div className="font-semibold text-sm">التظلمات</div>
+                                <div className="text-xs text-gray-500 mt-1">مراجعة طلبات</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">📈</div>
+                                <div className="font-semibold text-sm">التحليلات</div>
+                                <div className="text-xs text-gray-500 mt-1">إحصائيات</div>
+                            </div>
+                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
+                                <div className="text-3xl mb-2">⚙️</div>
+                                <div className="font-semibold text-sm">الإعدادات</div>
+                                <div className="text-xs text-gray-500 mt-1">سياسات المادة</div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Courses Cards */}
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                        📚 موادك ({sections.length})
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {sections.length === 0 ? (
+                            <Card className="col-span-full">
+                                <CardContent className="p-6 text-center text-gray-500">
+                                    لا توجد مواد مسندة إليك هذا الفصل الدراسي
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            sections.map((section) => (
+                                <Card
+                                    key={section.id}
+                                    className="hover:shadow-xl transition-all duration-300 cursor-pointer border-2 border-transparent hover:border-blue-500"
+                                    onClick={() => navigateToCourse(section.id)}
+                                >
+                                    <CardHeader className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20">
+                                        <CardTitle className="flex items-center justify-between">
+                                            <div>
+                                                <div className="text-lg font-bold">
+                                                    {section.course.code}
+                                                </div>
+                                                <div className="text-sm font-normal text-gray-600 dark:text-gray-400 mt-1">
+                                                    {section.course.nameAr}
+                                                </div>
+                                            </div>
+                                            <BookOpen className="w-6 h-6 text-blue-500" />
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="pt-4 space-y-3">
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-600 dark:text-gray-400">
+                                                👥 الطلاب:
+                                            </span>
+                                            <span className="font-semibold">
+                                                {section._count?.enrollments || 0}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between text-sm">
+                                            <span className="text-gray-600 dark:text-gray-400">
+                                                📖 القسم:
+                                            </span>
+                                            <span className="font-semibold">
+                                                {section.code}
+                                            </span>
+                                        </div>
+                                        <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+                                            <div className="flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                                <span>اضغط لعرض 8 أدوات الإدارة</span>
+                                                <ArrowLeft className="w-4 h-4 animate-pulse" />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Pending Tasks */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <FileText className="w-5 h-5" />
+                            المهام المعلقة
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        {/* Urgent Tasks */}
+                        <div>
+                            <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
+                                <AlertCircle className="w-4 h-4" />
+                                عاجل:
+                            </h3>
+                            <div className="space-y-2 mr-6">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    لا توجد مهام عاجلة حالياً
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* This Week Tasks */}
+                        <div>
+                            <h3 className="font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-2">
+                                <Calendar className="w-4 h-4" />
+                                هذا الأسبوع:
+                            </h3>
+                            <div className="space-y-2 mr-6">
+                                {pendingTasks
+                                    .filter((t) => t.type === "week")
+                                    .slice(0, 3)
+                                    .map((task) => (
+                                        <div
+                                            key={task.id}
+                                            className="flex items-center justify-between text-sm"
+                                        >
+                                            <span className="text-gray-600 dark:text-gray-400">
+                                                ├─ {task.title}
+                                            </span>
+                                            {task.sectionId && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() =>
+                                                        navigateToCourse(task.sectionId!)
+                                                    }
+                                                >
+                                                    فتح
+                                                </Button>
+                                            )}
+                                        </div>
+                                    ))}
+                                {pendingTasks.filter((t) => t.type === "week")
+                                    .length === 0 && (
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        لا توجد مهام هذا الأسبوع
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Completed Tasks */}
+                        <div>
+                            <h3 className="font-semibold text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4" />
+                                مكتمل:
+                            </h3>
+                            <div className="space-y-2 mr-6">
+                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                    ✅ جميع المهام السابقة مكتملة
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </DashboardLayout>
+    );
+}

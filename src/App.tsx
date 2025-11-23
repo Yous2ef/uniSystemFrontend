@@ -33,6 +33,9 @@ import SubjectDetailsPage from "@/pages/student/SubjectDetailsPage";
 import StudentSettingsPage from "@/pages/student/StudentSettingsPage";
 import DepartmentApplicationsPage from "@/pages/DepartmentApplicationsPage";
 import SettingsPage from "@/pages/SettingsPage";
+import FacultyDashboard from "@/pages/faculty/FacultyDashboard";
+import FacultyCourseManagement from "@/pages/faculty/FacultyCourseManagement";
+import FacultyReportsPage from "@/pages/faculty/FacultyReportsPage";
 import "./i18n/config";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -92,6 +95,21 @@ function StudentRoute({ children }: { children: React.ReactNode }) {
     }
 
     console.log("✅ Student authenticated, rendering student content");
+    return <>{children}</>;
+}
+
+function FacultyRoute({ children }: { children: React.ReactNode }) {
+    const { user, accessToken } = useAuthStore();
+
+    if (!user || !accessToken) {
+        return <Navigate to="/login" replace />;
+    }
+
+    // Only FACULTY and TA can access faculty routes
+    if (user?.role !== "FACULTY" && user?.role !== "TA") {
+        return <Navigate to="/dashboard" replace />;
+    }
+
     return <>{children}</>;
 }
 
@@ -257,7 +275,12 @@ function App() {
                     path="/reports"
                     element={
                         <ProtectedRoute>
-                            <ReportsPage />
+                            {useAuthStore.getState().user?.role === "FACULTY" || 
+                             useAuthStore.getState().user?.role === "TA" ? (
+                                <FacultyReportsPage />
+                            ) : (
+                                <ReportsPage />
+                            )}
                         </ProtectedRoute>
                     }
                 />
@@ -267,6 +290,23 @@ function App() {
                         <AdminRoute>
                             <SettingsPage />
                         </AdminRoute>
+                    }
+                />
+                {/* Faculty Routes */}
+                <Route
+                    path="/faculty/dashboard"
+                    element={
+                        <FacultyRoute>
+                            <FacultyDashboard />
+                        </FacultyRoute>
+                    }
+                />
+                <Route
+                    path="/faculty/course/:sectionId"
+                    element={
+                        <FacultyRoute>
+                            <FacultyCourseManagement />
+                        </FacultyRoute>
                     }
                 />
                 {/* Student Routes */}
