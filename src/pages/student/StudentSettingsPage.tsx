@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     User,
     Lock,
@@ -56,6 +57,7 @@ interface PasswordFormData {
 }
 
 export default function StudentSettingsPage() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const { theme, setTheme } = useThemeStore();
     const [loading, setLoading] = useState(true);
@@ -176,7 +178,7 @@ export default function StudentSettingsPage() {
             );
 
             if (response.success) {
-                alert("✅ تم حفظ التغييرات بنجاح");
+                alert("✅ " + t("student.settings.saveSuccess"));
                 setProfileChanged(false);
                 fetchStudentData();
             }
@@ -186,7 +188,7 @@ export default function StudentSettingsPage() {
                 response?: { data?: { message?: string } };
             };
             const message =
-                errorObj?.response?.data?.message || "فشل حفظ التغييرات";
+                errorObj?.response?.data?.message || t("student.settings.saveFailed");
             alert("❌ " + message);
         } finally {
             setSaving(false);
@@ -214,17 +216,17 @@ export default function StudentSettingsPage() {
             !passwordForm.newPassword ||
             !passwordForm.confirmPassword
         ) {
-            alert("❌ الرجاء ملء جميع الحقول");
+            alert("❌ " + t("student.settings.fillAllFields"));
             return;
         }
 
         if (passwordForm.newPassword.length < 8) {
-            alert("❌ كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل");
+            alert("❌ " + t("student.settings.passwordMinLength"));
             return;
         }
 
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            alert("❌ كلمة المرور الجديدة غير متطابقة");
+            alert("❌ " + t("student.settings.passwordMismatch"));
             return;
         }
 
@@ -244,7 +246,7 @@ export default function StudentSettingsPage() {
                     newPassword: "",
                     confirmPassword: "",
                 });
-                alert("✅ تم تغيير كلمة المرور بنجاح");
+                alert("✅ " + t("student.settings.passwordChangeSuccess"));
             }
         } catch (error: unknown) {
             console.error("❌ Error changing password:", error);
@@ -252,7 +254,7 @@ export default function StudentSettingsPage() {
                 response?: { data?: { message?: string } };
             };
             const message =
-                errorObj?.response?.data?.message || "فشل تغيير كلمة المرور";
+                errorObj?.response?.data?.message || t("student.settings.passwordChangeFailed");
             alert("❌ " + message);
         } finally {
             setSaving(false);
@@ -270,7 +272,7 @@ export default function StudentSettingsPage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل الإعدادات...
+                            {t("student.settings.loadingSettings")}
                         </p>
                     </div>
                 </div>
@@ -284,10 +286,10 @@ export default function StudentSettingsPage() {
                 {/* Header */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        ⚙️ الإعدادات
+                        ⚙️ {t("student.settings.title")}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        إدارة الملف الشخصي والتفضيلات
+                        {t("student.settings.subtitle")}
                     </p>
                 </div>
 
@@ -300,31 +302,31 @@ export default function StudentSettingsPage() {
                             value="profile"
                             className="flex items-center gap-2">
                             <User className="w-4 h-4" />
-                            الملف الشخصي
+                            {t("student.settings.tabs.profile")}
                         </TabsTrigger>
                         <TabsTrigger
                             value="security"
                             className="flex items-center gap-2">
                             <Lock className="w-4 h-4" />
-                            الأمان
+                            {t("student.settings.tabs.security")}
                         </TabsTrigger>
                         <TabsTrigger
                             value="notifications"
                             className="flex items-center gap-2">
                             <Bell className="w-4 h-4" />
-                            الإشعارات
+                            {t("student.settings.tabs.notifications")}
                         </TabsTrigger>
                         <TabsTrigger
                             value="display"
                             className="flex items-center gap-2">
                             <Palette className="w-4 h-4" />
-                            العرض
+                            {t("student.settings.tabs.display")}
                         </TabsTrigger>
                         <TabsTrigger
                             value="privacy"
                             className="flex items-center gap-2">
                             <Shield className="w-4 h-4" />
-                            الخصوصية
+                            {t("student.settings.tabs.privacy")}
                         </TabsTrigger>
                     </TabsList>
 
@@ -332,13 +334,13 @@ export default function StudentSettingsPage() {
                     <TabsContent value="profile" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>المعلومات الشخصية</CardTitle>
+                                <CardTitle>{t("student.settings.personalInfo")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="nameAr">
-                                            الاسم بالعربية *
+                                            {t("student.settings.nameAr")} *
                                         </Label>
                                         <Input
                                             id="nameAr"
@@ -353,7 +355,7 @@ export default function StudentSettingsPage() {
                                     </div>
                                     <div>
                                         <Label htmlFor="nameEn">
-                                            الاسم بالإنجليزية *
+                                            {t("student.settings.nameEn")} *
                                         </Label>
                                         <Input
                                             id="nameEn"
@@ -371,7 +373,7 @@ export default function StudentSettingsPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor="phone">
-                                            رقم الهاتف
+                                            {t("student.settings.phone")}
                                         </Label>
                                         <Input
                                             id="phone"
@@ -388,7 +390,7 @@ export default function StudentSettingsPage() {
                                     </div>
                                     <div>
                                         <Label htmlFor="dateOfBirth">
-                                            تاريخ الميلاد
+                                            {t("student.settings.dateOfBirth")}
                                         </Label>
                                         <Input
                                             id="dateOfBirth"
@@ -406,7 +408,7 @@ export default function StudentSettingsPage() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label htmlFor="gender">الجنس</Label>
+                                        <Label htmlFor="gender">{t("student.settings.gender")}</Label>
                                         <select
                                             id="gender"
                                             value={profileForm.gender}
@@ -417,9 +419,9 @@ export default function StudentSettingsPage() {
                                                 )
                                             }
                                             className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                                            <option value="">اختر</option>
-                                            <option value="MALE">ذكر</option>
-                                            <option value="FEMALE">أنثى</option>
+                                            <option value="">{t("student.settings.select")}</option>
+                                            <option value="MALE">{t("student.settings.male")}</option>
+                                            <option value="FEMALE">{t("student.settings.female")}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -430,12 +432,12 @@ export default function StudentSettingsPage() {
                                             onClick={handleSaveProfile}
                                             disabled={saving}>
                                             <Save className="w-4 h-4 me-2" />
-                                            حفظ التغييرات
+                                            {t("student.settings.saveChanges")}
                                         </Button>
                                         <Button
                                             variant="outline"
                                             onClick={handleCancelProfile}>
-                                            إلغاء
+                                            {t("student.settings.cancel")}
                                         </Button>
                                     </div>
                                 )}
@@ -445,18 +447,18 @@ export default function StudentSettingsPage() {
                         {/* Read-Only Academic Info */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>المعلومات الأكاديمية</CardTitle>
+                                <CardTitle>{t("student.settings.academicInfo")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label>الرقم الجامعي</Label>
+                                        <Label>{t("student.settings.studentCode")}</Label>
                                         <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
                                             {studentData?.studentCode}
                                         </div>
                                     </div>
                                     <div>
-                                        <Label>البريد الإلكتروني</Label>
+                                        <Label>{t("student.settings.email")}</Label>
                                         <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
                                             {studentData?.email}
                                         </div>
@@ -465,31 +467,31 @@ export default function StudentSettingsPage() {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label>القسم</Label>
+                                        <Label>{t("student.settings.department")}</Label>
                                         <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
                                             {studentData?.department?.nameAr ||
-                                                "غير محدد"}
+                                                t("student.settings.notSpecified")}
                                         </div>
                                     </div>
                                     <div>
-                                        <Label>الدفعة</Label>
+                                        <Label>{t("student.settings.batch")}</Label>
                                         <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
                                             {studentData?.batch?.name ||
-                                                "غير محدد"}
+                                                t("student.settings.notSpecified")}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label>الحالة الأكاديمية</Label>
+                                        <Label>{t("student.settings.academicStatus")}</Label>
                                         <Badge className="mt-2">
                                             {studentData?.status}
                                         </Badge>
                                     </div>
                                     {studentData?.nationalId && (
                                         <div>
-                                            <Label>رقم الهوية</Label>
+                                            <Label>{t("student.settings.nationalId")}</Label>
                                             <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded border">
                                                 {studentData.nationalId}
                                             </div>
@@ -504,12 +506,12 @@ export default function StudentSettingsPage() {
                     <TabsContent value="security" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>تغيير كلمة المرور</CardTitle>
+                                <CardTitle>{t("student.settings.changePassword")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
                                     <Label htmlFor="currentPassword">
-                                        كلمة المرور الحالية *
+                                        {t("student.settings.currentPassword")} *
                                     </Label>
                                     <div className="relative">
                                         <Input
@@ -549,7 +551,7 @@ export default function StudentSettingsPage() {
 
                                 <div>
                                     <Label htmlFor="newPassword">
-                                        كلمة المرور الجديدة * (8 أحرف على الأقل)
+                                        {t("student.settings.newPassword")} * ({t("student.settings.minChars")})
                                     </Label>
                                     <div className="relative">
                                         <Input
@@ -587,7 +589,7 @@ export default function StudentSettingsPage() {
 
                                 <div>
                                     <Label htmlFor="confirmPassword">
-                                        تأكيد كلمة المرور *
+                                        {t("student.settings.confirmPassword")} *
                                     </Label>
                                     <div className="relative">
                                         <Input
@@ -629,7 +631,7 @@ export default function StudentSettingsPage() {
                                     onClick={handleChangePassword}
                                     disabled={saving}>
                                     <Lock className="w-4 h-4 me-2" />
-                                    تغيير كلمة المرور
+                                    {t("student.settings.changePassword")}
                                 </Button>
                             </CardContent>
                         </Card>
@@ -639,14 +641,14 @@ export default function StudentSettingsPage() {
                     <TabsContent value="notifications" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>إشعارات البريد الإلكتروني</CardTitle>
+                                <CardTitle>{t("student.settings.emailNotifications")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {Object.entries({
-                                    emailGrades: "إعلانات الدرجات",
-                                    emailMaterials: "تحميل المواد الدراسية",
-                                    emailSchedule: "تغييرات الجدول",
-                                    emailAnnouncements: "الإعلانات العامة",
+                                    emailGrades: t("student.settings.notif.grades"),
+                                    emailMaterials: t("student.settings.notif.materials"),
+                                    emailSchedule: t("student.settings.notif.schedule"),
+                                    emailAnnouncements: t("student.settings.notif.announcements"),
                                 }).map(([key, label]) => (
                                     <div
                                         key={key}
@@ -674,11 +676,11 @@ export default function StudentSettingsPage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>إشعارات التطبيق</CardTitle>
+                                <CardTitle>{t("student.settings.appNotifications")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <span>التنبيهات الفورية</span>
+                                    <span>{t("student.settings.notif.alerts")}</span>
                                     <input
                                         type="checkbox"
                                         checked={notifications.inAppAlerts}
@@ -692,7 +694,7 @@ export default function StudentSettingsPage() {
                                     />
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span>الأصوات</span>
+                                    <span>{t("student.settings.notif.sounds")}</span>
                                     <input
                                         type="checkbox"
                                         checked={notifications.sound}
@@ -713,15 +715,15 @@ export default function StudentSettingsPage() {
                     <TabsContent value="display" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>المظهر</CardTitle>
+                                <CardTitle>{t("student.settings.appearance")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                    <Label>الوضع</Label>
+                                    <Label>{t("student.settings.mode")}</Label>
                                     <div className="grid grid-cols-2 gap-3 mt-2">
                                         {[
-                                            { value: "light", label: "فاتح" },
-                                            { value: "dark", label: "داكن" },
+                                            { value: "light", label: t("student.settings.light") },
+                                            { value: "dark", label: t("student.settings.dark") },
                                         ].map((option) => (
                                             <Button
                                                 key={option.value}
@@ -751,11 +753,11 @@ export default function StudentSettingsPage() {
                     <TabsContent value="privacy" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>إعدادات الخصوصية</CardTitle>
+                                <CardTitle>{t("student.settings.privacySettings")}</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
-                                    <Label>ظهور الملف الشخصي</Label>
+                                    <Label>{t("student.settings.profileVisibility")}</Label>
                                     <select
                                         value={privacy.profileVisibility}
                                         onChange={(e) =>
@@ -767,13 +769,13 @@ export default function StudentSettingsPage() {
                                         }
                                         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm mt-2">
                                         <option value="public">
-                                            عام (جميع الطلاب)
+                                            {t("student.settings.visibility.public")}
                                         </option>
                                         <option value="department">
-                                            القسم فقط
+                                            {t("student.settings.visibility.department")}
                                         </option>
                                         <option value="private">
-                                            خاص (أنا فقط)
+                                            {t("student.settings.visibility.private")}
                                         </option>
                                     </select>
                                 </div>
@@ -781,7 +783,7 @@ export default function StudentSettingsPage() {
                                 <div className="space-y-3 mt-4">
                                     <div className="flex items-center justify-between">
                                         <span>
-                                            إظهار البريد الإلكتروني للطلاب
+                                            {t("student.settings.privacy.showEmail")}
                                         </span>
                                         <input
                                             type="checkbox"
@@ -796,7 +798,7 @@ export default function StudentSettingsPage() {
                                         />
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span>إظهار رقم الهاتف للطلاب</span>
+                                        <span>{t("student.settings.privacy.showPhone")}</span>
                                         <input
                                             type="checkbox"
                                             checked={privacy.showPhone}
@@ -810,7 +812,7 @@ export default function StudentSettingsPage() {
                                         />
                                     </div>
                                     <div className="flex items-center justify-between">
-                                        <span>السماح للمدرسين بالتواصل</span>
+                                        <span>{t("student.settings.privacy.allowFacultyContact")}</span>
                                         <input
                                             type="checkbox"
                                             checked={

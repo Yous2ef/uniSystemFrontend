@@ -94,13 +94,7 @@ export default function StudentDashboard() {
                     0
                 );
 
-                // Map academic standing to Arabic
-                const standingMap: Record<string, string> = {
-                    GOOD_STANDING: "جيد",
-                    ACADEMIC_WARNING: "إنذار أكاديمي",
-                    ACADEMIC_PROBATION: "تحت المراقبة",
-                    ACADEMIC_DISMISSAL: "فصل أكاديمي",
-                };
+                // Academic standing will be translated via i18n
 
                 // Calculate expected graduation (4 years from admission)
                 const admissionYear = new Date(
@@ -113,9 +107,9 @@ export default function StudentDashboard() {
                     termGpa: cgpa, // Use CGPA as term GPA for now
                     totalCredits: totalCredits,
                     requiredCredits: requiredCredits,
-                    standing: standingMap[academicStanding] || "جيد",
+                    standing: academicStanding,
                     creditsThisTerm: creditsThisTerm,
-                    expectedGraduation: `ربيع ${expectedGradYear}`,
+                    expectedGraduation: `${expectedGradYear}`,
                 });
 
                 // Clear alerts for now (can be populated later based on attendance, etc.)
@@ -129,8 +123,8 @@ export default function StudentDashboard() {
     };
 
     const getStandingColor = (standing: string) => {
-        if (standing === "ممتاز" || standing === "جيد جداً") return "default";
-        if (standing === "جيد") return "secondary";
+        if (standing === "GOOD_STANDING") return "default";
+        if (standing === "ACADEMIC_WARNING") return "secondary";
         return "destructive";
     };
 
@@ -145,7 +139,7 @@ export default function StudentDashboard() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري التحميل...
+                            {t("common.loading")}
                         </p>
                     </div>
                 </div>
@@ -159,10 +153,10 @@ export default function StudentDashboard() {
                 {/* Welcome Section */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        👋 أهلاً بك!
+                        👋 {t("student.dashboard.welcome")}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        نظرة عامة على وضعك الأكاديمي
+                        {t("student.dashboard.academicOverview")}
                     </p>
                 </div>
 
@@ -173,13 +167,13 @@ export default function StudentDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                        المعدل التراكمي
+                                        {t("student.dashboard.cgpa")}
                                     </p>
                                     <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                                         {academicData?.cgpa.toFixed(2)}
                                     </p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        من 4.0
+                                        {t("common.from")} 4.0
                                     </p>
                                 </div>
                                 <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-full">
@@ -194,13 +188,13 @@ export default function StudentDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                        معدل الترم الحالي
+                                        {t("student.dashboard.termGpa")}
                                     </p>
                                     <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                                         {academicData?.termGpa.toFixed(2)}
                                     </p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        {academicData?.creditsThisTerm} ساعة
+                                        {academicData?.creditsThisTerm} {t("student.registration.credits")}
                                     </p>
                                 </div>
                                 <div className="bg-green-100 dark:bg-green-900 p-3 rounded-full">
@@ -215,13 +209,13 @@ export default function StudentDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                        الساعات المكتسبة
+                                        {t("student.dashboard.earnedCredits")}
                                     </p>
                                     <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">
                                         {academicData?.totalCredits}
                                     </p>
                                     <p className="text-xs text-gray-500 mt-1">
-                                        من {academicData?.requiredCredits} ساعة
+                                        {t("common.from")} {academicData?.requiredCredits} {t("student.registration.credits")}
                                     </p>
                                 </div>
                                 <div className="bg-purple-100 dark:bg-purple-900 p-3 rounded-full">
@@ -236,17 +230,17 @@ export default function StudentDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                        الحالة الأكاديمية
+                                        {t("student.dashboard.academicStanding")}
                                     </p>
                                     <Badge
                                         variant={getStandingColor(
                                             academicData?.standing || ""
                                         )}
                                         className="mt-2">
-                                        {academicData?.standing}
+                                        {t(`student.dashboard.standing.${academicData?.standing}`)}
                                     </Badge>
                                     <p className="text-xs text-gray-500 mt-2">
-                                        التخرج:{" "}
+                                        {t("student.dashboard.expectedGraduation")}:{" "}
                                         {academicData?.expectedGraduation}
                                     </p>
                                 </div>
@@ -262,15 +256,15 @@ export default function StudentDashboard() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-lg">
-                            تقدمك نحو التخرج
+                            {t("student.dashboard.progressToGraduation")}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="space-y-2">
                             <div className="flex justify-between text-sm">
                                 <span className="text-gray-600 dark:text-gray-400">
-                                    {academicData?.totalCredits} من{" "}
-                                    {academicData?.requiredCredits} ساعة
+                                    {academicData?.totalCredits} {t("common.from")}{" "}
+                                    {academicData?.requiredCredits} {t("student.registration.credits")}
                                 </span>
                                 <span className="font-medium text-gray-900 dark:text-white">
                                     {progressPercentage.toFixed(0)}%
@@ -283,10 +277,10 @@ export default function StudentDashboard() {
                                 />
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                                باقي لك{" "}
+                                {t("student.dashboard.remainingCredits")}:{" "}
                                 {(academicData?.requiredCredits || 0) -
                                     (academicData?.totalCredits || 0)}{" "}
-                                ساعة عشان تتخرج
+                                {t("student.registration.credits")}
                             </p>
                         </div>
                     </CardContent>
@@ -298,13 +292,13 @@ export default function StudentDashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <AlertCircle className="w-5 h-5" />
-                                التنبيهات المهمة
+                                {t("student.dashboard.alerts")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
                             {alerts.length === 0 ? (
                                 <p className="text-center text-gray-500 dark:text-gray-400 py-8">
-                                    لا توجد تنبيهات جديدة
+                                    {t("student.dashboard.noAlerts")}
                                 </p>
                             ) : (
                                 <div className="space-y-3">
@@ -350,7 +344,7 @@ export default function StudentDashboard() {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <FileText className="w-5 h-5" />
-                                إجراءات سريعة
+                                {t("student.dashboard.quickActions")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -362,14 +356,14 @@ export default function StudentDashboard() {
                                     }
                                     className="h-24 flex flex-col items-center justify-center gap-2">
                                     <Calendar className="w-6 h-6" />
-                                    <span className="text-sm">التسجيل</span>
+                                    <span className="text-sm">{t("student.dashboard.registerCourses")}</span>
                                 </Button>
                                 <Button
                                     variant="outline"
                                     onClick={() => navigate("/student/grades")}
                                     className="h-24 flex flex-col items-center justify-center gap-2">
                                     <BookOpen className="w-6 h-6" />
-                                    <span className="text-sm">الدرجات</span>
+                                    <span className="text-sm">{t("student.dashboard.viewGrades")}</span>
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -378,7 +372,7 @@ export default function StudentDashboard() {
                                     }
                                     className="h-24 flex flex-col items-center justify-center gap-2">
                                     <Clock className="w-6 h-6" />
-                                    <span className="text-sm">الجدول</span>
+                                    <span className="text-sm">{t("student.dashboard.checkSchedule")}</span>
                                 </Button>
                                 <Button
                                     variant="outline"
@@ -387,7 +381,7 @@ export default function StudentDashboard() {
                                     }
                                     className="h-24 flex flex-col items-center justify-center gap-2">
                                     <AlertCircle className="w-6 h-6" />
-                                    <span className="text-sm">الحضور</span>
+                                    <span className="text-sm">{t("student.dashboard.trackAttendance")}</span>
                                 </Button>
                             </div>
                         </CardContent>

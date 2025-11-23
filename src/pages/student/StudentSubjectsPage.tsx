@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useAuthStore } from "@/store/auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -42,15 +43,8 @@ interface CourseEnrollment {
     };
 }
 
-const DAYS_MAP: Record<number, string> = {
-    0: "الأحد",
-    1: "الاثنين",
-    2: "الثلاثاء",
-    3: "الأربعاء",
-    4: "الخميس",
-};
-
 export default function StudentSubjectsPage() {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(true);
@@ -94,21 +88,16 @@ export default function StudentSubjectsPage() {
             DROPPED:
                 "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
         };
-        const statusText: Record<string, string> = {
-            ENROLLED: "مسجل",
-            COMPLETED: "مكتمل",
-            DROPPED: "منسحب",
-        };
         return (
             <Badge className={statusColors[status] || ""}>
-                {statusText[status] || status}
+                {t(`student.subjects.status.${status}`)}
             </Badge>
         );
     };
 
     const getTermStatusBadge = (status: string) => {
         if (status === "ACTIVE") {
-            return <Badge variant="default">الفصل الحالي</Badge>;
+            return <Badge variant="default">{t("student.subjects.currentTerm")}</Badge>;
         }
         return null;
     };
@@ -149,7 +138,7 @@ export default function StudentSubjectsPage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل المواد...
+                            {t("common.loading")}
                         </p>
                     </div>
                 </div>
@@ -164,10 +153,10 @@ export default function StudentSubjectsPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            📚 موادي الدراسية
+                            📚 {t("student.subjects.title")}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            عرض وإدارة المواد المسجلة
+                            {t("student.subjects.subtitle")}
                         </p>
                     </div>
 
@@ -180,14 +169,14 @@ export default function StudentSubjectsPage() {
                             onClick={() => setFilter("current")}
                             className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
-                            الفصل الحالي
+                            {t("student.subjects.currentCourses")}
                         </Button>
                         <Button
                             variant={filter === "all" ? "default" : "outline"}
                             onClick={() => setFilter("all")}
                             className="flex items-center gap-2">
                             <BookOpen className="w-4 h-4" />
-                            جميع الفصول
+                            {t("student.subjects.allCourses")}
                         </Button>
                     </div>
                 </div>
@@ -198,19 +187,19 @@ export default function StudentSubjectsPage() {
                         <CardContent className="p-12 text-center">
                             <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                لا توجد مواد مسجلة
+                                {t("student.subjects.noCourses")}
                             </h3>
                             <p className="text-gray-500 dark:text-gray-400 mb-4">
                                 {filter === "current"
-                                    ? "لم تقم بتسجيل أي مواد في الفصل الحالي"
-                                    : "لم تقم بتسجيل أي مواد بعد"}
+                                    ? t("student.subjects.noCurrentCourses")
+                                    : t("student.subjects.noCoursesYet")}
                             </p>
                             <Button
                                 onClick={() =>
                                     navigate("/student/registration")
                                 }
                                 variant="default">
-                                تسجيل المواد
+                                {t("student.dashboard.registerCourses")}
                             </Button>
                         </CardContent>
                     </Card>
@@ -226,7 +215,7 @@ export default function StudentSubjectsPage() {
                             </h2>
                             {getTermStatusBadge(term.status)}
                             <Badge variant="outline">
-                                {termEnrollments.length} مادة
+                                {termEnrollments.length} {t("student.subjects.courses")}
                             </Badge>
                         </div>
 
@@ -256,7 +245,7 @@ export default function StudentSubjectsPage() {
                                                         <Badge
                                                             variant="outline"
                                                             className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800">
-                                                            عام
+                                                            {t("student.subjects.general")}
                                                         </Badge>
                                                     )}
                                                     {getStatusBadge(
@@ -300,13 +289,13 @@ export default function StudentSubjectsPage() {
                                                         enrollment.section
                                                             .course.credits
                                                     }{" "}
-                                                    ساعة
+                                                    {t("student.registration.credits")}
                                                 </span>
                                             </div>
                                             <Badge
                                                 variant="outline"
                                                 className="text-xs">
-                                                شعبة{" "}
+                                                {t("student.subjects.section")}{" "}
                                                 {enrollment.section.sectionCode}
                                             </Badge>
                                         </div>
@@ -330,12 +319,7 @@ export default function StudentSubjectsPage() {
                                                                             idx
                                                                         }
                                                                         className="text-gray-600 dark:text-gray-400">
-                                                                        {
-                                                                            DAYS_MAP[
-                                                                                schedule
-                                                                                    .day
-                                                                            ]
-                                                                        }{" "}
+                                                                        {t(`student.subjects.days.${schedule.day}`)}{" "}
                                                                         {
                                                                             schedule.startTime
                                                                         }{" "}
@@ -356,7 +340,7 @@ export default function StudentSubjectsPage() {
                                                                     .schedules
                                                                     .length -
                                                                     2}{" "}
-                                                                أخرى
+                                                                {t("student.subjects.more")}
                                                             </span>
                                                         )}
                                                     </div>

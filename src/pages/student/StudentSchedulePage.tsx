@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,19 +18,10 @@ interface ScheduleSlot {
     sectionCode: string;
 }
 
-const DAYS_MAP: Record<number, string> = {
-    0: "الأحد",
-    1: "الاثنين",
-    2: "الثلاثاء",
-    3: "الأربعاء",
-    4: "الخميس",
-    5: "الجمعة",
-    6: "السبت",
-};
-
 const DAYS = [0, 1, 2, 3, 4]; // Sunday to Thursday
 
 export default function StudentSchedulePage() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(true);
     const [schedule, setSchedule] = useState<ScheduleSlot[]>([]);
@@ -135,7 +127,7 @@ export default function StudentSchedulePage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل الجدول...
+                            {t("common.loading")}
                         </p>
                     </div>
                 </div>
@@ -148,10 +140,10 @@ export default function StudentSchedulePage() {
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        📅 جدولي الدراسي
+                        📅 {t("student.schedule.title")}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        مواعيد محاضراتك ومعاملك الأسبوعية
+                        {t("student.schedule.subtitle")}
                     </p>
                 </div>
 
@@ -164,13 +156,13 @@ export default function StudentSchedulePage() {
                                     <thead>
                                         <tr className="border-b dark:border-gray-700">
                                             <th className="p-4 text-right font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
-                                                الوقت
+                                                {t("student.schedule.time")}
                                             </th>
                                             {DAYS.map((day) => (
                                                 <th
                                                     key={day}
                                                     className="p-4 text-center font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
-                                                    {DAYS_MAP[day]}
+                                                    {t(`student.schedule.days.${day}`)}
                                                 </th>
                                             ))}
                                         </tr>
@@ -271,7 +263,7 @@ export default function StudentSchedulePage() {
                             <Card key={day}>
                                 <CardHeader>
                                     <CardTitle className="text-lg">
-                                        {DAYS_MAP[day]}
+                                        {t(`student.schedule.days.${day}`)}
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-3">
@@ -288,7 +280,7 @@ export default function StudentSchedulePage() {
                                                         <Badge
                                                             variant="outline"
                                                             className="text-xs">
-                                                            شعبة{" "}
+                                                            {t("student.subjects.section")}{" "}
                                                             {slot.sectionCode}
                                                         </Badge>
                                                     </div>
@@ -324,7 +316,7 @@ export default function StudentSchedulePage() {
                 {schedule.length === 0 && !loading && (
                     <Card>
                         <CardContent className="p-6 text-center text-gray-500">
-                            لا يوجد جدول دراسي حالياً. قم بتسجيل المواد أولاً.
+                            {t("student.schedule.noSchedule")}
                         </CardContent>
                     </Card>
                 )}

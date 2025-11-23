@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import {
     TrendingUp,
     Award,
@@ -77,6 +78,7 @@ interface TermGrades {
 }
 
 export default function StudentGradesPage() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(true);
     const [studentData, setStudentData] = useState<any>(null);
@@ -457,15 +459,15 @@ export default function StudentGradesPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            📊 درجاتي الأكاديمية
+                            📊 {t("student.grades.title")}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            متابعة الأداء الأكاديمي والتقديرات
+                            {t("student.grades.subtitle")}
                         </p>
                     </div>
                     <Button variant="outline">
                         <Download className="w-4 h-4 me-2" />
-                        تحميل كشف الدرجات
+                        {t("student.grades.downloadTranscript")}
                     </Button>
                 </div>
 
@@ -482,7 +484,7 @@ export default function StudentGradesPage() {
                                 onClick={() => setSelectedFilter("current")}
                                 className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
-                                الفصل الحالي
+                                {t("student.grades.currentTerm")}
                             </Button>
                             <Button
                                 variant={
@@ -493,7 +495,7 @@ export default function StudentGradesPage() {
                                 onClick={() => setSelectedFilter("all")}
                                 className="flex items-center gap-2">
                                 <BookOpen className="w-4 h-4" />
-                                جميع السنوات
+                                {t("student.grades.allTerms")}
                             </Button>
                             <div className="flex-1"></div>
                             <select
@@ -502,8 +504,8 @@ export default function StudentGradesPage() {
                                     setSelectedFilter(e.target.value)
                                 }
                                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                <option value="current">الفصل الحالي</option>
-                                <option value="all">جميع الفصول</option>
+                                <option value="current">{t("student.grades.currentTerm")}</option>
+                                <option value="all">{t("student.grades.allTerms")}</option>
                                 {allGrades.map((term) => (
                                     <option
                                         key={term.termId}
@@ -521,7 +523,7 @@ export default function StudentGradesPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                المعدل الفصلي
+                                {t("student.grades.termGpa")}
                             </CardTitle>
                             <TrendingUp className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
@@ -532,7 +534,7 @@ export default function StudentGradesPage() {
                                     : "0.00"}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                الفصل الحالي
+                                {t("student.grades.currentTerm")}
                             </p>
                         </CardContent>
                     </Card>
@@ -540,7 +542,7 @@ export default function StudentGradesPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                المعدل التراكمي
+                                {t("student.grades.cgpa")}
                             </CardTitle>
                             <Award className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
@@ -557,7 +559,7 @@ export default function StudentGradesPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                الساعات المكتسبة
+                                {t("student.grades.earnedCredits")}
                             </CardTitle>
                             <BookOpen className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
@@ -566,10 +568,10 @@ export default function StudentGradesPage() {
                                 {totalCredits}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                من{" "}
+                                {t("student.grades.outOf")}{" "}
                                 {studentData?.batch?.curriculum?.totalCredits ||
                                     132}{" "}
-                                ساعة
+                                {t("student.grades.credits")}
                             </p>
                             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-2">
                                 <div
@@ -589,7 +591,7 @@ export default function StudentGradesPage() {
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                التقدير الأكاديمي
+                                {t("student.grades.academicStanding")}
                             </CardTitle>
                             <Award className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
@@ -603,7 +605,7 @@ export default function StudentGradesPage() {
                                     (sum, t) => sum + t.courses.length,
                                     0
                                 )}{" "}
-                                مادة مسجلة
+                                {t("student.grades.coursesEnrolled")}
                             </p>
                         </CardContent>
                     </Card>
@@ -614,7 +616,7 @@ export default function StudentGradesPage() {
                     {/* GPA Trend Chart */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>تطور المعدل التراكمي</CardTitle>
+                            <CardTitle>{t("student.grades.gpaTrend")}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={250}>
@@ -639,7 +641,7 @@ export default function StudentGradesPage() {
                     {/* Grade Distribution Chart */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>توزيع التقديرات</CardTitle>
+                            <CardTitle>{t("student.grades.gradeDistribution")}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={250}>
@@ -684,7 +686,7 @@ export default function StudentGradesPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Award className="w-5 h-5 text-green-600" />
-                                    أفضل المواد
+                                    {t("student.grades.bestCourses")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -718,13 +720,13 @@ export default function StudentGradesPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <AlertCircle className="w-5 h-5 text-orange-600" />
-                                    مواد تحتاج تحسين
+                                    {t("student.grades.weakCourses")}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
                                 {getWeakCourses().length === 0 ? (
                                     <p className="text-center text-gray-500 py-4">
-                                        🎉 ممتاز! جميع المواد بمستوى جيد
+                                        🎉 {t("student.grades.allCoursesGood")}
                                     </p>
                                 ) : (
                                     <div className="space-y-3">
@@ -762,17 +764,17 @@ export default function StudentGradesPage() {
                 {/* Detailed Grades Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>الدرجات التفصيلية</CardTitle>
+                        <CardTitle>{t("student.grades.detailedGrades")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {filteredGrades.length === 0 ? (
                             <div className="text-center py-12">
                                 <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                                    لا توجد درجات
+                                    {t("student.grades.noGrades")}
                                 </h3>
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    لم يتم نشر الدرجات للفصل المحدد بعد
+                                    {t("student.grades.noGradesYet")}
                                 </p>
                             </div>
                         ) : (
@@ -801,25 +803,25 @@ export default function StudentGradesPage() {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead>
-                                                            رمز المادة
+                                                            {t("student.grades.courseCode")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            اسم المادة
+                                                            {t("student.grades.courseName")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            الساعات
+                                                            {t("student.grades.credits")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            الدرجة النهائية
+                                                            {t("student.grades.finalScore")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            النسبة
+                                                            {t("student.grades.percentage")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            التقدير
+                                                            {t("student.grades.grade")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            الحالة
+                                                            {t("student.grades.status")}
                                                         </TableHead>
                                                     </TableRow>
                                                 </TableHeader>

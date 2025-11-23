@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ interface AttendanceRecord {
 }
 
 export default function StudentAttendancePage() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [courses, setCourses] = useState<CourseAttendance[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<string | null>(null);
@@ -158,7 +160,7 @@ export default function StudentAttendancePage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل بيانات الحضور...
+                            {t("student.attendance.loadingData")}
                         </p>
                     </div>
                 </div>
@@ -171,10 +173,10 @@ export default function StudentAttendancePage() {
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        👁️ الحضور والغياب
+                        👁️ {t("student.attendance.title")}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        متابعة حضورك وغيابك في جميع المواد الدراسية
+                        {t("student.attendance.subtitle")}
                     </p>
                 </div>
 
@@ -183,9 +185,7 @@ export default function StudentAttendancePage() {
                     <Alert className="bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
                         <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
                         <AlertDescription className="text-red-800 dark:text-red-300">
-                            <strong>تحذير هام:</strong> نسبة حضورك في بعض المواد
-                            أقل من 75%. قد تكون معرضاً للحرمان من دخول الامتحان
-                            النهائي.
+                            <strong>{t("student.attendance.criticalWarning")}</strong> {t("student.attendance.criticalMessage")}
                         </AlertDescription>
                     </Alert>
                 )}
@@ -217,14 +217,14 @@ export default function StudentAttendancePage() {
                                         <Badge
                                             variant="destructive"
                                             className="text-xs">
-                                            حرج
+                                            {t("student.attendance.critical")}
                                         </Badge>
                                     )}
                                     {course.isWarning && !course.isCritical && (
                                         <Badge
                                             variant="outline"
                                             className="text-xs bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800">
-                                            تحذير
+                                            {t("student.attendance.warning")}
                                         </Badge>
                                     )}
                                 </div>
@@ -240,7 +240,7 @@ export default function StudentAttendancePage() {
                                         %
                                     </p>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                        نسبة الحضور
+                                        {t("student.attendance.attendancePercentage")}
                                     </p>
                                 </div>
 
@@ -271,7 +271,7 @@ export default function StudentAttendancePage() {
                                             {course.attendedSessions}
                                         </p>
                                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                                            حضور
+                                            {t("student.attendance.present")}
                                         </p>
                                     </div>
                                     <div className="text-center p-2 bg-red-50 dark:bg-red-900/20 rounded-lg">
@@ -279,7 +279,7 @@ export default function StudentAttendancePage() {
                                             {course.absentSessions}
                                         </p>
                                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                                            غياب
+                                            {t("student.attendance.absent")}
                                         </p>
                                     </div>
                                     <div className="text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
@@ -287,7 +287,7 @@ export default function StudentAttendancePage() {
                                             {course.excusedAbsences}
                                         </p>
                                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                                            عذر مقبول
+                                            {t("student.attendance.excused")}
                                         </p>
                                     </div>
                                     <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -295,7 +295,7 @@ export default function StudentAttendancePage() {
                                             {course.totalSessions}
                                         </p>
                                         <p className="text-xs text-gray-600 dark:text-gray-400">
-                                            إجمالي
+                                            {t("student.attendance.total")}
                                         </p>
                                     </div>
                                 </div>
@@ -310,7 +310,7 @@ export default function StudentAttendancePage() {
                         <CardHeader>
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle>سجل الحضور التفصيلي</CardTitle>
+                                    <CardTitle>{t("student.attendance.detailedRecords")}</CardTitle>
                                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                         {
                                             courses.find(
@@ -323,7 +323,7 @@ export default function StudentAttendancePage() {
                                 </div>
                                 <Button variant="outline" size="sm">
                                     <FileText className="w-4 h-4 ml-2" />
-                                    تقديم عذر
+                                    {t("student.attendance.submitExcuse")}
                                 </Button>
                             </div>
                         </CardHeader>
@@ -337,7 +337,7 @@ export default function StudentAttendancePage() {
                                             {getStatusIcon(record.status)}
                                             <div>
                                                 <p className="font-medium text-gray-900 dark:text-white">
-                                                    المحاضرة{" "}
+                                                    {t("student.attendance.session")}{" "}
                                                     {record.sessionNumber}
                                                 </p>
                                                 <div className="flex items-center gap-2 mt-1">
@@ -371,12 +371,12 @@ export default function StudentAttendancePage() {
                                                     : "outline"
                                             }>
                                             {record.status === "present"
-                                                ? "حاضر"
+                                                ? t("student.attendance.present")
                                                 : record.status === "absent"
-                                                ? "غائب"
+                                                ? t("student.attendance.absent")
                                                 : record.status === "excused"
-                                                ? "عذر"
-                                                : "متأخر"}
+                                                ? t("student.attendance.excused")
+                                                : t("student.attendance.late")}
                                         </Badge>
                                     </div>
                                 ))}
@@ -389,19 +389,17 @@ export default function StudentAttendancePage() {
                 <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                     <CardContent className="p-6">
                         <h3 className="font-medium text-blue-900 dark:text-blue-300 mb-2">
-                            💡 معلومات هامة
+                            💡 {t("student.attendance.importantInfo")}
                         </h3>
                         <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-                            <li>• الحد الأدنى للحضور المطلوب: 75%</li>
+                            <li>• {t("student.attendance.info1")}</li>
                             <li>
-                                • في حالة الحضور أقل من 75% قد تُحرم من دخول
-                                الامتحان النهائي
+                                • {t("student.attendance.info2")}
                             </li>
                             <li>
-                                • يمكنك تقديم الأعذار المرضية خلال 3 أيام من
-                                تاريخ الغياب
+                                • {t("student.attendance.info3")}
                             </li>
-                            <li>• تحتسب الأعذار المقبولة ضمن نسبة الحضور</li>
+                            <li>• {t("student.attendance.info4")}</li>
                         </ul>
                     </CardContent>
                 </Card>

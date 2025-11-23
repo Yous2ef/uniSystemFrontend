@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Plus, X, CheckCircle, AlertCircle } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -82,6 +83,7 @@ interface StudentData {
 }
 
 export default function RegistrationPage() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const [studentData, setStudentData] = useState<StudentData | null>(null);
     const [terms, setTerms] = useState<Term[]>([]);
@@ -202,12 +204,12 @@ export default function RegistrationPage() {
 
     const handleValidateEnrollment = async () => {
         if (selectedSections.length === 0) {
-            alert("الرجاء اختيار شعبة واحدة على الأقل");
+            alert(t("student.registration.pleaseSelectAtLeastOne"));
             return;
         }
 
         if (!studentData?.id) {
-            alert("لم يتم العثور على بيانات الطالب");
+            alert(t("student.registration.studentDataNotFound"));
             return;
         }
 
@@ -226,7 +228,7 @@ export default function RegistrationPage() {
             setValidationResult(validations);
         } catch (error) {
             console.error("Error validating enrollment:", error);
-            alert("حدث خطأ أثناء التحقق من التسجيل");
+            alert(t("student.registration.validationError"));
         } finally {
             setLoading(false);
         }
@@ -234,12 +236,12 @@ export default function RegistrationPage() {
 
     const handleEnroll = async () => {
         if (!validationResult || validationResult.some((v) => !v.valid)) {
-            alert("يرجى حل المشاكل قبل التسجيل");
+            alert(t("student.registration.resolveIssuesFirst"));
             return;
         }
 
         if (!studentData?.id) {
-            alert("لم يتم العثور على بيانات الطالب");
+            alert(t("student.registration.studentDataNotFound"));
             return;
         }
 
@@ -255,42 +257,33 @@ export default function RegistrationPage() {
                 )
             );
 
-            alert("تم التسجيل بنجاح!");
+            alert(t("student.registration.registrationSuccess"));
             setSelectedSections([]);
             setValidationResult(null);
             fetchMyEnrollments();
         } catch (error) {
             console.error("Error enrolling:", error);
-            alert("حدث خطأ أثناء التسجيل");
+            alert(t("student.registration.registrationFailed"));
         } finally {
             setLoading(false);
         }
     };
 
     const handleDropEnrollment = async (enrollmentId: string) => {
-        if (!confirm("هل أنت متأكد من حذف هذا التسجيل؟")) return;
+        if (!confirm(t("student.registration.confirmDrop"))) return;
 
         try {
             await enrollmentsService.dropEnrollment(enrollmentId);
-            alert("تم حذف التسجيل بنجاح");
+            alert(t("student.registration.dropSuccess"));
             fetchMyEnrollments();
         } catch (error) {
             console.error("Error dropping enrollment:", error);
-            alert("حدث خطأ أثناء حذف التسجيل");
+            alert(t("student.registration.dropFailed"));
         }
     };
 
     const getDayName = (day: number) => {
-        const days = [
-            "الأحد",
-            "الإثنين",
-            "الثلاثاء",
-            "الأربعاء",
-            "الخميس",
-            "الجمعة",
-            "السبت",
-        ];
-        return days[day];
+        return t(`student.subjects.days.${day}`);
     };
 
     const totalCredits = myEnrollments.reduce(
@@ -307,7 +300,7 @@ export default function RegistrationPage() {
     const canEnroll = totalWithSelected <= maxCredits;
     const creditWarning =
         totalWithSelected > maxCredits
-            ? `تجاوزت الحد الأقصى بـ ${totalWithSelected - maxCredits} ساعة`
+            ? t("student.registration.exceededMaxBy", { credits: totalWithSelected - maxCredits })
             : null;
 
     return (
@@ -315,20 +308,20 @@ export default function RegistrationPage() {
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        تسجيل المواد
+                        {t("student.registration.title")}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        اختر المواد التي تريد التسجيل فيها
+                        {t("student.registration.subtitle")}
                     </p>
                     {selectedTerm && (
                         <div className="mt-2 flex items-center gap-2">
                             <Badge variant="default" className="text-sm">
-                                الفصل الحالي:{" "}
+                                {t("student.registration.currentTerm")}:{" "}
                                 {terms.find((t) => t.id === selectedTerm)?.name}
                             </Badge>
                             {studentData && (
                                 <Badge variant="outline" className="text-sm">
-                                    الحد الأقصى: {maxCredits} ساعة
+                                    {t("student.registration.maxCredits")}: {maxCredits} {t("student.registration.credits")}
                                 </Badge>
                             )}
                         </div>
@@ -353,9 +346,9 @@ export default function RegistrationPage() {
                                     )}
                                     <div>
                                         <p className="font-semibold">
-                                            إجمالي الساعات: {totalWithSelected}{" "}
-                                            ساعة ({totalCredits} مسجلة +{" "}
-                                            {selectedCredits} مختارة)
+                                            {t("student.registration.totalCredits")}: {totalWithSelected}{" "}
+                                            {t("student.registration.credits")} ({totalCredits} {t("student.registration.enrolled")} +{" "}
+                                            {selectedCredits} {t("student.registration.selected")})
                                         </p>
                                         {creditWarning && (
                                             <p className="text-sm text-red-600 mt-1">
@@ -368,7 +361,7 @@ export default function RegistrationPage() {
                                     <Badge
                                         variant="default"
                                         className="bg-green-600">
-                                        جاهز للتسجيل
+                                        {t("student.registration.readyToRegister")}
                                     </Badge>
                                 )}
                             </div>
@@ -380,27 +373,27 @@ export default function RegistrationPage() {
                 <Card>
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle>المواد المسجلة</CardTitle>
+                            <CardTitle>{t("student.registration.enrolledCourses")}</CardTitle>
                             <Badge variant="default">
-                                {totalCredits} ساعة معتمدة
+                                {totalCredits} {t("student.registration.credits")}
                             </Badge>
                         </div>
                     </CardHeader>
                     <CardContent>
                         {myEnrollments.length === 0 ? (
                             <p className="text-center text-gray-500 py-4">
-                                لم تسجل أي مواد بعد
+                                {t("student.registration.noEnrollments")}
                             </p>
                         ) : (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>كود المادة</TableHead>
-                                        <TableHead>اسم المادة</TableHead>
-                                        <TableHead>الساعات</TableHead>
-                                        <TableHead>الشعبة</TableHead>
+                                        <TableHead>{t("student.registration.courseCode")}</TableHead>
+                                        <TableHead>{t("student.registration.courseName")}</TableHead>
+                                        <TableHead>{t("student.registration.credits")}</TableHead>
+                                        <TableHead>{t("student.subjects.section")}</TableHead>
                                         <TableHead className="text-end">
-                                            إجراءات
+                                            {t("common.actions")}
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -411,10 +404,7 @@ export default function RegistrationPage() {
                                                 {enrollment.section.course.code}
                                             </TableCell>
                                             <TableCell>
-                                                {
-                                                    enrollment.section.course
-                                                        .nameAr
-                                                }
+                                                {enrollment.section.course.nameAr}
                                             </TableCell>
                                             <TableCell>
                                                 {
@@ -450,10 +440,10 @@ export default function RegistrationPage() {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle>الشعب المتاحة</CardTitle>
+                                <CardTitle>{t("student.registration.availableCourses")}</CardTitle>
                                 <div className="flex gap-2">
                                     <Badge variant="secondary">
-                                        محدد: {selectedCredits} ساعة
+                                        {t("student.registration.selected")}: {selectedCredits} {t("student.registration.credits")}
                                     </Badge>
                                     <Button
                                         onClick={handleValidateEnrollment}
@@ -463,7 +453,7 @@ export default function RegistrationPage() {
                                             !canEnroll
                                         }>
                                         <CheckCircle className="w-4 h-4 me-2" />
-                                        التحقق من التسجيل
+                                        {t("student.registration.validateRegistration")}
                                     </Button>
                                     {validationResult &&
                                         validationResult.every(
@@ -472,7 +462,7 @@ export default function RegistrationPage() {
                                         canEnroll && (
                                             <Button onClick={handleEnroll}>
                                                 <Plus className="w-4 h-4 me-2" />
-                                                تسجيل المواد
+                                                {t("student.registration.submitRegistration")}
                                             </Button>
                                         )}
                                 </div>
@@ -481,11 +471,11 @@ export default function RegistrationPage() {
                         <CardContent>
                             {loading ? (
                                 <p className="text-center py-4">
-                                    جاري التحميل...
+                                    {t("common.loading")}
                                 </p>
                             ) : availableSections.length === 0 ? (
                                 <p className="text-center text-gray-500 py-4">
-                                    لا توجد شعب متاحة
+                                    {t("student.registration.noAvailableSections")}
                                 </p>
                             ) : (
                                 <div className="space-y-4">
@@ -509,10 +499,10 @@ export default function RegistrationPage() {
                                                         {section.course.nameAr}
                                                     </h3>
                                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                        الشعبة: {section.code} |
-                                                        المدرس:{" "}
-                                                        {section.faculty.nameAr}{" "}
-                                                        | الساعات:{" "}
+                                                        {t("student.subjects.section")}: {section.code} |
+                                                        {t("student.registration.instructor")}:{" "}
+                                                        {section.faculty.nameAr}{" "}|
+                                                        {t("student.registration.credits")}:{" "}
                                                         {section.course.credits}
                                                     </p>
                                                     <div className="mt-2 flex flex-wrap gap-2">
@@ -559,7 +549,7 @@ export default function RegistrationPage() {
                             {/* Validation Results */}
                             {validationResult && (
                                 <div className="mt-4 space-y-2">
-                                    <h4 className="font-bold">نتائج التحقق:</h4>
+                                    <h4 className="font-bold">{t("student.registration.validationResults")}:</h4>
                                     {validationResult.map(
                                         (result, idx: number) => (
                                             <div
@@ -578,12 +568,12 @@ export default function RegistrationPage() {
                                                     <div>
                                                         {result.valid ? (
                                                             <p className="text-green-700 dark:text-green-300">
-                                                                التسجيل صالح
+                                                                {t("student.registration.validRegistration")}
                                                             </p>
                                                         ) : (
                                                             <div>
                                                                 <p className="text-red-700 dark:text-red-300 font-medium">
-                                                                    توجد مشاكل:
+                                                                    {t("student.registration.issuesFound")}:
                                                                 </p>
                                                                 <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400">
                                                                     {result.errors?.map(

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ interface ApplicationData {
 }
 
 export default function DepartmentSelectionPage() {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [departments, setDepartments] = useState<DepartmentEligibility[]>([]);
@@ -179,14 +181,14 @@ export default function DepartmentSelectionPage() {
                 return (
                     <Badge className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                         <CheckCircle className="w-3 h-3 ml-1" />
-                        موافق عليه
+                        {t("student.departmentSelection.status.approved")}
                     </Badge>
                 );
             case "REJECTED":
                 return (
                     <Badge variant="destructive">
                         <XCircle className="w-3 h-3 ml-1" />
-                        مرفوض
+                        {t("student.departmentSelection.status.rejected")}
                     </Badge>
                 );
             case "PENDING":
@@ -195,7 +197,7 @@ export default function DepartmentSelectionPage() {
                         variant="outline"
                         className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800">
                         <Clock className="w-3 h-3 ml-1" />
-                        قيد المراجعة
+                        {t("student.departmentSelection.status.pending")}
                     </Badge>
                 );
             case "WITHDRAWN":
@@ -203,7 +205,7 @@ export default function DepartmentSelectionPage() {
                     <Badge
                         variant="outline"
                         className="bg-gray-100 dark:bg-gray-800">
-                        تم السحب
+                        {t("student.departmentSelection.status.withdrawn")}
                     </Badge>
                 );
             default:
@@ -214,22 +216,22 @@ export default function DepartmentSelectionPage() {
     const getEligibilityMessages = (dept: DepartmentEligibility) => {
         const messages: string[] = [];
         if (!dept.eligibilityReasons.hasMinimumGPA) {
-            messages.push(`المعدل المطلوب: ${dept.minGpa}`);
+            messages.push(t("student.departmentSelection.eligibility.minGpaRequired", { gpa: dept.minGpa }));
         }
         if (!dept.eligibilityReasons.hasAvailableSeats) {
-            messages.push("لا توجد مقاعد متاحة");
+            messages.push(t("student.departmentSelection.eligibility.noSeats"));
         }
         if (!dept.eligibilityReasons.isCorrectYear) {
-            messages.push("ليس في السنة المناسبة");
+            messages.push(t("student.departmentSelection.eligibility.wrongYear"));
         }
         if (!dept.eligibilityReasons.hasNoExistingDepartment) {
-            messages.push("لديك قسم معين بالفعل");
+            messages.push(t("student.departmentSelection.eligibility.alreadyAssigned"));
         }
         if (!dept.eligibilityReasons.hasNoPendingApplication) {
-            messages.push("لديك طلب قيد المراجعة");
+            messages.push(t("student.departmentSelection.eligibility.pendingApplication"));
         }
         if (!dept.eligibilityReasons.isGoodAcademicStanding) {
-            messages.push("الوضع الأكاديمي لا يسمح");
+            messages.push(t("student.departmentSelection.eligibility.poorStanding"));
         }
         return messages;
     };
@@ -241,7 +243,7 @@ export default function DepartmentSelectionPage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل التخصصات...
+                            {t("student.departmentSelection.loadingDepartments")}
                         </p>
                     </div>
                 </div>
@@ -254,10 +256,10 @@ export default function DepartmentSelectionPage() {
             <div className="space-y-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        🎓 اختيار التخصص
+                        🎓 {t("student.departmentSelection.title")}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        اختر التخصص المناسب بناءً على معدلك التراكمي واهتماماتك
+                        {t("student.departmentSelection.subtitle")}
                     </p>
                 </div>
 
@@ -276,18 +278,18 @@ export default function DepartmentSelectionPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="font-semibold">
-                                        طلبك لقسم {application.departmentNameAr}{" "}
+                                        {t("student.departmentSelection.yourApplication")} {application.departmentNameAr}{" "}
                                         ({application.departmentCode})
                                     </p>
                                     <p className="text-sm mt-1">
-                                        الحالة:{" "}
+                                        {t("student.departmentSelection.status.label")}:{" "}
                                         {getApplicationStatusBadge(
                                             application.status
                                         )}
                                     </p>
                                     {application.rejectionReason && (
                                         <p className="text-sm mt-1 text-red-600">
-                                            سبب الرفض:{" "}
+                                            {t("student.departmentSelection.rejectionReason")}:{" "}
                                             {application.rejectionReason}
                                         </p>
                                     )}
@@ -297,7 +299,7 @@ export default function DepartmentSelectionPage() {
                                         variant="outline"
                                         size="sm"
                                         onClick={handleWithdrawApplication}>
-                                        سحب الطلب
+                                        {t("student.departmentSelection.withdrawApplication")}
                                     </Button>
                                 )}
                             </div>
@@ -331,11 +333,11 @@ export default function DepartmentSelectionPage() {
                                             <Badge
                                                 variant="outline"
                                                 className="bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800">
-                                                مؤهل
+                                                {t("student.departmentSelection.eligible")}
                                             </Badge>
                                         ) : (
                                             <Badge variant="destructive">
-                                                غير مؤهل
+                                                {t("student.departmentSelection.notEligible")}
                                             </Badge>
                                         )}
                                     </div>
@@ -366,7 +368,7 @@ export default function DepartmentSelectionPage() {
                                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                             <TrendingUp className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto mb-1" />
                                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                الحد الأدنى
+                                                {t("student.departmentSelection.minGpa")}
                                             </p>
                                             <p className="font-medium text-sm">
                                                 {department.minGpa.toFixed(1)}
@@ -375,7 +377,7 @@ export default function DepartmentSelectionPage() {
                                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                             <Users className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto mb-1" />
                                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                المقاعد المتاحة
+                                                {t("student.departmentSelection.availableSeats")}
                                             </p>
                                             <p className="font-medium text-sm">
                                                 {department.availableSeats} /{" "}
@@ -385,7 +387,7 @@ export default function DepartmentSelectionPage() {
                                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                             <GraduationCap className="w-5 h-5 text-gray-600 dark:text-gray-400 mx-auto mb-1" />
                                             <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                الطلاب المسجلون
+                                                {t("student.departmentSelection.enrolledStudents")}
                                             </p>
                                             <p className="font-medium text-sm">
                                                 {department.enrolledCount}
@@ -405,9 +407,9 @@ export default function DepartmentSelectionPage() {
                                         onClick={() => handleApply(department)}>
                                         {department.isEligible
                                             ? application?.status === "PENDING"
-                                                ? "لديك طلب معلق"
-                                                : "تقديم طلب"
-                                            : "غير مؤهل"}
+                                                ? t("student.departmentSelection.hasPendingApplication")
+                                                : t("student.departmentSelection.apply")
+                                            : t("student.departmentSelection.notEligible")}
                                     </Button>
                                 </CardContent>
                             </Card>
@@ -422,28 +424,23 @@ export default function DepartmentSelectionPage() {
                             <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
                             <div>
                                 <h3 className="font-medium text-blue-900 dark:text-blue-300 mb-2">
-                                    معلومات هامة عن اختيار التخصص
+                                    {t("student.departmentSelection.importantInfo")}
                                 </h3>
                                 <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
                                     <li>
-                                        • يتم اختيار التخصص بعد إتمام متطلبات
-                                        السنة التحضيرية بنجاح
+                                        • {t("student.departmentSelection.info1")}
                                     </li>
                                     <li>
-                                        • يجب أن يكون معدلك التراكمي أعلى من
-                                        الحد الأدنى المطلوب
+                                        • {t("student.departmentSelection.info2")}
                                     </li>
                                     <li>
-                                        • المقاعد محدودة والقبول يتم حسب
-                                        الأولوية
+                                        • {t("student.departmentSelection.info3")}
                                     </li>
                                     <li>
-                                        • يتم مراجعة الطلبات خلال 5-7 أيام عمل
-                                        من تاريخ التقديم
+                                        • {t("student.departmentSelection.info4")}
                                     </li>
                                     <li>
-                                        • يمكنك تقديم طلب واحد فقط في كل فصل
-                                        دراسي
+                                        • {t("student.departmentSelection.info5")}
                                     </li>
                                 </ul>
                             </div>
@@ -456,7 +453,7 @@ export default function DepartmentSelectionPage() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                        <DialogTitle>تقديم طلب اختيار تخصص</DialogTitle>
+                        <DialogTitle>{t("student.departmentSelection.applyTitle")}</DialogTitle>
                         <DialogDescription>
                             {selectedDepartment?.departmentNameAr} (
                             {selectedDepartment?.departmentCode})
@@ -466,7 +463,7 @@ export default function DepartmentSelectionPage() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-2">
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600 dark:text-gray-400">
-                                    الحد الأدنى المطلوب:
+                                    {t("student.departmentSelection.minGpaRequired")}:
                                 </span>
                                 <span className="font-medium">
                                     {selectedDepartment?.minGpa.toFixed(2)}
@@ -474,7 +471,7 @@ export default function DepartmentSelectionPage() {
                             </div>
                             <div className="flex items-center justify-between text-sm">
                                 <span className="text-gray-600 dark:text-gray-400">
-                                    المقاعد المتاحة:
+                                    {t("student.departmentSelection.availableSeats")}:
                                 </span>
                                 <span className="font-medium">
                                     {selectedDepartment?.availableSeats}
@@ -484,18 +481,18 @@ export default function DepartmentSelectionPage() {
 
                         <div className="space-y-2">
                             <Label htmlFor="statement">
-                                لماذا تريد الالتحاق بهذا القسم؟ (اختياري)
+                                {t("student.departmentSelection.whyJoin")}
                             </Label>
                             <Textarea
                                 id="statement"
-                                placeholder="اكتب سبب اهتمامك بهذا التخصص..."
+                                placeholder={t("student.departmentSelection.statementPlaceholder")}
                                 value={statement}
                                 onChange={(e) => setStatement(e.target.value)}
                                 rows={4}
                                 maxLength={1000}
                             />
                             <p className="text-xs text-gray-500">
-                                {statement.length} / 1000 حرف
+                                {statement.length} / 1000 {t("student.departmentSelection.characters")}
                             </p>
                         </div>
                     </div>
@@ -504,12 +501,12 @@ export default function DepartmentSelectionPage() {
                             variant="outline"
                             onClick={() => setIsDialogOpen(false)}
                             disabled={submitting}>
-                            إلغاء
+                            {t("student.departmentSelection.cancel")}
                         </Button>
                         <Button
                             onClick={handleSubmitApplication}
                             disabled={submitting}>
-                            {submitting ? "جاري الإرسال..." : "تقديم الطلب"}
+                            {submitting ? t("student.departmentSelection.submitting") : t("student.departmentSelection.submit")}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
