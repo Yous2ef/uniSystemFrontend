@@ -28,6 +28,7 @@ import {
 } from "@/services/api";
 import { useAuthStore } from "@/store/auth";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Student {
     id: string;
@@ -79,7 +80,7 @@ export default function ReportsPage() {
     const [attendanceReport, setAttendanceReport] = useState<any>(null);
     const [loadingGrades, setLoadingGrades] = useState(false);
     const [loadingAttendance, setLoadingAttendance] = useState(false);
-
+    const { t } = useTranslation();
     useEffect(() => {
         // Redirect student to their grades page
         if (user?.role === "STUDENT") {
@@ -195,65 +196,6 @@ export default function ReportsPage() {
         alert("سيتم تصدير التقرير كملف Excel");
     };
 
-    // Mock transcript data
-    const transcript = {
-        studentCode: "2021001",
-        nameAr: "أحمد محمد علي",
-        specialization: "علوم الحاسوب",
-        batch: "2021",
-        currentGPA: 3.75,
-        totalCredits: 90,
-        terms: [
-            {
-                name: "الفصل الأول 2021/2022",
-                gpa: 3.85,
-                courses: [
-                    {
-                        code: "CS101",
-                        name: "مقدمة في البرمجة",
-                        credits: 3,
-                        grade: "A",
-                        points: 4.0,
-                    },
-                    {
-                        code: "CS102",
-                        name: "الرياضيات المتقطعة",
-                        credits: 3,
-                        grade: "A",
-                        points: 4.0,
-                    },
-                    {
-                        code: "CS103",
-                        name: "مهارات الاتصال",
-                        credits: 2,
-                        grade: "B+",
-                        points: 3.5,
-                    },
-                ],
-            },
-            {
-                name: "الفصل الثاني 2021/2022",
-                gpa: 3.65,
-                courses: [
-                    {
-                        code: "CS201",
-                        name: "هياكل البيانات",
-                        credits: 3,
-                        grade: "A-",
-                        points: 3.7,
-                    },
-                    {
-                        code: "CS202",
-                        name: "قواعد البيانات",
-                        credits: 3,
-                        grade: "B+",
-                        points: 3.5,
-                    },
-                ],
-            },
-        ],
-    };
-
     return (
         <DashboardLayout>
             <div className="space-y-6">
@@ -280,7 +222,9 @@ export default function ReportsPage() {
                                 <Download className="w-4 h-4 me-2" />
                                 Excel
                             </Button>
-                            <Button onClick={handleExportPDF} className="flex-1 sm:flex-none">
+                            <Button
+                                onClick={handleExportPDF}
+                                className="flex-1 sm:flex-none">
                                 <FileText className="w-4 h-4 me-2" />
                                 PDF
                             </Button>
@@ -352,7 +296,9 @@ export default function ReportsPage() {
                                                             }
                                                         </p>
                                                         <p className="text-sm text-gray-500">
-                                                            إجمالي الطلاب
+                                                            {t(
+                                                                "reports.Total students"
+                                                            )}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -613,68 +559,69 @@ export default function ReportsPage() {
                                                 </CardHeader>
                                                 <CardContent>
                                                     <div className="overflow-x-auto">
-                                                    <Table>
-                                                        <TableHeader>
-                                                            <TableRow>
-                                                                <TableHead>
-                                                                    الرمز
-                                                                </TableHead>
-                                                                <TableHead>
-                                                                    اسم المقرر
-                                                                </TableHead>
-                                                                <TableHead>
-                                                                    الساعات
-                                                                </TableHead>
-                                                                <TableHead>
-                                                                    الدرجة
-                                                                </TableHead>
-                                                                <TableHead>
-                                                                    النقاط
-                                                                </TableHead>
-                                                            </TableRow>
-                                                        </TableHeader>
-                                                        <TableBody>
-                                                            {term.courses.map(
-                                                                (
-                                                                    course,
-                                                                    courseIndex
-                                                                ) => (
-                                                                    <TableRow
-                                                                        key={
-                                                                            courseIndex
-                                                                        }>
-                                                                        <TableCell>
-                                                                            {
-                                                                                course.code
-                                                                            }
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {
-                                                                                course.name
-                                                                            }
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {
-                                                                                course.credits
-                                                                            }
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            <Badge>
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead>
+                                                                        الرمز
+                                                                    </TableHead>
+                                                                    <TableHead>
+                                                                        اسم
+                                                                        المقرر
+                                                                    </TableHead>
+                                                                    <TableHead>
+                                                                        الساعات
+                                                                    </TableHead>
+                                                                    <TableHead>
+                                                                        الدرجة
+                                                                    </TableHead>
+                                                                    <TableHead>
+                                                                        النقاط
+                                                                    </TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {term.courses.map(
+                                                                    (
+                                                                        course,
+                                                                        courseIndex
+                                                                    ) => (
+                                                                        <TableRow
+                                                                            key={
+                                                                                courseIndex
+                                                                            }>
+                                                                            <TableCell>
                                                                                 {
-                                                                                    course.grade
+                                                                                    course.code
                                                                                 }
-                                                                            </Badge>
-                                                                        </TableCell>
-                                                                        <TableCell>
-                                                                            {course.points.toFixed(
-                                                                                1
-                                                                            )}
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                )
-                                                            )}
-                                                        </TableBody>
-                                                    </Table>
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                {
+                                                                                    course.name
+                                                                                }
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                {
+                                                                                    course.credits
+                                                                                }
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                <Badge>
+                                                                                    {
+                                                                                        course.grade
+                                                                                    }
+                                                                                </Badge>
+                                                                            </TableCell>
+                                                                            <TableCell>
+                                                                                {course.points.toFixed(
+                                                                                    1
+                                                                                )}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    )
+                                                                )}
+                                                            </TableBody>
+                                                        </Table>
                                                     </div>
                                                 </CardContent>
                                             </Card>
@@ -740,59 +687,61 @@ export default function ReportsPage() {
                                             </p>
                                         </div>
                                         <div className="overflow-x-auto">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead>
-                                                        الرقم الجامعي
-                                                    </TableHead>
-                                                    <TableHead>
-                                                        اسم الطالب
-                                                    </TableHead>
-                                                    <TableHead>
-                                                        عدد المقررات
-                                                    </TableHead>
-                                                    <TableHead>
-                                                        المعدل الفصلي
-                                                    </TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {gradesReport.students.map(
-                                                    (student: any) => (
-                                                        <TableRow
-                                                            key={
-                                                                student.studentCode
-                                                            }>
-                                                            <TableCell>
-                                                                {
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead>
+                                                            الرقم الجامعي
+                                                        </TableHead>
+                                                        <TableHead>
+                                                            اسم الطالب
+                                                        </TableHead>
+                                                        <TableHead>
+                                                            عدد المقررات
+                                                        </TableHead>
+                                                        <TableHead>
+                                                            المعدل الفصلي
+                                                        </TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {gradesReport.students.map(
+                                                        (student: any) => (
+                                                            <TableRow
+                                                                key={
                                                                     student.studentCode
-                                                                }
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {student.nameAr}
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                {
-                                                                    student
-                                                                        .courses
-                                                                        .length
-                                                                }
-                                                            </TableCell>
-                                                            <TableCell>
-                                                                <Badge>
-                                                                    {student.termGPA
-                                                                        ? student.termGPA.toFixed(
-                                                                              2
-                                                                          )
-                                                                        : "غير محسوب"}
-                                                                </Badge>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )
-                                                )}
-                                            </TableBody>
-                                        </Table>
+                                                                }>
+                                                                <TableCell>
+                                                                    {
+                                                                        student.studentCode
+                                                                    }
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {
+                                                                        student.nameAr
+                                                                    }
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    {
+                                                                        student
+                                                                            .courses
+                                                                            .length
+                                                                    }
+                                                                </TableCell>
+                                                                <TableCell>
+                                                                    <Badge>
+                                                                        {student.termGPA
+                                                                            ? student.termGPA.toFixed(
+                                                                                  2
+                                                                              )
+                                                                            : "غير محسوب"}
+                                                                    </Badge>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        )
+                                                    )}
+                                                </TableBody>
+                                            </Table>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -903,80 +852,80 @@ export default function ReportsPage() {
                                         </CardHeader>
                                         <CardContent>
                                             <div className="overflow-x-auto">
-                                            <Table>
-                                                <TableHeader>
-                                                    <TableRow>
-                                                        <TableHead>
-                                                            الرقم الجامعي
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            اسم الطالب
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            إجمالي الجلسات
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            الحضور
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            الغياب
-                                                        </TableHead>
-                                                        <TableHead>
-                                                            النسبة
-                                                        </TableHead>
-                                                    </TableRow>
-                                                </TableHeader>
-                                                <TableBody>
-                                                    {attendanceReport.students.map(
-                                                        (student: any) => (
-                                                            <TableRow
-                                                                key={
-                                                                    student.studentCode
-                                                                }>
-                                                                <TableCell>
-                                                                    {
+                                                <Table>
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>
+                                                                الرقم الجامعي
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                اسم الطالب
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                إجمالي الجلسات
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                الحضور
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                الغياب
+                                                            </TableHead>
+                                                            <TableHead>
+                                                                النسبة
+                                                            </TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {attendanceReport.students.map(
+                                                            (student: any) => (
+                                                                <TableRow
+                                                                    key={
                                                                         student.studentCode
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {
-                                                                        student.nameAr
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    {
-                                                                        student.totalSessions
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell className="text-green-600">
-                                                                    {
-                                                                        student.presentCount
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell className="text-red-600">
-                                                                    {
-                                                                        student.absentCount
-                                                                    }
-                                                                </TableCell>
-                                                                <TableCell>
-                                                                    <Badge
-                                                                        variant={
-                                                                            student.attendanceRate >=
-                                                                            75
-                                                                                ? "default"
-                                                                                : "destructive"
-                                                                        }>
-                                                                        {student.attendanceRate.toFixed(
-                                                                            1
-                                                                        )}
-                                                                        %
-                                                                    </Badge>
-                                                                </TableCell>
-                                                            </TableRow>
-                                                        )
-                                                    )}
-                                                </TableBody>
-                                            </Table>
+                                                                    }>
+                                                                    <TableCell>
+                                                                        {
+                                                                            student.studentCode
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {
+                                                                            student.nameAr
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        {
+                                                                            student.totalSessions
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell className="text-green-600">
+                                                                        {
+                                                                            student.presentCount
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell className="text-red-600">
+                                                                        {
+                                                                            student.absentCount
+                                                                        }
+                                                                    </TableCell>
+                                                                    <TableCell>
+                                                                        <Badge
+                                                                            variant={
+                                                                                student.attendanceRate >=
+                                                                                75
+                                                                                    ? "default"
+                                                                                    : "destructive"
+                                                                            }>
+                                                                            {student.attendanceRate.toFixed(
+                                                                                1
+                                                                            )}
+                                                                            %
+                                                                        </Badge>
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            )
+                                                        )}
+                                                    </TableBody>
+                                                </Table>
                                             </div>
                                         </CardContent>
                                     </Card>
