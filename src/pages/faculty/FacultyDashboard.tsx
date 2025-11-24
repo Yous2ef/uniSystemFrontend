@@ -82,106 +82,22 @@ export default function FacultyDashboard() {
                     console.log("Sections response:", sectionsResponse);
 
                     if (sectionsResponse.success) {
-                        const facultySections = sectionsResponse.data || [];
+                        const facultySections = sectionsResponse.data?.sections || sectionsResponse.data || [];
                         setSections(facultySections);
                         console.log("✅ Sections loaded:", facultySections.length);
 
                         // Generate pending tasks based on sections
                         generatePendingTasks(facultySections);
-                    } else {
-                        // Use mock data if no sections found
-                        console.log("⚠️ No sections found, using mock data");
-                        setMockData();
                     }
                 } else {
-                    // Use mock data if faculty not found
-                    console.log("⚠️ Faculty not found, using mock data");
-                    setMockData();
+                    console.warn("⚠️ No faculty record found for this user");
                 }
-            } else {
-                // Use mock data if API fails
-                console.log("⚠️ API failed, using mock data");
-                setMockData();
             }
         } catch (error) {
             console.error("❌ Error fetching dashboard data:", error);
-            // Use mock data on error
-            setMockData();
         } finally {
             setLoading(false);
         }
-    };
-
-    const setMockData = () => {
-        setFacultyData({
-            id: "mock-faculty-1",
-            nameAr: "د. أحمد محمد",
-            nameEn: "Dr. Ahmed Mohamed",
-        });
-
-        const mockSections = [
-            {
-                id: "mock-section-1",
-                code: "01",
-                capacity: 40,
-                course: {
-                    code: "CS301",
-                    nameAr: "هياكل البيانات",
-                    nameEn: "Data Structures",
-                    credits: 3,
-                },
-                term: {
-                    name: "خريف 2025",
-                    status: "ACTIVE",
-                },
-                schedules: [],
-                _count: {
-                    enrollments: 35,
-                },
-            },
-            {
-                id: "mock-section-2",
-                code: "01",
-                capacity: 35,
-                course: {
-                    code: "CS405",
-                    nameAr: "خوارزميات",
-                    nameEn: "Algorithms",
-                    credits: 3,
-                },
-                term: {
-                    name: "خريف 2025",
-                    status: "ACTIVE",
-                },
-                schedules: [],
-                _count: {
-                    enrollments: 32,
-                },
-            },
-            {
-                id: "mock-section-3",
-                code: "02",
-                capacity: 30,
-                course: {
-                    code: "CS201",
-                    nameAr: "البرمجة الكائنية",
-                    nameEn: "Object Oriented Programming",
-                    credits: 3,
-                },
-                term: {
-                    name: "خريف 2025",
-                    status: "ACTIVE",
-                },
-                schedules: [],
-                _count: {
-                    enrollments: 28,
-                },
-            },
-        ];
-
-        setSections(mockSections as Section[]);
-        generatePendingTasks(mockSections as Section[]);
-        console.log("✅ Mock data loaded with", mockSections.length, "sections");
     };
 
     const generatePendingTasks = (facultySections: Section[]) => {

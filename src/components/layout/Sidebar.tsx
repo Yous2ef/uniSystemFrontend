@@ -51,20 +51,32 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
 
     const fetchFacultySections = async () => {
         try {
+            console.log("🔍 Fetching faculty sections for user:", user?.id);
             const facultyResponse = await facultyService.getAll();
+            console.log("📚 Faculty response:", facultyResponse);
+            
             if (facultyResponse.success) {
                 const allFaculty = facultyResponse.data?.faculty || facultyResponse.data || [];
+                console.log("👨‍🏫 All faculty:", allFaculty);
+                
                 const currentFaculty = allFaculty.find((f: any) => f.userId === user?.id);
+                console.log("✅ Current faculty:", currentFaculty);
                 
                 if (currentFaculty) {
                     const sectionsResponse = await facultyService.getSections(currentFaculty.id);
+                    console.log("📖 Sections response:", sectionsResponse);
+                    
                     if (sectionsResponse.success) {
-                        setFacultySections(sectionsResponse.data || []);
+                        const sections = sectionsResponse.data?.sections || sectionsResponse.data || [];
+                        console.log("✅ Faculty sections:", sections);
+                        setFacultySections(sections);
                     }
+                } else {
+                    console.warn("⚠️ No faculty record found for user");
                 }
             }
         } catch (error) {
-            console.error("Error fetching faculty sections:", error);
+            console.error("❌ Error fetching faculty sections:", error);
         }
     };
 
@@ -269,7 +281,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                     })}
 
                     {/* Faculty Courses Section */}
-                    {(user?.role === "FACULTY" || user?.role === "TA") && facultySections.length > 0 && (
+                    {(user?.role === "FACULTY" || user?.role === "TA") && (
                         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                             <button
                                 onClick={() => setShowCourses(!showCourses)}
@@ -288,30 +300,36 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }: Sideb
                             
                             {showCourses && (
                                 <div className="mt-2 space-y-1">
-                                    {facultySections.map((section: any) => {
-                                        const courseActive = location.pathname === `/faculty/course/${section.id}`;
-                                        return (
-                                            <Link
-                                                key={section.id}
-                                                to={`/faculty/course/${section.id}`}
-                                                onClick={() => setIsMobileMenuOpen(false)}
-                                                className={`flex items-start gap-2 px-4 py-2 rounded-lg transition-all duration-200 group ${
-                                                    courseActive
-                                                        ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-                                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
-                                                }`}
-                                            >
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium truncate">
-                                                        {section.course?.code}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
-                                                        {section.course?.nameAr}
-                                                    </p>
-                                                </div>
-                                            </Link>
-                                        );
-                                    })}
+                                    {facultySections.length > 0 ? (
+                                        facultySections.map((section: any) => {
+                                            const courseActive = location.pathname === `/faculty/course/${section.id}`;
+                                            return (
+                                                <Link
+                                                    key={section.id}
+                                                    to={`/faculty/course/${section.id}`}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                    className={`flex items-start gap-2 px-4 py-2 rounded-lg transition-all duration-200 group ${
+                                                        courseActive
+                                                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 dark:hover:text-blue-400"
+                                                    }`}
+                                                >
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium truncate">
+                                                            {section.course?.code}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
+                                                            {section.course?.nameAr}
+                                                        </p>
+                                                    </div>
+                                                </Link>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 text-center">
+                                            لا توجد مواد مسندة لك حالياً
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

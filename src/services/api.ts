@@ -375,6 +375,10 @@ export const enrollmentsService = {
         const { data } = await api.get("/enrollments", { params });
         return data;
     },
+    getBySectionId: async (sectionId: string) => {
+        const { data } = await api.get(`/enrollments/section/${sectionId}`);
+        return data;
+    },
     getMyEnrollments: async (params?: any) => {
         const { data } = await api.get("/enrollments/my-enrollments", {
             params,

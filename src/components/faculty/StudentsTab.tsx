@@ -85,11 +85,11 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
             setLoading(true);
             console.log("📚 Fetching students for section:", sectionId);
 
-            const response = await enrollmentsService.getBySectionId(sectionId);
-            console.log("Enrollments response:", response);
+            const data = await enrollmentsService.getBySectionId(sectionId);
+            console.log("Enrollments response:", data);
 
-            if (response.success) {
-                const enrollments = response.data || [];
+            if (data && data.success) {
+                const enrollments = data.data || [];
                 const studentsData = enrollments.map((enrollment: any) => ({
                     ...enrollment.student,
                     enrollment: {
@@ -99,6 +99,7 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                     },
                 }));
                 setStudents(studentsData);
+                console.log("✅ Students loaded:", studentsData.length);
             }
         } catch (error) {
             console.error("❌ Error fetching students:", error);

@@ -43,40 +43,14 @@ export default function FacultyCourseManagement() {
             setLoading(true);
             console.log("📚 Fetching section data for:", sectionId);
 
-            // Check if it's a mock section
-            if (sectionId?.startsWith("mock-section-")) {
-                console.log("✅ Using mock section data");
-                setSection({
-                    id: sectionId,
-                    code: "01",
-                    course: {
-                        code: sectionId === "mock-section-1" ? "CS301" : 
-                              sectionId === "mock-section-2" ? "CS405" : "CS201",
-                        nameAr: sectionId === "mock-section-1" ? "هياكل البيانات" : 
-                                sectionId === "mock-section-2" ? "خوارزميات" : "البرمجة الكائنية",
-                        nameEn: sectionId === "mock-section-1" ? "Data Structures" : 
-                                sectionId === "mock-section-2" ? "Algorithms" : "OOP",
-                        credits: 3,
-                    },
-                    term: {
-                        name: "خريف 2025",
-                    },
-                    _count: {
-                        enrollments: sectionId === "mock-section-1" ? 35 : 
-                                    sectionId === "mock-section-2" ? 32 : 28,
-                        materials: 12,
-                        announcements: 5,
-                    },
-                });
-                setLoading(false);
-                return;
-            }
+            const data = await sectionsService.getById(sectionId!);
+            console.log("Section response:", data);
 
-            const response = await sectionsService.getById(sectionId!);
-            console.log("Section response:", response);
-
-            if (response.success) {
-                setSection(response.data);
+            if (data) {
+                setSection(data);
+                console.log("✅ Section data set successfully");
+            } else {
+                console.error("❌ No section data returned");
             }
         } catch (error) {
             console.error("❌ Error fetching section:", error);
