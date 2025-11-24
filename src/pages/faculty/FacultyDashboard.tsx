@@ -162,35 +162,6 @@ export default function FacultyDashboard() {
                     </p>
                 </div>
 
-                {/* Important Notice */}
-                <Card className="border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/20">
-                    <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                            <div className="bg-blue-600 text-white p-3 rounded-full shrink-0">
-                                <AlertCircle className="w-6 h-6" />
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100 mb-2">
-                                    🎯 كيف تصل للـ 8 أدوات؟
-                                </h3>
-                                <p className="text-blue-800 dark:text-blue-200 mb-3 text-lg">
-                                    <strong>اضغط على أي مادة من البطاقات بالأسفل</strong> عشان تشوف:
-                                </p>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">👥 الطلاب</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📊 الدرجات</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📅 الحضور</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📚 المحتوى</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📢 الإعلانات</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">💬 التظلمات</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">📈 التحليلات</div>
-                                    <div className="bg-white dark:bg-gray-800 p-2 rounded">⚙️ الإعدادات</div>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
                 {/* Quick Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card>
@@ -239,60 +210,6 @@ export default function FacultyDashboard() {
                         </CardContent>
                     </Card>
                 </div>
-
-                {/* Features Overview */}
-                <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-800">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <span className="text-2xl">🎯</span>
-                            الأدوات المتاحة لكل مادة
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">👥</div>
-                                <div className="font-semibold text-sm">الطلاب</div>
-                                <div className="text-xs text-gray-500 mt-1">قائمة وتفاصيل</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">📊</div>
-                                <div className="font-semibold text-sm">الدرجات</div>
-                                <div className="text-xs text-gray-500 mt-1">إدارة كاملة</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">📅</div>
-                                <div className="font-semibold text-sm">الحضور</div>
-                                <div className="text-xs text-gray-500 mt-1">تسجيل وتقارير</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">📚</div>
-                                <div className="font-semibold text-sm">المحتوى</div>
-                                <div className="text-xs text-gray-500 mt-1">رفع ملفات</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">📢</div>
-                                <div className="font-semibold text-sm">الإعلانات</div>
-                                <div className="text-xs text-gray-500 mt-1">نشر أخبار</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">💬</div>
-                                <div className="font-semibold text-sm">التظلمات</div>
-                                <div className="text-xs text-gray-500 mt-1">مراجعة طلبات</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">📈</div>
-                                <div className="font-semibold text-sm">التحليلات</div>
-                                <div className="text-xs text-gray-500 mt-1">إحصائيات</div>
-                            </div>
-                            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg text-center shadow-sm">
-                                <div className="text-3xl mb-2">⚙️</div>
-                                <div className="font-semibold text-sm">الإعدادات</div>
-                                <div className="text-xs text-gray-500 mt-1">سياسات المادة</div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 {/* Courses Cards */}
                 <div>

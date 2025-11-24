@@ -91,12 +91,22 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
             if (data && data.success) {
                 const enrollments = data.data || [];
                 const studentsData = enrollments.map((enrollment: any) => ({
-                    ...enrollment.student,
+                    id: enrollment.student.id,
+                    studentCode: enrollment.student.studentCode,
+                    user: {
+                        name: enrollment.student.nameAr || enrollment.student.nameEn,
+                        email: enrollment.student.user.email,
+                    },
+                    academicYear: enrollment.student.batch?.year || 0,
+                    gpa: 0, // GPA not available in enrollment data
+                    status: enrollment.status,
                     enrollment: {
                         id: enrollment.id,
                         finalGrade: enrollment.finalGrade,
                         status: enrollment.status,
                     },
+                    department: enrollment.student.department,
+                    batch: enrollment.student.batch,
                 }));
                 setStudents(studentsData);
                 console.log("✅ Students loaded:", studentsData.length);
@@ -145,7 +155,23 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
             const response = await studentsService.getById(studentId);
             
             if (response.success) {
-                setSelectedStudent(response.data);
+                const studentData = response.data;
+                // Transform the data to match the expected structure
+                const transformedStudent: StudentDetails = {
+                    id: studentData.id,
+                    studentCode: studentData.studentCode,
+                    user: {
+                        name: studentData.nameAr || studentData.nameEn,
+                        email: studentData.user?.email || studentData.email || '',
+                        phone: studentData.phone,
+                    },
+                    academicYear: studentData.batch?.year || 0,
+                    gpa: studentData.gpa || 0,
+                    status: studentData.status || 'ACTIVE',
+                    department: studentData.department,
+                    batch: studentData.batch,
+                };
+                setSelectedStudent(transformedStudent);
                 setDetailsOpen(true);
             }
         } catch (error) {
