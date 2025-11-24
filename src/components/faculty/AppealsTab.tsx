@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { FileText, CheckCircle, XCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Appeal {
     id: string;
@@ -28,6 +29,7 @@ interface Appeal {
 }
 
 export default function AppealsTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [appeals, setAppeals] = useState<Appeal[]>([
         {
             id: "1",
@@ -51,12 +53,12 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
         if (!selectedAppeal) return;
 
         if (!response.trim()) {
-            toast.error("يرجى إدخال الرد");
+            toast.error(t('appealsTab.errors.enterResponse'));
             return;
         }
 
         if (action === "approve" && (newGrade === null || newGrade === selectedAppeal.currentGrade)) {
-            toast.error("يرجى تعديل الدرجة");
+            toast.error(t('appealsTab.errors.modifyGrade'));
             return;
         }
 
@@ -76,7 +78,7 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
         setDialogOpen(false);
         setResponse("");
         setNewGrade(null);
-        toast.success(`تم ${action === "approve" ? "قبول" : "رفض"} التظلم`);
+        toast.success(t(`appealsTab.success.appeal${action === "approve" ? "Approved" : "Rejected"}`));
     };
 
     const pendingAppeals = appeals.filter((a) => a.status === "pending");
@@ -85,19 +87,19 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold">💬 التظلمات والاستفسارات</h3>
+                <h3 className="text-lg font-semibold">{t('appealsTab.title')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    مراجعة طلبات التظلم على الدرجات
+                    {t('appealsTab.subtitle')}
                 </p>
             </div>
 
             {/* Pending Appeals */}
             <div>
-                <h4 className="font-medium mb-3">📝 تظلمات معلقة ({pendingAppeals.length})</h4>
+                <h4 className="font-medium mb-3">{t('appealsTab.pending')} ({pendingAppeals.length})</h4>
                 {pendingAppeals.length === 0 ? (
                     <Card>
                         <CardContent className="p-8 text-center text-gray-500">
-                            لا توجد تظلمات معلقة
+                            {t('appealsTab.noPending')}
                         </CardContent>
                     </Card>
                 ) : (
@@ -108,23 +110,23 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <CardTitle className="text-lg">
-                                                📝 تظلم جديد من: {appeal.studentName}
+                                                {t('appealsTab.newAppeal')}: {appeal.studentName}
                                             </CardTitle>
                                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                                الكود: {appeal.studentCode} | التاريخ: {appeal.date}
+                                                {t('appealsTab.code')}: {appeal.studentCode} | {t('appealsTab.date')}: {appeal.date}
                                             </p>
                                         </div>
-                                        <Badge className="bg-yellow-500">معلق</Badge>
+                                        <Badge className="bg-yellow-500">{t('appealsTab.statusPending')}</Badge>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-6 space-y-4">
                                     <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">المكون</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('appealsTab.component')}</p>
                                             <p className="font-medium">{appeal.component}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">الدرجة الحالية</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('appealsTab.currentGrade')}</p>
                                             <p className="font-medium text-blue-600 dark:text-blue-400">
                                                 {appeal.currentGrade}/{appeal.maxGrade}
                                             </p>
@@ -132,7 +134,7 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
                                     </div>
 
                                     <div>
-                                        <p className="font-medium mb-2">سبب التظلم:</p>
+                                        <p className="font-medium mb-2">{t('appealsTab.reason')}:</p>
                                         <p className="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
                                             "{appeal.reason}"
                                         </p>
@@ -140,7 +142,7 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
 
                                     {appeal.attachments && appeal.attachments.length > 0 && (
                                         <div>
-                                            <p className="font-medium mb-2">المرفقات:</p>
+                                            <p className="font-medium mb-2">{t('appealsTab.attachments')}:</p>
                                             {appeal.attachments.map((file, index) => (
                                                 <Button key={index} variant="outline" size="sm" className="gap-2">
                                                     <FileText className="w-4 h-4" />
@@ -160,7 +162,7 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
                                                 setDialogOpen(true);
                                             }}
                                         >
-                                            مراجعة
+                                            {t('appealsTab.reviewAppeal')}
                                         </Button>
                                     </div>
                                 </CardContent>
@@ -173,7 +175,7 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
             {/* Processed Appeals */}
             {processedAppeals.length > 0 && (
                 <div>
-                    <h4 className="font-medium mb-3">✅ تظلمات تمت معالجتها</h4>
+                    <h4 className="font-medium mb-3">{t('appealsTab.processed')}</h4>
                     <div className="space-y-4">
                         {processedAppeals.map((appeal) => (
                             <Card key={appeal.id}>
@@ -196,17 +198,17 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
                                                 appeal.status === "approved" ? "bg-green-500" : "bg-red-500"
                                             }
                                         >
-                                            {appeal.status === "approved" ? "مقبول" : "مرفوض"}
+                                            {t(`appealsTab.status${appeal.status === "approved" ? "Approved" : "Rejected"}`)}
                                         </Badge>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-6">
                                     <p className="text-sm">
-                                        <span className="font-medium">الرد:</span> {appeal.response}
+                                        <span className="font-medium">{t('appealsTab.instructorResponse')}:</span> {appeal.response}
                                     </p>
                                     {appeal.status === "approved" && (
                                         <p className="text-sm mt-2 text-green-600 dark:text-green-400">
-                                            الدرجة الجديدة: {appeal.currentGrade}/{appeal.maxGrade}
+                                            {t('appealsTab.gradeUpdated')}: {appeal.currentGrade}/{appeal.maxGrade}
                                         </p>
                                     )}
                                 </CardContent>
@@ -220,21 +222,21 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>💬 مراجعة التظلم</DialogTitle>
+                        <DialogTitle>{t('appealsTab.reviewAppeal')}</DialogTitle>
                     </DialogHeader>
                     {selectedAppeal && (
                         <div className="space-y-4">
                             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                 <p className="font-medium">{selectedAppeal.studentName}</p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    {selectedAppeal.component} | الدرجة الحالية: {selectedAppeal.currentGrade}/
+                                    {selectedAppeal.component} | {t('appealsTab.currentGrade')}: {selectedAppeal.currentGrade}/
                                     {selectedAppeal.maxGrade}
                                 </p>
                                 <p className="text-sm mt-2">{selectedAppeal.reason}</p>
                             </div>
 
                             <div>
-                                <label className="text-sm font-medium">الدرجة الجديدة (في حالة القبول)</label>
+                                <label className="text-sm font-medium">{t('appealsTab.newGrade')}</label>
                                 <input
                                     type="number"
                                     min="0"
@@ -246,34 +248,34 @@ export default function AppealsTab({ sectionId }: { sectionId: string }) {
                             </div>
 
                             <div>
-                                <label className="text-sm font-medium">ردك</label>
+                                <label className="text-sm font-medium">{t('appealsTab.yourResponse')}</label>
                                 <Textarea
                                     value={response}
                                     onChange={(e) => setResponse(e.target.value)}
-                                    placeholder="اكتب ردك على التظلم..."
+                                    placeholder={t('appealsTab.enterResponse')}
                                     rows={4}
                                     className="mt-1"
                                 />
                             </div>
 
                             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-sm">
-                                <p className="font-medium">الإجراء:</p>
-                                <p className="mt-1">● قبول: تعديل الدرجة وإرسال الرد للطالب</p>
-                                <p>● رفض: الدرجة تظل كما هي مع إرسال الرد</p>
+                                <p className="font-medium">{t('common.actions')}:</p>
+                                <p className="mt-1">● {t('appealsTab.approveAppeal')}: {t('appealsTab.gradeUpdated')}</p>
+                                <p>● {t('appealsTab.rejectAppeal')}: {t('appealsTab.currentGrade')}</p>
                             </div>
                         </div>
                     )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
                         <Button variant="destructive" onClick={() => handleAppeal("reject")}>
                             <XCircle className="w-4 h-4 ml-2" />
-                            رفض
+                            {t('appealsTab.rejectAppeal')}
                         </Button>
                         <Button className="bg-green-500 hover:bg-green-600" onClick={() => handleAppeal("approve")}>
                             <CheckCircle className="w-4 h-4 ml-2" />
-                            قبول
+                            {t('appealsTab.approveAppeal')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

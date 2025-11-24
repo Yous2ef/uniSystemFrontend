@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -64,6 +65,7 @@ interface StudentDetails {
 }
 
 export default function StudentsTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [students, setStudents] = useState<Student[]>([]);
     const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(true);
@@ -182,11 +184,11 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "GOOD_STANDING":
-                return <Badge className="bg-green-500">ممتاز</Badge>;
+                return <Badge className="bg-green-500">{t('studentsTab.status.excellent')}</Badge>;
             case "WARNING":
-                return <Badge className="bg-yellow-500">تحذير</Badge>;
+                return <Badge className="bg-yellow-500">{t('studentsTab.status.warning')}</Badge>;
             case "PROBATION":
-                return <Badge className="bg-red-500">إنذار</Badge>;
+                return <Badge className="bg-red-500">{t('studentsTab.status.probation')}</Badge>;
             default:
                 return <Badge>{status}</Badge>;
         }
@@ -197,7 +199,7 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
             <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-                    <p className="mt-4 text-gray-600 dark:text-gray-400">جاري التحميل...</p>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -210,7 +212,7 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                 <div className="flex-1 relative">
                     <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <Input
-                        placeholder="🔍 بحث: اسم الطالب أو الكود"
+                        placeholder={t('studentsTab.searchPlaceholder')}
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="pr-10"
@@ -218,13 +220,13 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                 </div>
                 <Select value={filterStatus} onValueChange={setFilterStatus}>
                     <SelectTrigger className="w-full md:w-[200px]">
-                        <SelectValue placeholder="🎯 فلتر حسب الحالة" />
+                        <SelectValue placeholder={t('studentsTab.filterPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="all">جميع الطلاب</SelectItem>
-                        <SelectItem value="good">حالة جيدة</SelectItem>
-                        <SelectItem value="warning">تحذير</SelectItem>
-                        <SelectItem value="probation">إنذار</SelectItem>
+                        <SelectItem value="all">{t('studentsTab.allStudents')}</SelectItem>
+                        <SelectItem value="good">{t('studentsTab.goodStanding')}</SelectItem>
+                        <SelectItem value="warning">{t('studentsTab.warning')}</SelectItem>
+                        <SelectItem value="probation">{t('studentsTab.probation')}</SelectItem>
                     </SelectContent>
                 </Select>
             </div>
@@ -232,7 +234,7 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
             {/* Students Count */}
             <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                    👥 قائمة الطلاب ({filteredStudents.length} طالب)
+                    {t('studentsTab.studentsList', { count: filteredStudents.length })}
                 </p>
             </div>
 
@@ -243,20 +245,20 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="text-right">الصورة</TableHead>
-                                    <TableHead className="text-right">الكود</TableHead>
-                                    <TableHead className="text-right">الاسم</TableHead>
-                                    <TableHead className="text-right">السنة</TableHead>
-                                    <TableHead className="text-right">المعدل</TableHead>
-                                    <TableHead className="text-right">الحالة</TableHead>
-                                    <TableHead className="text-right">الإجراءات</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.image')}</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.code')}</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.name')}</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.year')}</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.gpa')}</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.status')}</TableHead>
+                                    <TableHead className="text-right">{t('studentsTab.table.actions')}</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {filteredStudents.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={7} className="text-center py-8 text-gray-500">
-                                            لا يوجد طلاب
+                                            {t('studentsTab.noStudents')}
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -282,7 +284,7 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                                                     size="sm"
                                                     onClick={() => openStudentDetails(student.id)}
                                                 >
-                                                    عرض التفاصيل
+                                                    {t('studentsTab.viewDetails')}
                                                 </Button>
                                             </TableCell>
                                         </TableRow>
@@ -299,7 +301,7 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                 <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                         <DialogTitle className="text-2xl">
-                            👤 ملف الطالب
+                            {t('studentsTab.studentProfile')}
                         </DialogTitle>
                     </DialogHeader>
 
@@ -310,41 +312,41 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                                 <CardContent className="p-6">
                                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                                         <User className="w-5 h-5" />
-                                        معلومات أساسية
+                                        {t('studentsTab.basicInfo')}
                                     </h3>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">الاسم</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.name')}</p>
                                             <p className="font-medium">{selectedStudent.user.name}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">الكود</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.code')}</p>
                                             <p className="font-mono font-medium">{selectedStudent.studentCode}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">البريد</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.email')}</p>
                                             <p className="text-sm">{selectedStudent.user.email}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">الهاتف</p>
-                                            <p className="text-sm">{selectedStudent.user.phone || "غير متوفر"}</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.phone')}</p>
+                                            <p className="text-sm">{selectedStudent.user.phone || t('studentsTab.notAvailable')}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">السنة الدراسية</p>
-                                            <p className="font-medium">السنة {selectedStudent.academicYear}</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.academicYear')}</p>
+                                            <p className="font-medium">{t('studentsTab.yearNum', { year: selectedStudent.academicYear })}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">التخصص</p>
-                                            <p className="font-medium">{selectedStudent.department?.nameAr || "غير محدد"}</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.major')}</p>
+                                            <p className="font-medium">{selectedStudent.department?.nameAr || t('studentsTab.notSpecified')}</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">المعدل التراكمي</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.gpa')}</p>
                                             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                                 {selectedStudent.gpa ? selectedStudent.gpa.toFixed(2) : "--"}
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">الحالة الأكاديمية</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.details.academicStatus')}</p>
                                             <div className="mt-1">{getStatusBadge(selectedStudent.status)}</div>
                                         </div>
                                     </div>
@@ -354,21 +356,21 @@ export default function StudentsTab({ sectionId }: { sectionId: string }) {
                             {/* Course Performance - Placeholder */}
                             <Card>
                                 <CardContent className="p-6">
-                                    <h3 className="text-lg font-semibold mb-4">📊 في هذه المادة</h3>
+                                    <h3 className="text-lg font-semibold mb-4">{t('studentsTab.inThisCourse')}</h3>
                                     <div className="space-y-4">
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">الحضور</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.coursePerformance.attendance')}</p>
                                             <p className="text-lg font-semibold">-- (--)</p>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">الدرجات</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{t('studentsTab.coursePerformance.grades')}</p>
                                             <div className="space-y-2">
-                                                <p className="text-sm text-gray-500">لم يتم رفع الدرجات بعد</p>
+                                                <p className="text-sm text-gray-500">{t('studentsTab.coursePerformance.noGrades')}</p>
                                             </div>
                                         </div>
                                         <div>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">المحاولات السابقة</p>
-                                            <p className="text-sm">أول مرة في المادة</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-400">{t('studentsTab.coursePerformance.previousAttempts')}</p>
+                                            <p className="text-sm">{t('studentsTab.coursePerformance.firstTime')}</p>
                                         </div>
                                     </div>
                                 </CardContent>

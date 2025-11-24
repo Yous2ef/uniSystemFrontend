@@ -28,6 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Upload, FileText, Video, Link as LinkIcon, Trash2, Calendar } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Material {
     id: string;
@@ -42,6 +43,7 @@ interface Material {
 }
 
 export default function MaterialsTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [materials, setMaterials] = useState<Material[]>([
         {
             id: "1",
@@ -80,10 +82,57 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
         publishNow: true,
         publishDate: "",
     });
+    const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+    const [isDragging, setIsDragging] = useState(false);
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        
+        const files = Array.from(e.dataTransfer.files);
+        setUploadedFiles(prev => [...prev, ...files]);
+        
+        if (files.length > 0 && !newMaterial.title) {
+            setNewMaterial({ ...newMaterial, title: files[0].name.replace(/\.[^/.]+$/, "") });
+        }
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files);
+            setUploadedFiles(prev => [...prev, ...files]);
+            
+            if (files.length > 0 && !newMaterial.title) {
+                setNewMaterial({ ...newMaterial, title: files[0].name.replace(/\.[^/.]+$/, "") });
+            }
+        }
+    };
+
+    const removeFile = (index: number) => {
+        setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    };
 
     const uploadMaterial = () => {
         if (!newMaterial.title) {
-            toast.error("يرجى إدخال العنوان");
+            toast.error(t('materialsTab.errors.enterTitle'));
             return;
         }
 
@@ -107,12 +156,13 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
             publishNow: true,
             publishDate: "",
         });
-        toast.success("تم رفع المحتوى بنجاح");
+        setUploadedFiles([]);
+        toast.success(t('materialsTab.success.materialUploaded'));
     };
 
     const deleteMaterial = (id: string) => {
         setMaterials(materials.filter((m) => m.id !== id));
-        toast.success("تم حذف المحتوى");
+        toast.success(t('materialsTab.success.materialDeleted'));
     };
 
     const getIcon = (type: string) => {
@@ -146,19 +196,19 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">📚 محتوى المادة</h3>
+                <h3 className="text-lg font-semibold">{t('materialsTab.title')}</h3>
                 <Button onClick={() => setUploadDialog(true)}>
                     <Plus className="w-4 h-4 ml-2" />
-                    رفع محتوى جديد
+                    {t('materialsTab.addMaterial')}
                 </Button>
             </div>
 
             <div className="space-y-4">
                 {weeks.map((weekNum) => (
                     <Card key={weekNum}>
-                        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+                        <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
                             <CardTitle className="text-lg">
-                                📅 الأسبوع {weekNum}
+                                📅 {t('materialsTab.week')} {weekNum}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-4">
@@ -181,12 +231,9 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                                         <div className="flex items-center gap-2">
                                             {material.status === "scheduled" && (
                                                 <span className="text-xs text-orange-600">
-                                                    📅 مجدول: {material.publishDate}
+                                                    📅 {material.publishDate}
                                                 </span>
                                             )}
-                                            <Button variant="ghost" size="sm">
-                                                ✏️ تعديل
-                                            </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
@@ -204,9 +251,9 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
 
                 {/* Empty state for next week */}
                 <Card>
-                    <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+                    <CardHeader className="bg-linear-to-r from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
                         <CardTitle className="text-lg text-gray-600 dark:text-gray-400">
-                            📅 الأسبوع {weeks.length + 1}: قريباً...
+                            📅 {t('materialsTab.week')} {weeks.length + 1}: {t('common.comingSoon')}...
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-4">
@@ -218,7 +265,7 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                             }}
                         >
                             <Plus className="w-4 h-4 ml-2" />
-                            إضافة محتوى
+                            {t('materialsTab.addMaterial')}
                         </Button>
                     </CardContent>
                 </Card>
@@ -228,12 +275,12 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
             <Dialog open={uploadDialog} onOpenChange={setUploadDialog}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>📤 رفع محتوى جديد</DialogTitle>
+                        <DialogTitle>{t('materialsTab.uploadMaterial')}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label>الأسبوع</Label>
+                                <Label>{t('materialsTab.weekNumber')}</Label>
                                 <Select
                                     value={newMaterial.weekNumber.toString()}
                                     onValueChange={(v) =>
@@ -246,14 +293,14 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                                     <SelectContent>
                                         {Array.from({ length: 15 }, (_, i) => i + 1).map((week) => (
                                             <SelectItem key={week} value={week.toString()}>
-                                                الأسبوع {week}
+                                                {t('materialsTab.week')} {week}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div>
-                                <Label>نوع المحتوى</Label>
+                                <Label>{t('materialsTab.materialType')}</Label>
                                 <Select
                                     value={newMaterial.type}
                                     onValueChange={(v: any) => setNewMaterial({ ...newMaterial, type: v })}
@@ -262,35 +309,103 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="pdf">📄 PDF</SelectItem>
-                                        <SelectItem value="video">🎥 فيديو</SelectItem>
-                                        <SelectItem value="code">💻 كود</SelectItem>
-                                        <SelectItem value="link">🔗 رابط</SelectItem>
+                                        <SelectItem value="pdf">📄 {t('materialsTab.pdf')}</SelectItem>
+                                        <SelectItem value="video">🎥 {t('materialsTab.video')}</SelectItem>
+                                        <SelectItem value="code">💻 {t('materialsTab.code')}</SelectItem>
+                                        <SelectItem value="link">🔗 {t('materialsTab.link')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
                         <div>
-                            <Label>العنوان</Label>
+                            <Label>{t('materialsTab.materialTitle')}</Label>
                             <Input
                                 value={newMaterial.title}
                                 onChange={(e) => setNewMaterial({ ...newMaterial, title: e.target.value })}
-                                placeholder="مثال: محاضرة الأسبوع الأول"
+                                placeholder={t('common.enterTitle')}
                             />
                         </div>
 
                         <div>
-                            <Label>إرفاق ملفات</Label>
-                            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
-                                <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                                <p className="text-sm text-gray-600">📎 اسحب الملفات هنا أو اضغط للرفع</p>
+                            <Label>{t('common.attachFiles')}</Label>
+                            <div
+                                onDragOver={handleDragOver}
+                                onDragLeave={handleDragLeave}
+                                onDrop={handleDrop}
+                                className={`
+                                    border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer
+                                    ${isDragging 
+                                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20' 
+                                        : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+                                    }
+                                `}
+                                onClick={() => document.getElementById('file-upload')?.click()}
+                            >
+                                <input
+                                    id="file-upload"
+                                    type="file"
+                                    multiple
+                                    className="hidden"
+                                    onChange={handleFileSelect}
+                                    accept={
+                                        newMaterial.type === 'pdf' ? '.pdf' :
+                                        newMaterial.type === 'video' ? 'video/*' :
+                                        newMaterial.type === 'code' ? '.zip,.rar,.7z' :
+                                        '*'
+                                    }
+                                />
+                                <Upload className={`w-12 h-12 mx-auto mb-3 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
+                                <p className={`text-sm font-medium mb-1 ${isDragging ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                                    {isDragging ? t('common.dropHere') : t('common.dragOrClick')}
+                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    {newMaterial.type === 'pdf' && 'PDF files only'}
+                                    {newMaterial.type === 'video' && 'Video files (MP4, AVI, MOV)'}
+                                    {newMaterial.type === 'code' && 'Compressed files (ZIP, RAR)'}
+                                    {newMaterial.type === 'link' && 'Any file type'}
+                                </p>
                             </div>
+
+                            {/* Uploaded Files List */}
+                            {uploadedFiles.length > 0 && (
+                                <div className="mt-4 space-y-2">
+                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        {uploadedFiles.length} {uploadedFiles.length === 1 ? 'file' : 'files'} selected:
+                                    </p>
+                                    {uploadedFiles.map((file, index) => (
+                                        <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                                <FileText className="w-5 h-5 text-blue-500 shrink-0" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                        {file.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        {formatFileSize(file.size)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    removeFile(index);
+                                                }}
+                                                className="shrink-0"
+                                            >
+                                                <Trash2 className="w-4 h-4 text-red-500" />
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {newMaterial.type === "link" && (
                             <div>
-                                <Label>الرابط</Label>
+                                <Label>{t('materialsTab.url')}</Label>
                                 <Input
                                     value={newMaterial.url}
                                     onChange={(e) => setNewMaterial({ ...newMaterial, url: e.target.value })}
@@ -300,7 +415,7 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                         )}
 
                         <div className="space-y-2">
-                            <Label>📅 موعد النشر</Label>
+                            <Label>📅 {t('materialsTab.publishDate')}</Label>
                             <div className="flex items-center gap-4">
                                 <label className="flex items-center gap-2">
                                     <input
@@ -308,7 +423,7 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                                         checked={newMaterial.publishNow}
                                         onChange={() => setNewMaterial({ ...newMaterial, publishNow: true })}
                                     />
-                                    <span>● الآن</span>
+                                    <span>● {t('materialsTab.publishNow')}</span>
                                 </label>
                                 <label className="flex items-center gap-2">
                                     <input
@@ -316,7 +431,7 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                                         checked={!newMaterial.publishNow}
                                         onChange={() => setNewMaterial({ ...newMaterial, publishNow: false })}
                                     />
-                                    <span>○ جدولة</span>
+                                    <span>○ {t('materialsTab.schedulePublish')}</span>
                                 </label>
                             </div>
                             {!newMaterial.publishNow && (
@@ -332,11 +447,11 @@ export default function MaterialsTab({ sectionId }: { sectionId: string }) {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setUploadDialog(false)}>
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
                         <Button onClick={uploadMaterial}>
                             <Upload className="w-4 h-4 ml-2" />
-                            📤 رفع ونشر
+                            {t('materialsTab.upload')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

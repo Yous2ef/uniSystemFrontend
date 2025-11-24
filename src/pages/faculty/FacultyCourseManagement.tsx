@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +26,7 @@ import AnalyticsTab from "@/components/faculty/AnalyticsTab";
 import SettingsTab from "@/components/faculty/SettingsTab";
 
 export default function FacultyCourseManagement() {
+    const { t } = useTranslation();
     const { sectionId } = useParams<{ sectionId: string }>();
     const [loading, setLoading] = useState(true);
     const [section, setSection] = useState<any>(null);
@@ -66,7 +68,7 @@ export default function FacultyCourseManagement() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري التحميل...
+                            {t('common.loading')}
                         </p>
                     </div>
                 </div>
@@ -79,7 +81,7 @@ export default function FacultyCourseManagement() {
             <DashboardLayout>
                 <Card>
                     <CardContent className="p-6 text-center text-gray-500">
-                        المادة غير موجودة
+                        {t('courseManagement.notFound')}
                     </CardContent>
                 </Card>
             </DashboardLayout>
@@ -95,7 +97,7 @@ export default function FacultyCourseManagement() {
                         📖 {section.course?.code} - {section.course?.nameAr}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        القسم {section.code} - {section.term?.name}
+                        {t('courseManagement.sectionInfo', { section: section.code, term: section.term?.name })}
                     </p>
                 </div>
 
@@ -106,7 +108,7 @@ export default function FacultyCourseManagement() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        إجمالي الطلاب
+                                        {t('courseManagement.stats.totalStudents')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                         {section._count?.enrollments || 0}
@@ -122,7 +124,7 @@ export default function FacultyCourseManagement() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        متوسط الدرجات
+                                        {t('courseManagement.stats.averageGrades')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                         --
@@ -138,7 +140,7 @@ export default function FacultyCourseManagement() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        نسبة الحضور
+                                        {t('courseManagement.stats.attendanceRate')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                         --
@@ -154,7 +156,7 @@ export default function FacultyCourseManagement() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        المواد المرفوعة
+                                        {t('courseManagement.stats.uploadedMaterials')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                                         {section._count?.materials || 0}
@@ -173,35 +175,35 @@ export default function FacultyCourseManagement() {
                             <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-2">
                                 <TabsTrigger value="students" className="gap-2">
                                     <Users className="w-4 h-4" />
-                                    <span className="hidden sm:inline">الطلاب</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.students')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="grades" className="gap-2">
                                     <BarChart3 className="w-4 h-4" />
-                                    <span className="hidden sm:inline">الدرجات</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.grades')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="attendance" className="gap-2">
                                     <Calendar className="w-4 h-4" />
-                                    <span className="hidden sm:inline">الحضور</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.attendance')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="materials" className="gap-2">
                                     <FileText className="w-4 h-4" />
-                                    <span className="hidden sm:inline">المحتوى</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.materials')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="announcements" className="gap-2">
                                     <MessageSquare className="w-4 h-4" />
-                                    <span className="hidden sm:inline">الإعلانات</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.announcements')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="appeals" className="gap-2">
                                     <AlertCircle className="w-4 h-4" />
-                                    <span className="hidden sm:inline">التظلمات</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.appeals')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="analytics" className="gap-2">
                                     <TrendingUp className="w-4 h-4" />
-                                    <span className="hidden sm:inline">التحليلات</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.analytics')}</span>
                                 </TabsTrigger>
                                 <TabsTrigger value="settings" className="gap-2">
                                     <Settings className="w-4 h-4" />
-                                    <span className="hidden sm:inline">الإعدادات</span>
+                                    <span className="hidden sm:inline">{t('courseManagement.tabs.settings')}</span>
                                 </TabsTrigger>
                             </TabsList>
                         </Tabs>

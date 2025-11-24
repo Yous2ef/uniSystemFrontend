@@ -2,8 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BarChart3, TrendingUp, TrendingDown, AlertTriangle, Download } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     // Mock data
     const gradeDistribution = [
         { grade: "A+", count: 7, percentage: 15 },
@@ -42,9 +44,9 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
     return (
         <div className="space-y-6">
             <div>
-                <h3 className="text-lg font-semibold">📈 تحليلات وإحصائيات المادة</h3>
+                <h3 className="text-lg font-semibold">{t('analyticsTab.title')}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    تحليل شامل لأداء الطلاب في المادة
+                    {t('analyticsTab.subtitle')}
                 </p>
             </div>
 
@@ -52,25 +54,25 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
                     <CardContent className="p-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">متوسط الدرجات</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('analyticsTab.average')}</p>
                         <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.average}%</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="p-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">الوسيط</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('analyticsTab.median')}</p>
                         <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.median}%</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="p-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">نسبة النجاح</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('analyticsTab.passRate')}</p>
                         <p className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.passRate}%</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardContent className="p-4">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">نسبة الرسوب</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('analyticsTab.failRate')}</p>
                         <p className="text-3xl font-bold text-red-600 dark:text-red-400">{stats.failRate}%</p>
                     </CardContent>
                 </Card>
@@ -81,7 +83,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <BarChart3 className="w-5 h-5" />
-                        📊 توزيع الدرجات
+                        {t('analyticsTab.gradeDistribution')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -92,7 +94,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                                 <div className="flex-1">
                                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
                                         <div
-                                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-end pr-2 text-white text-sm font-medium"
+                                            className="h-full bg-linear-to-r from-blue-500 to-purple-500 flex items-center justify-end pr-2 text-white text-sm font-medium"
                                             style={{ width: `${item.percentage}%` }}
                                         >
                                             {item.percentage > 10 && `${item.percentage}%`}
@@ -100,7 +102,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                                     </div>
                                 </div>
                                 <div className="w-20 text-sm text-gray-600 dark:text-gray-400">
-                                    {item.count} طالب
+                                    {item.count} {t('analyticsTab.student')}
                                 </div>
                             </div>
                         ))}
@@ -114,11 +116,11 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                     <CardHeader className="bg-green-50 dark:bg-green-900/20">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <TrendingUp className="w-5 h-5 text-green-500" />
-                            أعلى درجة
+                            {t('analyticsTab.highestGrade')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">الطالب</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('analyticsTab.studentLabel')}</p>
                         <p className="font-medium text-lg">{stats.highestStudent}</p>
                         <p className="text-4xl font-bold text-green-600 dark:text-green-400 mt-2">
                             {stats.highest}%
@@ -130,11 +132,11 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                     <CardHeader className="bg-red-50 dark:bg-red-900/20">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <TrendingDown className="w-5 h-5 text-red-500" />
-                            أقل درجة
+                            {t('analyticsTab.lowestGrade')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">الطالب</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">{t('analyticsTab.studentLabel')}</p>
                         <p className="font-medium text-lg">{stats.lowestStudent}</p>
                         <p className="text-4xl font-bold text-red-600 dark:text-red-400 mt-2">{stats.lowest}%</p>
                     </CardContent>
@@ -146,7 +148,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                 <CardHeader className="bg-yellow-50 dark:bg-yellow-900/20">
                     <CardTitle className="flex items-center gap-2">
                         <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                        ⚠️ طلاب في خطر (درجة {"<"} 70%)
+                        {t('analyticsTab.atRiskStudents')}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -165,7 +167,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                         ))}
                     </div>
                     <Button className="w-full mt-4" variant="outline">
-                        📧 إرسال تنبيه لهم
+                        {t('analyticsTab.sendWarning')}
                     </Button>
                 </CardContent>
             </Card>
@@ -173,7 +175,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
             {/* Historical Comparison */}
             <Card>
                 <CardHeader>
-                    <CardTitle>📊 مقارنة بالترمات السابقة</CardTitle>
+                    <CardTitle>{t('analyticsTab.historicalTrends')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
@@ -183,7 +185,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                                 <div className="flex-1">
                                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-8">
                                         <div
-                                            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-end pr-3 text-white font-medium"
+                                            className="h-full bg-linear-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-end pr-3 text-white font-medium"
                                             style={{ width: `${item.average}%` }}
                                         >
                                             {item.average}%
@@ -191,7 +193,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
                                     </div>
                                 </div>
                                 {index === historicalData.length - 1 && (
-                                    <Badge className="bg-green-500">✅ تحسن</Badge>
+                                    <Badge className="bg-green-500">✅ {t('common.success')}</Badge>
                                 )}
                             </div>
                         ))}
@@ -203,7 +205,7 @@ export default function AnalyticsTab({ sectionId }: { sectionId: string }) {
             <div className="flex justify-end">
                 <Button variant="outline">
                     <Download className="w-4 h-4 ml-2" />
-                    📥 تصدير التقرير
+                    {t('analyticsTab.exportReport')}
                 </Button>
             </div>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ interface Section {
 }
 
 export default function MyCoursesPage() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -73,57 +75,57 @@ export default function MyCoursesPage() {
     const courseFeatures = [
         {
             icon: Users,
-            label: "👥 الطلاب",
-            description: "قائمة، فلاتر، تفاصيل",
+            label: t('myCourses.features.students.label'),
+            description: t('myCourses.features.students.description'),
             color: "text-blue-600",
             bg: "bg-blue-50",
         },
         {
             icon: BarChart3,
-            label: "📊 الدرجات",
-            description: "إعداد، إدخال، رفع، نشر",
+            label: t('myCourses.features.grades.label'),
+            description: t('myCourses.features.grades.description'),
             color: "text-green-600",
             bg: "bg-green-50",
         },
         {
             icon: Calendar,
-            label: "📅 الحضور",
-            description: "تسجيل، تقارير، أعذار",
+            label: t('myCourses.features.attendance.label'),
+            description: t('myCourses.features.attendance.description'),
             color: "text-purple-600",
             bg: "bg-purple-50",
         },
         {
             icon: FileText,
-            label: "📚 المحتوى",
-            description: "رفع محاضرات، فيديوهات، أكواد",
+            label: t('myCourses.features.content.label'),
+            description: t('myCourses.features.content.description'),
             color: "text-orange-600",
             bg: "bg-orange-50",
         },
         {
             icon: MessageSquare,
-            label: "📢 الإعلانات",
-            description: "نشر إعلانات للطلاب",
+            label: t('myCourses.features.announcements.label'),
+            description: t('myCourses.features.announcements.description'),
             color: "text-pink-600",
             bg: "bg-pink-50",
         },
         {
             icon: AlertCircle,
-            label: "💬 التظلمات",
-            description: "مراجعة التظلمات على الدرجات",
+            label: t('myCourses.features.appeals.label'),
+            description: t('myCourses.features.appeals.description'),
             color: "text-red-600",
             bg: "bg-red-50",
         },
         {
             icon: TrendingUp,
-            label: "📈 التحليلات",
-            description: "إحصائيات وتوزيع الدرجات",
+            label: t('myCourses.features.analytics.label'),
+            description: t('myCourses.features.analytics.description'),
             color: "text-indigo-600",
             bg: "bg-indigo-50",
         },
         {
             icon: Settings,
-            label: "⚙️ الإعدادات",
-            description: "سياسات المادة والمساعدين",
+            label: t('myCourses.features.settings.label'),
+            description: t('myCourses.features.settings.description'),
             color: "text-gray-600",
             bg: "bg-gray-50",
         },
@@ -136,7 +138,7 @@ export default function MyCoursesPage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري التحميل...
+                            {t('common.loading')}
                         </p>
                     </div>
                 </div>
@@ -150,10 +152,10 @@ export default function MyCoursesPage() {
                 {/* Header */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        📚 موادي الدراسية
+                        {t('myCourses.title')}
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">
-                        جميع المواد التي تدرسها مع كل المميزات والأدوات
+                        {t('myCourses.subtitle')}
                     </p>
                 </div>
 
@@ -161,7 +163,7 @@ export default function MyCoursesPage() {
                 <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
                     <CardHeader>
                         <CardTitle className="text-xl">
-                            🎯 المميزات المتاحة لكل مادة
+                            {t('myCourses.featuresTitle')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -194,13 +196,13 @@ export default function MyCoursesPage() {
                 {/* Courses List */}
                 <div>
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                        المواد ({sections.length})
+                        {t('myCourses.coursesCount', { count: sections.length })}
                     </h2>
                     
                     {sections.length === 0 ? (
                         <Card>
                             <CardContent className="p-8 text-center text-gray-500">
-                                لا توجد مواد مسندة إليك هذا الفصل الدراسي
+                                {t('myCourses.noCourses')}
                             </CardContent>
                         </Card>
                     ) : (
@@ -229,7 +231,7 @@ export default function MyCoursesPage() {
                                         <div className="space-y-3">
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="text-gray-600 dark:text-gray-400">
-                                                    👥 عدد الطلاب:
+                                                    {t('myCourses.studentsCount')}
                                                 </span>
                                                 <span className="font-semibold text-gray-900 dark:text-white">
                                                     {section._count?.enrollments || 0}
@@ -237,7 +239,7 @@ export default function MyCoursesPage() {
                                             </div>
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="text-gray-600 dark:text-gray-400">
-                                                    📖 القسم:
+                                                    {t('myCourses.section')}
                                                 </span>
                                                 <span className="font-semibold text-gray-900 dark:text-white">
                                                     {section.code}
@@ -245,7 +247,7 @@ export default function MyCoursesPage() {
                                             </div>
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="text-gray-600 dark:text-gray-400">
-                                                    📅 الفصل:
+                                                    {t('myCourses.term')}
                                                 </span>
                                                 <span className="font-semibold text-gray-900 dark:text-white">
                                                     {section.term.name}
@@ -260,14 +262,14 @@ export default function MyCoursesPage() {
                                                 navigate(`/faculty/course/${section.id}`);
                                             }}
                                         >
-                                            فتح المادة
+                                            {t('myCourses.openCourse')}
                                             <ArrowRight className="w-4 h-4 mr-2" />
                                         </Button>
 
                                         {/* Features Preview */}
                                         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                                                الأدوات المتاحة:
+                                                {t('myCourses.availableTools')}
                                             </p>
                                             <div className="flex flex-wrap gap-2">
                                                 {courseFeatures.slice(0, 4).map((feature, idx) => {
@@ -281,7 +283,7 @@ export default function MyCoursesPage() {
                                                         </div>
                                                     );
                                                 })}
-                                                <span className="text-xs text-gray-500">+4 المزيد</span>
+                                                <span className="text-xs text-gray-500">{t('myCourses.moreTools')}</span>
                                             </div>
                                         </div>
                                     </CardContent>

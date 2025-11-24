@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MessageSquare, Bell, Mail, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface Announcement {
     id: string;
@@ -25,6 +26,7 @@ interface Announcement {
 }
 
 export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [announcements, setAnnouncements] = useState<Announcement[]>([
         {
             id: "1",
@@ -45,7 +47,7 @@ export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
 
     const createAnnouncement = () => {
         if (!newAnnouncement.title || !newAnnouncement.content) {
-            toast.error("يرجى إدخال العنوان والمحتوى");
+            toast.error(t('announcementsTab.errors.enterTitleContent'));
             return;
         }
 
@@ -63,21 +65,21 @@ export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
             sendNotification: true,
             sendEmail: true,
         });
-        toast.success("تم نشر الإعلان بنجاح");
+        toast.success(t('announcementsTab.success.announcementPublished'));
     };
 
     const deleteAnnouncement = (id: string) => {
         setAnnouncements(announcements.filter((a) => a.id !== id));
-        toast.success("تم حذف الإعلان");
+        toast.success(t('announcementsTab.success.announcementDeleted'));
     };
 
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">📢 الإعلانات</h3>
+                <h3 className="text-lg font-semibold">{t('announcementsTab.title')}</h3>
                 <Button onClick={() => setDialogOpen(true)}>
                     <Plus className="w-4 h-4 ml-2" />
-                    إعلان جديد
+                    {t('announcementsTab.newAnnouncement')}
                 </Button>
             </div>
 
@@ -85,13 +87,13 @@ export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
                 {announcements.length === 0 ? (
                     <Card>
                         <CardContent className="p-12 text-center text-gray-500">
-                            لا توجد إعلانات
+                            {t('announcementsTab.noAnnouncements')}
                         </CardContent>
                     </Card>
                 ) : (
                     announcements.map((announcement) => (
                         <Card key={announcement.id}>
-                            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+                            <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-3">
                                         <MessageSquare className="w-5 h-5 text-blue-500" />
@@ -119,13 +121,13 @@ export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
                                     {announcement.sendNotification && (
                                         <div className="flex items-center gap-1">
                                             <Bell className="w-4 h-4" />
-                                            إشعار في النظام
+                                            {t('announcementsTab.inSystem')}
                                         </div>
                                     )}
                                     {announcement.sendEmail && (
                                         <div className="flex items-center gap-1">
                                             <Mail className="w-4 h-4" />
-                                            بريد إلكتروني
+                                            {t('announcementsTab.email')}
                                         </div>
                                     )}
                                 </div>
@@ -139,43 +141,42 @@ export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>📢 إعلان جديد</DialogTitle>
+                        <DialogTitle>{t('announcementsTab.createAnnouncement')}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <Label>العنوان</Label>
+                            <Label>{t('announcementsTab.announcementTitle')}</Label>
                             <Input
                                 value={newAnnouncement.title}
                                 onChange={(e) =>
                                     setNewAnnouncement({ ...newAnnouncement, title: e.target.value })
                                 }
-                                placeholder="مثال: إلغاء محاضرة الغد"
+                                placeholder={t('common.enterTitle')}
                             />
                         </div>
                         <div>
-                            <Label>المحتوى</Label>
+                            <Label>{t('announcementsTab.content')}</Label>
                             <Textarea
                                 value={newAnnouncement.content}
                                 onChange={(e) =>
                                     setNewAnnouncement({ ...newAnnouncement, content: e.target.value })
                                 }
-                                placeholder="اكتب محتوى الإعلان هنا..."
+                                placeholder={t('common.enterContent')}
                                 rows={6}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>🔔 إرسال إشعار:</Label>
+                            <Label>🔔 {t('common.sendNotification')}:</Label>
                             <div className="flex items-center gap-2">
                                 <Checkbox
                                     checked={newAnnouncement.sendNotification}
                                     onCheckedChange={(checked) =>
-                                        setNewAnnouncement({
-                                            ...newAnnouncement,
+                                        setNewAnnouncement({...newAnnouncement,
                                             sendNotification: checked as boolean,
                                         })
                                     }
                                 />
-                                <label className="text-sm">في النظام</label>
+                                <label className="text-sm">{t('announcementsTab.sendNotification')}</label>
                             </div>
                             <div className="flex items-center gap-2">
                                 <Checkbox
@@ -187,17 +188,17 @@ export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
                                         })
                                     }
                                 />
-                                <label className="text-sm">بالبريد الإلكتروني</label>
+                                <label className="text-sm">{t('announcementsTab.sendEmail')}</label>
                             </div>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
                         <Button onClick={createAnnouncement}>
                             <MessageSquare className="w-4 h-4 ml-2" />
-                            📢 نشر الإعلان
+                            {t('announcementsTab.publish')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

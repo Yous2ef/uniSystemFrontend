@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -49,6 +50,7 @@ interface PendingTask {
 }
 
 export default function FacultyDashboard() {
+    const { t } = useTranslation();
     const { user } = useAuthStore();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
@@ -108,26 +110,12 @@ export default function FacultyDashboard() {
             tasks.push({
                 id: `attendance-${section.id}`,
                 type: "week",
-                title: `تسجيل حضور محاضرة ${section.course.nameAr}`,
+                title: `${t('facultyDashboard.markAttendanceFor')} ${section.course.nameAr}`,
                 sectionId: section.id,
             });
         });
 
         setPendingTasks(tasks);
-    };
-
-    const getDayName = (day: number) => {
-        const days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-        return days[day] || "";
-    };
-
-    const getNextLecture = (schedules: any[]) => {
-        if (!schedules || schedules.length === 0) return "لا يوجد جدول";
-        
-        const today = new Date().getDay();
-        const nextSchedule = schedules.find(s => s.day >= today) || schedules[0];
-        
-        return `${getDayName(nextSchedule.day)} ${nextSchedule.startTime}`;
     };
 
     const navigateToCourse = (sectionId: string) => {
@@ -141,7 +129,7 @@ export default function FacultyDashboard() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري التحميل...
+                            {t('common.loading')}
                         </p>
                     </div>
                 </div>
@@ -155,10 +143,10 @@ export default function FacultyDashboard() {
                 {/* Welcome Section */}
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-700 dark:to-indigo-700 rounded-lg p-6 text-white">
                     <h1 className="text-3xl font-bold">
-                        👋 أهلاً {facultyData?.nameAr || "دكتور"}
+                        👋 {t('facultyDashboard.welcome')} {facultyData?.nameAr || t('facultyDashboard.doctor')}
                     </h1>
                     <p className="mt-2 text-blue-100 text-lg">
-                        المواد اللي بتدرسها هذا الترم
+                        {t('facultyDashboard.coursesThisTerm')}
                     </p>
                 </div>
 
@@ -169,7 +157,7 @@ export default function FacultyDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        عدد المواد
+                                        {t('facultyDashboard.coursesCount')}
                                     </p>
                                     <p className="text-3xl font-bold text-blue-600">
                                         {sections.length}
@@ -184,7 +172,7 @@ export default function FacultyDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        إجمالي الطلاب
+                                        {t('facultyDashboard.totalStudents')}
                                     </p>
                                     <p className="text-3xl font-bold text-green-600">
                                         {sections.reduce((sum, s) => sum + (s._count?.enrollments || 0), 0)}
@@ -199,7 +187,7 @@ export default function FacultyDashboard() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        المهام المعلقة
+                                        {t('facultyDashboard.pendingTasks')}
                                     </p>
                                     <p className="text-3xl font-bold text-orange-600">
                                         {pendingTasks.length}
@@ -214,14 +202,14 @@ export default function FacultyDashboard() {
                 {/* Courses Cards */}
                 <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                        📚 موادك ({sections.length})
+                        📚 {t('facultyDashboard.yourCourses')} ({sections.length})
                     </h2>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {sections.length === 0 ? (
                             <Card className="col-span-full">
                                 <CardContent className="p-6 text-center text-gray-500">
-                                    لا توجد مواد مسندة إليك هذا الفصل الدراسي
+                                    {t('facultyDashboard.noCoursesAssigned')}
                                 </CardContent>
                             </Card>
                         ) : (
@@ -247,7 +235,7 @@ export default function FacultyDashboard() {
                                     <CardContent className="pt-4 space-y-3">
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-gray-600 dark:text-gray-400">
-                                                👥 الطلاب:
+                                                👥 {t('facultyDashboard.students')}:
                                             </span>
                                             <span className="font-semibold">
                                                 {section._count?.enrollments || 0}
@@ -255,7 +243,7 @@ export default function FacultyDashboard() {
                                         </div>
                                         <div className="flex items-center justify-between text-sm">
                                             <span className="text-gray-600 dark:text-gray-400">
-                                                📖 القسم:
+                                                📖 {t('facultyDashboard.section')}:
                                             </span>
                                             <span className="font-semibold">
                                                 {section.code}
@@ -263,7 +251,7 @@ export default function FacultyDashboard() {
                                         </div>
                                         <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
                                             <div className="flex items-center justify-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                                <span>اضغط لعرض 8 أدوات الإدارة</span>
+                                                <span>{t('facultyDashboard.clickToView')}</span>
                                                 <ArrowLeft className="w-4 h-4 animate-pulse" />
                                             </div>
                                         </div>
@@ -279,7 +267,7 @@ export default function FacultyDashboard() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <FileText className="w-5 h-5" />
-                            المهام المعلقة
+                            {t('facultyDashboard.pendingTasks')}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
@@ -287,11 +275,11 @@ export default function FacultyDashboard() {
                         <div>
                             <h3 className="font-semibold text-red-600 dark:text-red-400 mb-2 flex items-center gap-2">
                                 <AlertCircle className="w-4 h-4" />
-                                عاجل:
+                                {t('facultyDashboard.urgent')}:
                             </h3>
                             <div className="space-y-2 mr-6">
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    لا توجد مهام عاجلة حالياً
+                                    {t('facultyDashboard.noUrgentTasks')}
                                 </p>
                             </div>
                         </div>
@@ -300,7 +288,7 @@ export default function FacultyDashboard() {
                         <div>
                             <h3 className="font-semibold text-blue-600 dark:text-blue-400 mb-2 flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
-                                هذا الأسبوع:
+                                {t('facultyDashboard.thisWeek')}:
                             </h3>
                             <div className="space-y-2 mr-6">
                                 {pendingTasks
@@ -322,7 +310,7 @@ export default function FacultyDashboard() {
                                                         navigateToCourse(task.sectionId!)
                                                     }
                                                 >
-                                                    فتح
+                                                    {t('facultyDashboard.open')}
                                                 </Button>
                                             )}
                                         </div>
@@ -330,7 +318,7 @@ export default function FacultyDashboard() {
                                 {pendingTasks.filter((t) => t.type === "week")
                                     .length === 0 && (
                                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        لا توجد مهام هذا الأسبوع
+                                        {t('facultyDashboard.noWeekTasks')}
                                     </p>
                                 )}
                             </div>
@@ -340,11 +328,11 @@ export default function FacultyDashboard() {
                         <div>
                             <h3 className="font-semibold text-green-600 dark:text-green-400 mb-2 flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4" />
-                                مكتمل:
+                                {t('facultyDashboard.completed')}:
                             </h3>
                             <div className="space-y-2 mr-6">
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    ✅ جميع المهام السابقة مكتملة
+                                    ✅ {t('facultyDashboard.allPreviousTasksCompleted')}
                                 </p>
                             </div>
                         </div>

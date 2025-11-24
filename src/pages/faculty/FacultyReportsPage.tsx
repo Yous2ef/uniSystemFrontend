@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export default function FacultyReportsPage() {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("grades");
 
     // Mock Data
@@ -40,14 +42,14 @@ export default function FacultyReportsPage() {
 
     const attendanceData = {
         byWeek: [
-            { week: "الأسبوع 1", attendance: 95 },
-            { week: "الأسبوع 2", attendance: 92 },
-            { week: "الأسبوع 3", attendance: 88 },
-            { week: "الأسبوع 4", attendance: 90 },
-            { week: "الأسبوع 5", attendance: 85 },
-            { week: "الأسبوع 6", attendance: 87 },
-            { week: "الأسبوع 7", attendance: 89 },
-            { week: "الأسبوع 8", attendance: 91 },
+            { week: 1, attendance: 95 },
+            { week: 2, attendance: 92 },
+            { week: 3, attendance: 88 },
+            { week: 4, attendance: 90 },
+            { week: 5, attendance: 85 },
+            { week: 6, attendance: 87 },
+            { week: 7, attendance: 89 },
+            { week: 8, attendance: 91 },
         ],
         stats: {
             average: 89.6,
@@ -57,11 +59,11 @@ export default function FacultyReportsPage() {
     };
 
     const studentsData = [
-        { id: "20230001", name: "أحمد حسن", cgpa: 3.45, attendance: 85, grade: "A", status: "ممتاز" },
-        { id: "20230002", name: "سارة علي", cgpa: 3.80, attendance: 92, grade: "A+", status: "ممتاز" },
-        { id: "20230003", name: "محمد خالد", cgpa: 2.90, attendance: 65, grade: "D+", status: "تحذير" },
-        { id: "20230004", name: "فاطمة أحمد", cgpa: 3.20, attendance: 88, grade: "B+", status: "جيد" },
-        { id: "20230005", name: "علي محمود", cgpa: 3.60, attendance: 90, grade: "A", status: "ممتاز" },
+        { id: "20230001", name: "أحمد حسن", cgpa: 3.45, attendance: 85, grade: "A", status: "excellent" },
+        { id: "20230002", name: "سارة علي", cgpa: 3.80, attendance: 92, grade: "A+", status: "excellent" },
+        { id: "20230003", name: "محمد خالد", cgpa: 2.90, attendance: 65, grade: "D+", status: "warning" },
+        { id: "20230004", name: "فاطمة أحمد", cgpa: 3.20, attendance: 88, grade: "B+", status: "good" },
+        { id: "20230005", name: "علي محمود", cgpa: 3.60, attendance: 90, grade: "A", status: "excellent" },
     ];
 
     const exportToExcel = () => {
@@ -69,26 +71,26 @@ export default function FacultyReportsPage() {
         let csvContent = "data:text/csv;charset=utf-8,";
         
         if (activeTab === "grades") {
-            csvContent += "التقدير,العدد,النسبة\n";
+            csvContent += t('facultyReports.grade') + "," + t('facultyReports.count') + "," + t('facultyReports.percentage') + "\n";
             gradesData.distribution.forEach(row => {
                 csvContent += `${row.grade},${row.count},${row.percentage}%\n`;
             });
         } else if (activeTab === "attendance") {
-            csvContent += "الأسبوع,نسبة الحضور\n";
+            csvContent += t('facultyReports.week') + "," + t('facultyReports.attendanceRate') + "\n";
             attendanceData.byWeek.forEach(row => {
-                csvContent += `${row.week},${row.attendance}%\n`;
+                csvContent += `${t('facultyReports.weekNum', {num: row.week})},${row.attendance}%\n`;
             });
         } else if (activeTab === "students") {
-            csvContent += "الكود,الاسم,المعدل,الحضور,الدرجة,الحالة\n";
+            csvContent += t('students.studentCode') + "," + t('students.nameAr') + "," + t('students.gpa') + "," + t('facultyReports.attendance') + "," + t('facultyReports.grade') + "," + t('facultyReports.status') + "\n";
             studentsData.forEach(row => {
-                csvContent += `${row.id},${row.name},${row.cgpa},${row.attendance}%,${row.grade},${row.status}\n`;
+                csvContent += `${row.id},${row.name},${row.cgpa},${row.attendance}%,${row.grade},${t('facultyReports.statusLabels.' + row.status)}\n`;
             });
         }
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `تقرير_${activeTab}_${new Date().toLocaleDateString('ar-EG')}.csv`);
+        link.setAttribute("download", `${t('facultyReports.report')}_${activeTab}_${new Date().toLocaleDateString()}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -105,10 +107,10 @@ export default function FacultyReportsPage() {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            📊 التقارير والإحصائيات
+                            📊 {t('facultyReports.title')}
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            تقارير شاملة عن الدرجات والحضور والطلاب
+                            {t('facultyReports.subtitle')}
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -117,14 +119,14 @@ export default function FacultyReportsPage() {
                             className="bg-green-600 hover:bg-green-700"
                         >
                             <FileSpreadsheet className="w-4 h-4 ml-2" />
-                            تصدير Excel
+                            {t('facultyReports.exportExcel')}
                         </Button>
                         <Button
                             onClick={exportToPDF}
                             className="bg-red-600 hover:bg-red-700"
                         >
                             <FileText className="w-4 h-4 ml-2" />
-                            تصدير PDF
+                            {t('facultyReports.exportPDF')}
                         </Button>
                     </div>
                 </div>
@@ -134,15 +136,15 @@ export default function FacultyReportsPage() {
                     <TabsList className="grid grid-cols-3 w-full max-w-md">
                         <TabsTrigger value="grades">
                             <BarChart3 className="w-4 h-4 ml-2" />
-                            الدرجات
+                            {t('facultyReports.grades')}
                         </TabsTrigger>
                         <TabsTrigger value="attendance">
                             <Calendar className="w-4 h-4 ml-2" />
-                            الحضور
+                            {t('facultyReports.attendance')}
                         </TabsTrigger>
                         <TabsTrigger value="students">
                             <Users className="w-4 h-4 ml-2" />
-                            الطلاب
+                            {t('facultyReports.students')}
                         </TabsTrigger>
                     </TabsList>
 
@@ -152,31 +154,31 @@ export default function FacultyReportsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">المتوسط</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.average')}</div>
                                     <div className="text-2xl font-bold text-blue-600">{gradesData.stats.average}%</div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">الوسيط</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.median')}</div>
                                     <div className="text-2xl font-bold text-green-600">{gradesData.stats.median}%</div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">أعلى درجة</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.highest')}</div>
                                     <div className="text-2xl font-bold text-purple-600">{gradesData.stats.highest}%</div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">أقل درجة</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.lowest')}</div>
                                     <div className="text-2xl font-bold text-orange-600">{gradesData.stats.lowest}%</div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">نسبة النجاح</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.passRate')}</div>
                                     <div className="text-2xl font-bold text-emerald-600">{gradesData.stats.passRate}%</div>
                                 </CardContent>
                             </Card>
@@ -187,7 +189,7 @@ export default function FacultyReportsPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <TrendingUp className="w-5 h-5" />
-                                    توزيع الدرجات
+                                    {t('facultyReports.gradeDistribution')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -197,7 +199,7 @@ export default function FacultyReportsPage() {
                                             <div className="flex items-center justify-between text-sm">
                                                 <span className="font-medium">{item.grade}</span>
                                                 <span className="text-gray-600 dark:text-gray-400">
-                                                    {item.count} طالب ({item.percentage}%)
+                                                    {item.count} {t('facultyReports.student')} ({item.percentage}%)
                                                 </span>
                                             </div>
                                             <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
@@ -215,16 +217,16 @@ export default function FacultyReportsPage() {
                         {/* Table */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>جدول التوزيع</CardTitle>
+                                <CardTitle>{t('facultyReports.distributionTable')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead className="bg-gray-50 dark:bg-gray-800">
                                             <tr>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">التقدير</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">العدد</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">النسبة</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.grade')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.count')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.percentage')}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -248,19 +250,19 @@ export default function FacultyReportsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">متوسط الحضور</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.averageAttendance')}</div>
                                     <div className="text-2xl font-bold text-blue-600">{attendanceData.stats.average}%</div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">عدد المحاضرات</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.lecturesCount')}</div>
                                     <div className="text-2xl font-bold text-green-600">{attendanceData.stats.totalSessions}</div>
                                 </CardContent>
                             </Card>
                             <Card>
                                 <CardContent className="p-4">
-                                    <div className="text-sm text-gray-600 dark:text-gray-400">عدد الطلاب</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.studentsCount')}</div>
                                     <div className="text-2xl font-bold text-purple-600">{attendanceData.stats.totalStudents}</div>
                                 </CardContent>
                             </Card>
@@ -271,7 +273,7 @@ export default function FacultyReportsPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Calendar className="w-5 h-5" />
-                                    نسبة الحضور أسبوعياً
+                                    {t('facultyReports.weeklyAttendance')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -279,7 +281,7 @@ export default function FacultyReportsPage() {
                                     {attendanceData.byWeek.map((item) => (
                                         <div key={item.week} className="space-y-1">
                                             <div className="flex items-center justify-between text-sm">
-                                                <span className="font-medium">{item.week}</span>
+                                                <span className="font-medium">{t('facultyReports.weekNum', {num: item.week})}</span>
                                                 <span className="text-gray-600 dark:text-gray-400">
                                                     {item.attendance}%
                                                 </span>
@@ -305,22 +307,22 @@ export default function FacultyReportsPage() {
                         {/* Table */}
                         <Card>
                             <CardHeader>
-                                <CardTitle>جدول الحضور</CardTitle>
+                                <CardTitle>{t('facultyReports.attendanceTable')}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
                                         <thead className="bg-gray-50 dark:bg-gray-800">
                                             <tr>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الأسبوع</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">نسبة الحضور</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الحالة</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.week')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.attendanceRate')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.status')}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                             {attendanceData.byWeek.map((item) => (
                                                 <tr key={item.week} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                                    <td className="px-4 py-3 font-medium">{item.week}</td>
+                                                    <td className="px-4 py-3 font-medium">{t('facultyReports.weekNum', {num: item.week})}</td>
                                                     <td className="px-4 py-3">{item.attendance}%</td>
                                                     <td className="px-4 py-3">
                                                         <span
@@ -332,7 +334,7 @@ export default function FacultyReportsPage() {
                                                                     : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                                                             }`}
                                                         >
-                                                            {item.attendance >= 90 ? "ممتاز" : item.attendance >= 75 ? "جيد" : "تحذير"}
+                                                            {item.attendance >= 90 ? t('facultyReports.statusLabels.excellent') : item.attendance >= 75 ? t('facultyReports.statusLabels.good') : t('facultyReports.statusLabels.warning')}
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -350,7 +352,7 @@ export default function FacultyReportsPage() {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Users className="w-5 h-5" />
-                                    قائمة الطلاب
+                                    {t('facultyReports.studentsList')}
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -358,12 +360,12 @@ export default function FacultyReportsPage() {
                                     <table className="w-full">
                                         <thead className="bg-gray-50 dark:bg-gray-800">
                                             <tr>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الكود</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الاسم</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">المعدل</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الحضور</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الدرجة</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold">الحالة</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.code')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.name')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.gpa')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.attendance')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.grade')}</th>
+                                                <th className="px-4 py-3 text-right text-sm font-semibold">{t('facultyReports.status')}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -391,14 +393,14 @@ export default function FacultyReportsPage() {
                                                     <td className="px-4 py-3">
                                                         <span
                                                             className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                                student.status === "ممتاز"
+                                                                student.status === "excellent"
                                                                     ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                                                    : student.status === "جيد"
+                                                                    : student.status === "good"
                                                                     ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
                                                                     : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
                                                             }`}
                                                         >
-                                                            {student.status}
+                                                            {t('facultyReports.statusLabels.' + student.status)}
                                                         </span>
                                                     </td>
                                                 </tr>
@@ -416,9 +418,9 @@ export default function FacultyReportsPage() {
                                     <div className="flex items-center gap-3">
                                         <Award className="w-8 h-8 text-yellow-500" />
                                         <div>
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">ممتاز</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.statusLabels.excellent')}</div>
                                             <div className="text-xl font-bold">
-                                                {studentsData.filter(s => s.status === "ممتاز").length}
+                                                {studentsData.filter(s => s.status === "excellent").length}
                                             </div>
                                         </div>
                                     </div>
@@ -429,9 +431,9 @@ export default function FacultyReportsPage() {
                                     <div className="flex items-center gap-3">
                                         <TrendingUp className="w-8 h-8 text-blue-500" />
                                         <div>
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">جيد</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.statusLabels.good')}</div>
                                             <div className="text-xl font-bold">
-                                                {studentsData.filter(s => s.status === "جيد").length}
+                                                {studentsData.filter(s => s.status === "good").length}
                                             </div>
                                         </div>
                                     </div>
@@ -442,9 +444,9 @@ export default function FacultyReportsPage() {
                                     <div className="flex items-center gap-3">
                                         <Users className="w-8 h-8 text-orange-500" />
                                         <div>
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">تحذير</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.statusLabels.warning')}</div>
                                             <div className="text-xl font-bold">
-                                                {studentsData.filter(s => s.status === "تحذير").length}
+                                                {studentsData.filter(s => s.status === "warning").length}
                                             </div>
                                         </div>
                                     </div>
@@ -455,7 +457,7 @@ export default function FacultyReportsPage() {
                                     <div className="flex items-center gap-3">
                                         <BarChart3 className="w-8 h-8 text-green-500" />
                                         <div>
-                                            <div className="text-sm text-gray-600 dark:text-gray-400">الإجمالي</div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">{t('facultyReports.total')}</div>
                                             <div className="text-xl font-bold">{studentsData.length}</div>
                                         </div>
                                     </div>

@@ -22,6 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar, CheckCircle, XCircle, AlertTriangle, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface AttendanceRecord {
     id: string;
@@ -53,6 +54,7 @@ interface ExcuseRequest {
 }
 
 export default function AttendanceTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("mark");
     const [records, setRecords] = useState<AttendanceRecord[]>([]);
     const [students, setStudents] = useState<StudentAttendance[]>([]);
@@ -136,7 +138,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
         const present = Object.values(attendance).filter((v) => v).length;
         const absent = markingStudents.length - present;
 
-        toast.success(`تم حفظ الحضور: ${present} حاضر، ${absent} غائب`);
+        toast.success(t('attendanceTab.success.attendanceSaved', { present, absent }));
     };
 
     const selectAll = () => {
@@ -158,7 +160,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
     const handleExcuse = (action: "approve" | "reject") => {
         if (!selectedExcuse) return;
 
-        toast.success(`تم ${action === "approve" ? "قبول" : "رفض"} العذر`);
+        toast.success(t(`attendanceTab.success.excuse${action === "approve" ? "Approved" : "Rejected"}`));
         setExcuses(excuses.map((e) =>
             e.id === selectedExcuse.id
                 ? { ...e, status: action === "approve" ? "approved" : "rejected" }
@@ -171,11 +173,11 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case "good":
-                return <Badge className="bg-green-500">✅ جيد</Badge>;
+                return <Badge className="bg-green-500">{t('attendanceTab.statusBadges.good')}</Badge>;
             case "warning":
-                return <Badge className="bg-yellow-500">⚠️ تحذير</Badge>;
+                return <Badge className="bg-yellow-500">{t('attendanceTab.statusBadges.warning')}</Badge>;
             case "danger":
-                return <Badge className="bg-red-500">🚨 خطر</Badge>;
+                return <Badge className="bg-red-500">{t('attendanceTab.statusBadges.danger')}</Badge>;
             default:
                 return <Badge>{status}</Badge>;
         }
@@ -187,9 +189,9 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
         <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid grid-cols-3">
-                    <TabsTrigger value="mark">تسجيل الحضور</TabsTrigger>
-                    <TabsTrigger value="report">تقرير الحضور</TabsTrigger>
-                    <TabsTrigger value="excuses">أعذار الغياب</TabsTrigger>
+                    <TabsTrigger value="mark">{t('attendanceTab.tabs.mark')}</TabsTrigger>
+                    <TabsTrigger value="report">{t('attendanceTab.tabs.report')}</TabsTrigger>
+                    <TabsTrigger value="excuses">{t('attendanceTab.tabs.excuses')}</TabsTrigger>
                 </TabsList>
 
                 {/* Mark Attendance Tab */}
@@ -198,7 +200,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Calendar className="w-5 h-5" />
-                                📅 تسجيل حضور - {new Date().toLocaleDateString("ar-EG", {
+                                {t('attendanceTab.markAttendance')} - {new Date().toLocaleDateString("ar-EG", {
                                     weekday: "long",
                                     year: "numeric",
                                     month: "long",
@@ -209,20 +211,20 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                         <CardContent>
                             <div className="mb-4 flex gap-2">
                                 <Button variant="outline" size="sm" onClick={selectAll}>
-                                    ✅ تحديد الكل حاضر
+                                    {t('attendanceTab.selectAllPresent')}
                                 </Button>
                                 <Button variant="outline" size="sm" onClick={deselectAll}>
-                                    ❌ تحديد الكل غائب
+                                    {t('attendanceTab.selectAllAbsent')}
                                 </Button>
                             </div>
 
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-right">الطالب</TableHead>
-                                        <TableHead className="text-right">الكود</TableHead>
-                                        <TableHead className="text-right">حاضر</TableHead>
-                                        <TableHead className="text-right">غائب</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.student')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.code')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.present')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.absent')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -253,13 +255,13 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
 
                             <div className="mt-6">
                                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
-                                    <p className="font-medium">📊 ملخص:</p>
+                                    <p className="font-medium">{t('attendanceTab.attendanceSummary')}:</p>
                                     <p>
-                                        حاضرين: {Object.values(attendance).filter((v) => v).length} | غائبين:{" "}
+                                        {t('attendanceTab.present')}: {Object.values(attendance).filter((v) => v).length} | {t('attendanceTab.absent')}:{" "}
                                         {markingStudents.length - Object.values(attendance).filter((v) => v).length}
                                     </p>
                                     <p>
-                                        نسبة الحضور:{" "}
+                                        {t('attendanceTab.attendanceRate')}:{" "}
                                         {(
                                             (Object.values(attendance).filter((v) => v).length /
                                                 markingStudents.length) *
@@ -269,7 +271,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                                     </p>
                                 </div>
                                 <Button onClick={saveAttendance} className="w-full" size="lg">
-                                    💾 حفظ الحضور
+                                    {t('attendanceTab.saveAttendance')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -281,10 +283,10 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle>📊 تقرير الحضور الشامل</CardTitle>
+                                <CardTitle>{t('attendanceTab.attendanceSummary')}</CardTitle>
                                 <Button variant="outline" size="sm">
                                     <Download className="w-4 h-4 ml-2" />
-                                    📥 تصدير Excel
+                                    {t('attendanceTab.exportReport')}
                                 </Button>
                             </div>
                         </CardHeader>
@@ -292,12 +294,12 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-right">الطالب</TableHead>
-                                        <TableHead className="text-right">الكود</TableHead>
-                                        <TableHead className="text-right">حاضر</TableHead>
-                                        <TableHead className="text-right">غائب</TableHead>
-                                        <TableHead className="text-right">النسبة</TableHead>
-                                        <TableHead className="text-right">الحالة</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.student')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.code')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.presentCount')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.absentCount')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.percentage')}</TableHead>
+                                        <TableHead className="text-right">{t('attendanceTab.status')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -337,12 +339,12 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                 <TabsContent value="excuses" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>📝 أعذار الغياب المعلقة</CardTitle>
+                            <CardTitle>{t('attendanceTab.pendingExcuses')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {excuses.filter((e) => e.status === "pending").length === 0 ? (
                                 <div className="text-center py-12 text-gray-500">
-                                    لا توجد أعذار معلقة
+                                    {t('attendanceTab.noExcuses')}
                                 </div>
                             ) : (
                                 <div className="space-y-4">
@@ -354,13 +356,13 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                                                     <div className="flex items-start justify-between">
                                                         <div className="flex-1">
                                                             <p className="font-medium text-lg">
-                                                                {excuse.studentName} - غياب يوم {excuse.date}
+                                                                {excuse.studentName} - {t('attendanceTab.absenceDate')} {excuse.date}
                                                             </p>
                                                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                                                الكود: {excuse.studentCode}
+                                                                {t('attendanceTab.code')}: {excuse.studentCode}
                                                             </p>
                                                             <p className="mt-2">
-                                                                <span className="font-medium">السبب:</span>{" "}
+                                                                <span className="font-medium">{t('attendanceTab.reason')}:</span>{" "}
                                                                 {excuse.reason}
                                                             </p>
                                                             {excuse.document && (
@@ -370,7 +372,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                                                                     className="mt-2"
                                                                 >
                                                                     <FileText className="w-4 h-4 ml-2" />
-                                                                    👁️ عرض المستند
+                                                                    {t('attendanceTab.viewDocument')}
                                                                 </Button>
                                                             )}
                                                         </div>
@@ -384,7 +386,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                                                                 }}
                                                             >
                                                                 <CheckCircle className="w-4 h-4 ml-2" />
-                                                                قبول
+                                                                {t('attendanceTab.approve')}
                                                             </Button>
                                                             <Button
                                                                 size="sm"
@@ -395,7 +397,7 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                                                                 }}
                                                             >
                                                                 <XCircle className="w-4 h-4 ml-2" />
-                                                                رفض
+                                                                {t('attendanceTab.reject')}
                                                             </Button>
                                                         </div>
                                                     </div>
@@ -413,29 +415,29 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
             <Dialog open={excuseDialog} onOpenChange={setExcuseDialog}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>مراجعة العذر</DialogTitle>
+                        <DialogTitle>{t('attendanceTab.reviewExcuse')}</DialogTitle>
                     </DialogHeader>
                     {selectedExcuse && (
                         <div className="space-y-4">
                             <div>
                                 <p className="font-medium">{selectedExcuse.studentName}</p>
-                                <p className="text-sm text-gray-600">التاريخ: {selectedExcuse.date}</p>
-                                <p className="text-sm">السبب: {selectedExcuse.reason}</p>
+                                <p className="text-sm text-gray-600">{t('attendanceTab.date')}: {selectedExcuse.date}</p>
+                                <p className="text-sm">{t('attendanceTab.reason')}: {selectedExcuse.reason}</p>
                             </div>
                             <div>
-                                <label className="text-sm font-medium">ملاحظات (اختياري)</label>
+                                <label className="text-sm font-medium">{t('attendanceTab.notesOptional')}</label>
                                 <Textarea
                                     value={excuseResponse}
                                     onChange={(e) => setExcuseResponse(e.target.value)}
-                                    placeholder="أضف ملاحظات إن وجدت..."
+                                    placeholder={t('attendanceTab.addNotes')}
                                     rows={3}
                                 />
                             </div>
                             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded text-sm">
-                                <p className="font-medium">عند القبول:</p>
-                                <p>└─ سيتم تحويل الغياب إلى حضور ✅</p>
-                                <p className="font-medium mt-2">عند الرفض:</p>
-                                <p>└─ سيظل الغياب محتسباً ❌</p>
+                                <p className="font-medium">{t('attendanceTab.onApprove')}</p>
+                                <p>{t('attendanceTab.absenceToPresent')}</p>
+                                <p className="font-medium mt-2">{t('attendanceTab.onReject')}</p>
+                                <p>{t('attendanceTab.absenceStays')}</p>
                             </div>
                         </div>
                     )}
@@ -444,19 +446,19 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
                             variant="outline"
                             onClick={() => setExcuseDialog(false)}
                         >
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
                         <Button
                             variant="destructive"
                             onClick={() => handleExcuse("reject")}
                         >
-                            رفض العذر
+                            {t('attendanceTab.rejectExcuse')}
                         </Button>
                         <Button
                             className="bg-green-500 hover:bg-green-600"
                             onClick={() => handleExcuse("approve")}
                         >
-                            قبول العذر
+                            {t('attendanceTab.approveExcuse')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

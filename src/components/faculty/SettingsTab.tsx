@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Settings as SettingsIcon, UserPlus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface TA {
     id: string;
@@ -23,6 +24,7 @@ interface TA {
 }
 
 export default function SettingsTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [settings, setSettings] = useState({
         minAttendance: 75,
         allowExcuses: true,
@@ -37,12 +39,12 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
     ]);
 
     const saveSettings = () => {
-        toast.success("تم حفظ الإعدادات بنجاح");
+        toast.success(t('settingsTab.success.settingsSaved'));
     };
 
     const removeTA = (id: string) => {
         setTas(tas.filter((ta) => ta.id !== id));
-        toast.success("تم إزالة المساعد");
+        toast.success(t('settingsTab.success.taRemoved'));
     };
 
     return (
@@ -50,38 +52,38 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
             <div>
                 <h3 className="text-lg font-semibold flex items-center gap-2">
                     <SettingsIcon className="w-5 h-5" />
-                    ⚙️ إعدادات المادة
+                    {t('settingsTab.title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    تخصيص سياسات وإعدادات المادة
+                    {t('settingsTab.subtitle')}
                 </p>
             </div>
 
             {/* Course Info */}
             <Card>
-                <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
-                    <CardTitle>معلومات عامة</CardTitle>
+                <CardHeader className="bg-linear-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30">
+                    <CardTitle>{t('settingsTab.generalInfo')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                            <Label>اسم المادة</Label>
+                            <Label>{t('settingsTab.courseName')}</Label>
                             <Input value="هياكل البيانات" disabled />
                         </div>
                         <div>
-                            <Label>الكود</Label>
+                            <Label>{t('settingsTab.courseCode')}</Label>
                             <Input value="CS301" disabled />
                         </div>
                         <div>
-                            <Label>الساعات</Label>
+                            <Label>{t('settingsTab.creditHours')}</Label>
                             <Input value="3" disabled />
                         </div>
                         <div>
-                            <Label>القسم</Label>
+                            <Label>{t('settingsTab.section')}</Label>
                             <Input value="1" disabled />
                         </div>
                         <div>
-                            <Label>الفصل الدراسي</Label>
+                            <Label>{t('settingsTab.semester')}</Label>
                             <Input value="خريف 2025" disabled />
                         </div>
                     </div>
@@ -90,12 +92,12 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
 
             {/* Attendance Policy */}
             <Card>
-                <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
-                    <CardTitle>سياسات الحضور</CardTitle>
+                <CardHeader className="bg-linear-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+                    <CardTitle>{t('settingsTab.attendancePolicy')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                     <div>
-                        <Label>الحد الأدنى للحضور (%)</Label>
+                        <Label>{t('settingsTab.minAttendance')}</Label>
                         <Input
                             type="number"
                             min="0"
@@ -106,15 +108,15 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
                             }
                         />
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            الطلاب الذين تقل نسبة حضورهم عن هذا الحد سيُمنعون من دخول الامتحان
+                            {t('settingsTab.minAttendanceDesc')}
                         </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                         <div>
-                            <Label>السماح بالأعذار</Label>
+                            <Label>{t('settingsTab.allowExcuses')}</Label>
                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                السماح للطلاب بتقديم أعذار للغياب
+                                {t('settingsTab.allowExcusesDesc')}
                             </p>
                         </div>
                         <Switch
@@ -127,7 +129,7 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
 
                     {settings.allowExcuses && (
                         <div>
-                            <Label>الحد الأقصى للأعذار</Label>
+                            <Label>{t('settingsTab.maxExcuses')}</Label>
                             <Input
                                 type="number"
                                 min="0"
@@ -143,12 +145,12 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
 
             {/* Late Submission Policy */}
             <Card>
-                <CardHeader className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30">
-                    <CardTitle>سياسات التأخير</CardTitle>
+                <CardHeader className="bg-linear-to-r from-orange-50 to-yellow-50 dark:from-orange-950/30 dark:to-yellow-950/30">
+                    <CardTitle>{t('settingsTab.lateSubmissionPolicy')}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                     <div>
-                        <Label>تسليم الواجبات بعد الموعد</Label>
+                        <Label>{t('settingsTab.lateSubmissionLabel')}</Label>
                         <Select
                             value={settings.lateSubmission}
                             onValueChange={(v) => setSettings({ ...settings, lateSubmission: v })}
@@ -157,15 +159,15 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="allowed">● مسموح مع خصم</SelectItem>
-                                <SelectItem value="not_allowed">○ غير مسموح</SelectItem>
+                                <SelectItem value="allowed">● {t('settingsTab.allowed')}</SelectItem>
+                                <SelectItem value="not_allowed">○ {t('settingsTab.notAllowed')}</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
 
                     {settings.lateSubmission === "allowed" && (
                         <div>
-                            <Label>نسبة الخصم (% كل يوم)</Label>
+                            <Label>{t('settingsTab.penalty')}</Label>
                             <Input
                                 type="number"
                                 min="0"
@@ -179,7 +181,7 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
                                 }
                             />
                             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                سيتم خصم {settings.lateSubmissionPenalty}% من الدرجة عن كل يوم تأخير
+                                {t('settingsTab.penaltyPerDay').replace('%', settings.lateSubmissionPenalty + '%')}
                             </p>
                         </div>
                     )}
@@ -188,12 +190,12 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
 
             {/* Teaching Assistants */}
             <Card>
-                <CardHeader className="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-950/30 dark:to-teal-950/30">
+                <CardHeader className="bg-linear-to-r from-green-50 to-teal-50 dark:from-green-950/30 dark:to-teal-950/30">
                     <div className="flex items-center justify-between">
-                        <CardTitle>المساعدين (TAs)</CardTitle>
+                        <CardTitle>{t('settingsTab.teachingAssistants')}</CardTitle>
                         <Button size="sm" variant="outline">
                             <UserPlus className="w-4 h-4 ml-2" />
-                            إضافة مساعد
+                            {t('settingsTab.addTA')}
                         </Button>
                     </div>
                 </CardHeader>
@@ -222,7 +224,7 @@ export default function SettingsTab({ sectionId }: { sectionId: string }) {
             {/* Save Button */}
             <div className="flex justify-end">
                 <Button onClick={saveSettings} size="lg">
-                    💾 حفظ الإعدادات
+                    {t('settingsTab.saveSettings')}
                 </Button>
             </div>
         </div>

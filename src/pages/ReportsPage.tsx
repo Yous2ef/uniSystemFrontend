@@ -211,8 +211,8 @@ export default function ReportsPage() {
             csvContent += t("students.gpa") + "," + studentTranscript.currentGPA.toFixed(2) + "\n\n";
             
             studentTranscript.terms.forEach((term: any) => {
-                csvContent += term.name + " - " + t("grades.termGPA") + ": " + term.gpa.toFixed(2) + "\n";
-                csvContent += t("courses.code") + "," + t("courses.name") + "," + t("courses.credits") + "," + t("grades.grade") + "," + t("grades.points") + "\n";
+                csvContent += term.name + " - " + t("student.grades.termGpa") + ": " + term.gpa.toFixed(2) + "\n";
+                csvContent += t("courses.code") + "," + t("courses.name") + "," + t("courses.credits") + "," + t("student.grades.grade") + "," + t("student.grades.points") + "\n";
                 term.courses.forEach((course: any) => {
                     csvContent += `${course.code},${course.name},${course.credits},${course.grade},${course.points}\n`;
                 });
@@ -220,16 +220,16 @@ export default function ReportsPage() {
             });
         } else if (reportType === "grades" && gradesReport) {
             csvContent += t("reports.Grades Report") + " - " + gradesReport.termName + "\n\n";
-            csvContent += t("students.studentCode") + "," + t("students.nameAr") + "," + t("reports.Number of courses") + "," + t("grades.termGPA") + "\n";
+            csvContent += t("students.studentCode") + "," + t("students.nameAr") + "," + t("reports.Number of courses") + "," + t("student.grades.termGpa") + "\n";
             gradesReport.students.forEach((student: any) => {
-                csvContent += `${student.studentCode},${student.nameAr},${student.courses.length},${student.termGPA ? student.termGPA.toFixed(2) : t("grades.notCalculated")}\n`;
+                csvContent += `${student.studentCode},${student.nameAr},${student.courses.length},${student.termGPA ? student.termGPA.toFixed(2) : t("student.grades.notPublished")}\n`;
             });
         } else if (reportType === "attendance" && attendanceReport) {
             csvContent += t("reports.Attendance Statistics") + " - " + attendanceReport.termName + "\n\n";
             csvContent += t("reports.Overall Attendance Rate") + "," + attendanceReport.overallAttendanceRate.toFixed(1) + "%\n";
             csvContent += t("reports.Regular Students") + "," + attendanceReport.regularStudents + "\n";
             csvContent += t("reports.Poor Attendance Students") + "," + attendanceReport.poorStudents + "\n\n";
-            csvContent += t("students.studentCode") + "," + t("students.nameAr") + "," + t("reports.Total Sessions") + "," + t("attendance.present") + "," + t("attendance.absent") + "," + t("reports.Rate") + "\n";
+            csvContent += t("students.studentCode") + "," + t("students.nameAr") + "," + t("reports.Total Sessions") + "," + t("pages.attendance.present") + "," + t("pages.attendance.absent") + "," + t("reports.Rate") + "\n";
             attendanceReport.students.forEach((student: any) => {
                 csvContent += `${student.studentCode},${student.nameAr},${student.totalSessions},${student.presentCount},${student.absentCount},${student.attendanceRate.toFixed(1)}%\n`;
             });
@@ -598,7 +598,7 @@ export default function ReportsPage() {
                                                             {term.name}
                                                         </CardTitle>
                                                         <Badge>
-                                                            {t("grades.termGPA")}:{" "}
+                                                            {t("student.grades.termGpa")}:{" "}
                                                             {term.gpa.toFixed(
                                                                 2
                                                             )}
@@ -620,10 +620,10 @@ export default function ReportsPage() {
                                                                         {t("courses.credits")}
                                                                     </TableHead>
                                                                     <TableHead>
-                                                                        {t("grades.grade")}
+                                                                        {t("student.grades.grade")}
                                                                     </TableHead>
                                                                     <TableHead>
-                                                                        {t("grades.points")}
+                                                                        {t("student.grades.points")}
                                                                     </TableHead>
                                                                 </TableRow>
                                                             </TableHeader>
@@ -700,7 +700,7 @@ export default function ReportsPage() {
                                                 setSelectedTerm(e.target.value)
                                             }
                                             className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                            <option value="">اختر الفصل</option>
+                                            <option value="">{t("terms.selectTerm")}</option>
                                             {terms &&
                                                 terms.map((term) => (
                                                     <option
@@ -725,7 +725,7 @@ export default function ReportsPage() {
                                     <CardContent>
                                         <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                                             <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {t("grades.termAverage")}:{" "}
+                                                {t("student.grades.termGpa")}:{" "}
                                                 <span className="font-bold text-lg">
                                                     {gradesReport.averageGPA.toFixed(
                                                         2
@@ -747,7 +747,7 @@ export default function ReportsPage() {
                                                             {t("reports.Number of courses")}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("grades.termGPA")}
+                                                            {t("student.grades.termGpa")}
                                                         </TableHead>
                                                     </TableRow>
                                                 </TableHeader>
@@ -781,7 +781,7 @@ export default function ReportsPage() {
                                                                             ? student.termGPA.toFixed(
                                                                                   2
                                                                               )
-                                                                            : t("grades.notCalculated")}
+                                                                            : t("student.grades.notPublished")}
                                                                     </Badge>
                                                                 </TableCell>
                                                             </TableRow>
@@ -910,10 +910,10 @@ export default function ReportsPage() {
                                                                 {t("reports.Total Sessions")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                {t("attendance.present")}
+                                                                {t("pages.attendance.present")}
                                                             </TableHead>
                                                             <TableHead>
-                                                                {t("attendance.absent")}
+                                                                {t("pages.attendance.absent")}
                                                             </TableHead>
                                                             <TableHead>
                                                                 {t("reports.Rate")}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,6 +50,7 @@ interface StudentGrade {
 }
 
 export default function GradesTab({ sectionId }: { sectionId: string }) {
+    const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("components");
     const [components, setComponents] = useState<GradeComponent[]>([
         { id: "1", name: "Quizzes", weight: 10, maxScore: 100 },
@@ -100,13 +102,13 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
 
     const addComponent = () => {
         if (!newComponent.name || newComponent.weight <= 0) {
-            toast.error("يرجى إدخال اسم المكون والوزن");
+            toast.error(t('gradesTab.errors.enterNameWeight'));
             return;
         }
 
         const totalWeight = components.reduce((sum, c) => sum + c.weight, 0) + newComponent.weight;
         if (totalWeight > 100) {
-            toast.error("مجموع الأوزان يتجاوز 100%");
+            toast.error(t('gradesTab.errors.totalWeightExceeds'));
             return;
         }
 
@@ -116,7 +118,7 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
         ]);
         setNewComponent({ name: "", weight: 0, maxScore: 100 });
         setComponentDialogOpen(false);
-        toast.success("تم إضافة المكون بنجاح");
+        toast.success(t('gradesTab.success.componentAdded'));
     };
 
     const calculateLetterGrade = (total: number): string => {
@@ -181,11 +183,11 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
     return (
         <div className="space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="grid grid-cols-4">
-                    <TabsTrigger value="components">توزيع الدرجات</TabsTrigger>
-                    <TabsTrigger value="manual">إدخال يدوي</TabsTrigger>
-                    <TabsTrigger value="upload">رفع Excel</TabsTrigger>
-                    <TabsTrigger value="preview">معاينة ونشر</TabsTrigger>
+                <TabsList className="grid grid-cols-4 gap-2">
+                    <TabsTrigger value="components">{t('gradesTab.tabs.gradeDistribution')}</TabsTrigger>
+                    <TabsTrigger value="manual">{t('gradesTab.tabs.manualEntry')}</TabsTrigger>
+                    <TabsTrigger value="upload">{t('gradesTab.tabs.excelUpload')}</TabsTrigger>
+                    <TabsTrigger value="preview">{t('gradesTab.tabs.previewPublish')}</TabsTrigger>
                 </TabsList>
 
                 {/* Components Tab */}
@@ -193,10 +195,10 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                     <Card>
                         <CardHeader>
                             <div className="flex items-center justify-between">
-                                <CardTitle>⚙️ إعداد توزيع الدرجات</CardTitle>
+                                <CardTitle>{t('gradesTab.setupGradeDistribution')}</CardTitle>
                                 <Button onClick={() => setComponentDialogOpen(true)} size="sm">
                                     <Plus className="w-4 h-4 ml-2" />
-                                    إضافة مكون
+                                    {t('gradesTab.addComponent')}
                                 </Button>
                             </div>
                         </CardHeader>
@@ -204,10 +206,10 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-right">الاسم</TableHead>
-                                        <TableHead className="text-right">الوزن</TableHead>
-                                        <TableHead className="text-right">الدرجة القصوى</TableHead>
-                                        <TableHead className="text-right">الإجراءات</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.table.name')}</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.table.weight')}</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.table.maxScore')}</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.table.actions')}</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
@@ -217,19 +219,19 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                                             <TableCell>{comp.weight}%</TableCell>
                                             <TableCell>{comp.maxScore}</TableCell>
                                             <TableCell>
-                                                <Button variant="ghost" size="sm">تعديل</Button>
+                                                <Button variant="ghost" size="sm">{t('gradesTab.edit')}</Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                     <TableRow className="font-bold bg-gray-50 dark:bg-gray-800">
-                                        <TableCell>المجموع</TableCell>
+                                        <TableCell>{t('gradesTab.total')}</TableCell>
                                         <TableCell className={totalWeight === 100 ? "text-green-600" : "text-red-600"}>
                                             {totalWeight}%
                                         </TableCell>
                                         <TableCell colSpan={2}>
                                             {totalWeight !== 100 && (
                                                 <span className="text-sm text-red-600">
-                                                    ⚠️ يجب أن يكون المجموع 100%
+                                                    {t('gradesTab.totalMustBe100')}
                                                 </span>
                                             )}
                                         </TableCell>
@@ -244,15 +246,15 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                 <TabsContent value="manual" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>📝 إدخال الدرجات يدوياً</CardTitle>
+                            <CardTitle>{t('gradesTab.manualGradeEntry')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="overflow-x-auto">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead className="text-right">الطالب</TableHead>
-                                            <TableHead className="text-right">الكود</TableHead>
+                                            <TableHead className="text-right">{t('gradesTab.student')}</TableHead>
+                                            <TableHead className="text-right">{t('gradesTab.code')}</TableHead>
                                             {components.map((comp) => (
                                                 <TableHead key={comp.id} className="text-right">
                                                     {comp.name}<br />
@@ -286,11 +288,11 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                             <div className="mt-4 flex gap-2">
                                 <Button variant="outline">
                                     <Save className="w-4 h-4 ml-2" />
-                                    حفظ مسودة
+                                    {t('gradesTab.saveDraft')}
                                 </Button>
                                 <Button>
                                     <CheckCircle className="w-4 h-4 ml-2" />
-                                    حفظ
+                                    {t('gradesTab.save')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -301,19 +303,19 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                 <TabsContent value="upload" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>📤 رفع ملف الدرجات</CardTitle>
+                            <CardTitle>{t('gradesTab.uploadGradesFile')}</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">
                                 <Upload className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                                <p className="text-lg mb-2">📄 اسحب الملف هنا أو اضغط للرفع</p>
+                                <p className="text-lg mb-2">{t('gradesTab.dragFileHere')}</p>
                                 <p className="text-sm text-gray-500">
-                                    ✅ تنسيق Excel (.xlsx, .xls) | ✅ تنسيق CSV (.csv)
+                                    {t('gradesTab.excelFormat')}
                                 </p>
                             </div>
                             <Button variant="outline" onClick={downloadTemplate}>
                                 <Download className="w-4 h-4 ml-2" />
-                                📥 تحميل النموذج
+                                {t('gradesTab.downloadTemplate')}
                             </Button>
                         </CardContent>
                     </Card>
@@ -323,21 +325,21 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                 <TabsContent value="preview" className="space-y-4">
                     <Card>
                         <CardHeader>
-                            <CardTitle>👁️ معاينة الدرجات النهائية</CardTitle>
+                            <CardTitle>{t('gradesTab.previewFinalGrades')}</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="text-right">الطالب</TableHead>
-                                        <TableHead className="text-right">الكود</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.student')}</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.code')}</TableHead>
                                         {components.map((comp) => (
                                             <TableHead key={comp.id} className="text-right text-xs">
                                                 {comp.name}
                                             </TableHead>
                                         ))}
-                                        <TableHead className="text-right">المجموع</TableHead>
-                                        <TableHead className="text-right">الدرجة</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.total')}</TableHead>
+                                        <TableHead className="text-right">{t('gradesTab.grade')}</TableHead>
                                         <TableHead className="text-right">Bonus</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -377,19 +379,19 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                             <div className="mt-6 grid grid-cols-3 gap-4">
                                 <Card>
                                     <CardContent className="p-4">
-                                        <p className="text-sm text-gray-600">المتوسط</p>
+                                        <p className="text-sm text-gray-600">{t('gradesTab.average')}</p>
                                         <p className="text-2xl font-bold">{average.toFixed(1)}%</p>
                                     </CardContent>
                                 </Card>
                                 <Card>
                                     <CardContent className="p-4">
-                                        <p className="text-sm text-gray-600">نسبة النجاح</p>
+                                        <p className="text-sm text-gray-600">{t('gradesTab.passRate')}</p>
                                         <p className="text-2xl font-bold text-green-600">{passRate.toFixed(0)}%</p>
                                     </CardContent>
                                 </Card>
                                 <Card>
                                     <CardContent className="p-4">
-                                        <p className="text-sm text-gray-600">نسبة الرسوب</p>
+                                        <p className="text-sm text-gray-600">{t('gradesTab.failRate')}</p>
                                         <p className="text-2xl font-bold text-red-600">{(100 - passRate).toFixed(0)}%</p>
                                     </CardContent>
                                 </Card>
@@ -402,7 +404,7 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                                     size="lg"
                                 >
                                     <CheckCircle className="w-5 h-5 ml-2" />
-                                    🚀 نشر الدرجات
+                                    {t('gradesTab.publishGrades')}
                                 </Button>
                             </div>
                         </CardContent>
@@ -414,19 +416,19 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
             <Dialog open={componentDialogOpen} onOpenChange={setComponentDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>➕ إضافة مكون جديد</DialogTitle>
+                        <DialogTitle>{t('gradesTab.addNewComponent')}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <Label>اسم المكون</Label>
+                            <Label>{t('gradesTab.componentName')}</Label>
                             <Input
                                 value={newComponent.name}
                                 onChange={(e) => setNewComponent({ ...newComponent, name: e.target.value })}
-                                placeholder="مثال: Assignment 1"
+                                placeholder={t('gradesTab.exampleAssignment')}
                             />
                         </div>
                         <div>
-                            <Label>الوزن (%)</Label>
+                            <Label>{t('gradesTab.weightPercent')}</Label>
                             <Input
                                 type="number"
                                 value={newComponent.weight}
@@ -434,7 +436,7 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                             />
                         </div>
                         <div>
-                            <Label>الدرجة القصوى</Label>
+                            <Label>{t('gradesTab.maxScore')}</Label>
                             <Input
                                 type="number"
                                 value={newComponent.maxScore}
@@ -444,9 +446,9 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setComponentDialogOpen(false)}>
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
-                        <Button onClick={addComponent}>إضافة</Button>
+                        <Button onClick={addComponent}>{t('common.add')}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -455,56 +457,56 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
             <Dialog open={bonusDialogOpen} onOpenChange={setBonusDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>⭐ منح Bonus / خصم</DialogTitle>
+                        <DialogTitle>{t('gradesTab.grantBonusPenalty')}</DialogTitle>
                     </DialogHeader>
                     {selectedStudent && (
                         <div className="space-y-4">
-                            <p className="font-medium">الطالب: {selectedStudent.studentName}</p>
+                            <p className="font-medium">{t('gradesTab.studentName')}: {selectedStudent.studentName}</p>
                             <div>
-                                <Label>النوع</Label>
+                                <Label>{t('gradesTab.type')}</Label>
                                 <Select value={bonusType} onValueChange={(v: "bonus" | "penalty") => setBonusType(v)}>
                                     <SelectTrigger>
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="bonus">Bonus</SelectItem>
-                                        <SelectItem value="penalty">خصم</SelectItem>
+                                        <SelectItem value="penalty">{t('gradesTab.deduction')}</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div>
-                                <Label>المقدار</Label>
+                                <Label>{t('gradesTab.amount')}</Label>
                                 <Input
                                     type="number"
                                     value={bonusAmount}
                                     onChange={(e) => setBonusAmount(Number(e.target.value))}
-                                    placeholder="مثال: 2"
+                                    placeholder={t('gradesTab.exampleTwo')}
                                 />
                             </div>
                             <div>
-                                <Label>السبب</Label>
+                                <Label>{t('gradesTab.reason')}</Label>
                                 <Input
                                     value={bonusReason}
                                     onChange={(e) => setBonusReason(e.target.value)}
-                                    placeholder="مثال: مشاركة فعالة"
+                                    placeholder={t('gradesTab.exampleActiveParticipation')}
                                 />
                             </div>
                             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                                <p className="text-sm font-medium">💡 النتيجة:</p>
+                                <p className="text-sm font-medium">{t('gradesTab.result')}</p>
                                 <p className="text-sm">
-                                    الدرجة الحالية: {selectedStudent.total.toFixed(1)}
+                                    {t('gradesTab.currentGrade')}: {selectedStudent.total.toFixed(1)}
                                 </p>
                                 <p className="text-sm">
-                                    بعد التعديل: {(selectedStudent.total + (bonusType === "bonus" ? bonusAmount : -bonusAmount)).toFixed(1)}
+                                    {t('gradesTab.afterAdjustment')}: {(selectedStudent.total + (bonusType === "bonus" ? bonusAmount : -bonusAmount)).toFixed(1)}
                                 </p>
                             </div>
                         </div>
                     )}
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setBonusDialogOpen(false)}>
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
-                        <Button onClick={applyBonus}>تطبيق</Button>
+                        <Button onClick={applyBonus}>{t('gradesTab.apply')}</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -513,33 +515,33 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
             <Dialog open={publishDialogOpen} onOpenChange={setPublishDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>🚀 تأكيد نشر الدرجات</DialogTitle>
+                        <DialogTitle>{t('gradesTab.confirmPublish')}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
                             <p className="flex items-center gap-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
                                 <AlertCircle className="w-5 h-5" />
-                                تحذير
+                                {t('common.warning')}
                             </p>
                             <p className="text-sm mt-2">
-                                هل أنت متأكد من نشر الدرجات؟ لن تتمكن من التعديل بعد النشر إلا بموافقة رئيس القسم.
+                                {t('gradesTab.publishWarning')}
                             </p>
                         </div>
                         <div className="space-y-2 text-sm">
-                            <p className="font-medium">📧 عند النشر:</p>
+                            <p className="font-medium">{t('gradesTab.onPublish')}</p>
                             <ul className="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
-                                <li>سيتم إرسال إشعار لكل طالب</li>
-                                <li>سيتم حساب GPA تلقائياً</li>
-                                <li>سيتم تحديث السجل الأكاديمي</li>
+                                <li>{t('gradesTab.publishActions.sendNotification')}</li>
+                                <li>{t('gradesTab.publishActions.calculateGPA')}</li>
+                                <li>{t('gradesTab.publishActions.updateRecord')}</li>
                             </ul>
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setPublishDialogOpen(false)}>
-                            إلغاء
+                            {t('common.cancel')}
                         </Button>
                         <Button onClick={publishGrades}>
-                            ✅ نشر الآن
+                            {t('gradesTab.publishNow')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
