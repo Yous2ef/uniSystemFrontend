@@ -3,7 +3,7 @@ import { useAuthStore } from "@/store/auth";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
-import { departmentsService, coursesService, studentsService, batchesService, termsService } from "@/services/api";
+import { departmentsService, coursesService, studentsService, batchesService, termsService, reportsService, enrollmentsService } from "@/services/api";
 import { Navigate } from "react-router-dom";
 import {
     BarChart,
@@ -84,121 +84,183 @@ export default function DashboardPage() {
 
     const fetchStats = async () => {
         try {
-            const [departmentsRes, coursesRes, studentsRes, batchesRes, termsRes] = await Promise.all([
-                departmentsService.getAll().catch(() => ({ success: false, data: { departments: [] } })),
-                coursesService.getAll().catch(() => ({ success: false, data: { courses: [] } })),
-                studentsService.getAll({}).catch(() => ({ success: false, data: [] })),
-                batchesService.getAll().catch(() => ({ success: false, data: { batches: [] } })),
-                termsService.getAll().catch(() => ({ success: false, data: { terms: [] } })),
+            // Fetch all data in parallel - request ALL records by setting high limit
+            const [departmentsRes, coursesRes, studentsRes, batchesRes, termsRes, enrollmentsRes] = await Promise.all([
+                departmentsService.getAll({ limit: 1000 }).catch((err) => {
+                    console.error('Departments fetch error:', err);
+                    return { success: false, data: { departments: [] } };
+                }),
+                coursesService.getAll({ limit: 1000 }).catch((err) => {
+                    console.error('Courses fetch error:', err);
+                    return { success: false, data: { courses: [] } };
+                }),
+                studentsService.getAll({ limit: 1000 }).catch((err) => {
+                    console.error('Students fetch error:', err);
+                    return { success: false, data: [] };
+                }),
+                batchesService.getAll().catch((err) => {
+                    console.error('Batches fetch error:', err);
+                    return { data: [] }; // Return empty array in data property
+                }),
+                termsService.getAll().catch((err) => {
+                    console.error('Terms fetch error:', err);
+                    return { success: false, data: { terms: [] } };
+                }),
+                enrollmentsService.getAll({ limit: 1000 }).catch((err) => {
+                    console.error('Enrollments fetch error:', err);
+                    return { success: false, data: { enrollments: [] } };
+                }),
             ]);
 
-            // Extract departments
-            const departments = departmentsRes?.data?.departments || [];
-            
-            // Extract courses
-            const courses = coursesRes?.data?.courses || [];
-            
-            // Extract students - handle both array and object with data property
-            const students = Array.isArray(studentsRes?.data) 
-                ? studentsRes.data 
-                : (studentsRes?.data?.students || studentsRes?.data?.data || []);
-            
-            // Extract batches
-            const batches = batchesRes?.data?.batches || [];
-            
-            // Extract terms
-            const terms = termsRes?.data?.terms || [];
+            // Log raw responses to debug
+            console.log('🔍 Raw API Responses:', {
+                departments: departmentsRes,
+                courses: coursesRes,
+                students: studentsRes,
+                batches: batchesRes,
+                terms: termsRes,
+                enrollments: enrollmentsRes,
+            });
 
-            console.log('Dashboard Data:', { 
+            // Extract data with proper fallbacks - handle different API response formats
+            const departments = departmentsRes?.data?.data?.departments || departmentsRes?.data?.departments || [];
+            const courses = coursesRes?.data?.data?.courses || coursesRes?.data?.courses || [];
+            
+            // Students - handle pagination response format: { success: true, data: [...], pagination: {...} }
+            const students = studentsRes?.data?.data || studentsRes?.data || [];
+            
+            // Batches - Handle ALL possible response formats
+            let batches: any[] = [];
+            const bData = batchesRes?.data;
+            if (Array.isArray(bData)) {
+                batches = bData;
+            } else if (bData?.data && Array.isArray(bData.data)) {
+                batches = bData.data;
+            } else if (bData?.batches && Array.isArray(bData.batches)) {
+                batches = bData.batches;
+            } else if (Array.isArray(batchesRes)) {
+                batches = batchesRes;
+            }
+            console.log('✅ Extracted batches count:', batches.length);
+            
+            // Terms - { success: true, data: { terms: [...], total: N } }
+            const terms = termsRes?.data?.data?.terms || termsRes?.data?.terms || [];
+            
+            // Enrollments - { success: true, data: [...] }
+            const enrollments = enrollmentsRes?.data?.data || enrollmentsRes?.data || [];
+
+            console.log('📊 Dashboard Real Data Extracted:', { 
                 departments: departments.length, 
                 courses: courses.length, 
                 students: students.length, 
                 batches: batches.length, 
-                terms: terms.length 
+                terms: terms.length,
+                enrollments: enrollments.length
             });
 
-            // Calculate students by department with strong validation
+            // Calculate students by department - REAL DATA
             let studentsByDept: any[] = [];
             if (departments.length > 0) {
                 studentsByDept = departments.map((dept: any) => {
                     const deptStudents = students.filter((s: any) => s.departmentId === dept.id);
                     return {
-                        name: (dept.name || 'قسم غير معروف').substring(0, 15),
+                        name: (dept.nameAr || dept.name || 'قسم غير معروف').substring(0, 15),
                         nameEn: dept.nameEn || dept.name || 'Unknown',
                         students: deptStudents.length,
                     };
-                });
-                // Show all departments or only those with data
-                if (studentsByDept.every(d => d.students === 0) && departments.length > 0) {
-                    // If no students, show departments with 0 values
-                    studentsByDept = studentsByDept.slice(0, 8);
-                } else {
-                    // Show departments with students
-                    studentsByDept = studentsByDept.filter(d => d.students > 0);
-                }
+                }).filter((d: any) => d.students > 0 || departments.length <= 8); // Show all if ≤8 depts
+                
+                console.log('📊 Students by Department:', studentsByDept);
             }
 
-            // Calculate courses by department with strong validation
+            // Calculate courses by department - REAL DATA
             let coursesByDept: any[] = [];
             if (departments.length > 0) {
                 coursesByDept = departments.map((dept: any, index: number) => {
                     const deptCourses = courses.filter((c: any) => c.departmentId === dept.id);
                     return {
-                        name: (dept.name || 'قسم غير معروف').substring(0, 15),
+                        name: (dept.nameAr || dept.name || 'قسم غير معروف').substring(0, 15),
                         courses: deptCourses.length,
                         fill: COLORS[index % COLORS.length],
                     };
-                });
-                // Only show departments with courses for pie chart
-                const hasAnyCourses = coursesByDept.some(d => d.courses > 0);
-                if (hasAnyCourses) {
-                    coursesByDept = coursesByDept.filter(d => d.courses > 0);
-                } else if (departments.length > 0) {
-                    // Show all departments if no courses exist yet
-                    coursesByDept = coursesByDept.slice(0, 6);
-                }
+                }).filter((d: any) => d.courses > 0);
+                
+                console.log('📊 Courses by Department:', coursesByDept);
             }
 
-            // Calculate enrollment trends by term with strong validation
+            // Calculate enrollment trends by term - REAL DATA from enrollments
             let enrollmentsByTerm: any[] = [];
             if (terms.length > 0) {
                 const sortedTerms = [...terms]
                     .filter((t: any) => t.startDate)
-                    .sort((a: any, b: any) => {
-                        const dateA = new Date(a.startDate).getTime();
-                        const dateB = new Date(b.startDate).getTime();
-                        return dateA - dateB;
-                    })
+                    .sort((a: any, b: any) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
                     .slice(-6); // Last 6 terms
 
                 enrollmentsByTerm = sortedTerms.map((term: any) => {
-                    // Try to get actual enrollment count
-                    const termStudents = students.filter((s: any) => 
-                        s.currentTermId === term.id || s.termId === term.id
-                    ).length;
+                    // Count enrollments by matching section's termId OR by checking if section has this term
+                    let termEnrollments = 0;
+                    
+                    enrollments.forEach((e: any) => {
+                        // Try multiple ways to match enrollment to term
+                        if (e.section?.termId === term.id || 
+                            e.section?.term?.id === term.id ||
+                            e.termId === term.id) {
+                            termEnrollments++;
+                        }
+                    });
+                    
+                    // If still no enrollments found, try counting from term's sections
+                    if (termEnrollments === 0 && term.sections) {
+                        term.sections.forEach((section: any) => {
+                            const sectionEnrollments = enrollments.filter((e: any) => 
+                                e.sectionId === section.id || e.section?.id === section.id
+                            ).length;
+                            termEnrollments += sectionEnrollments;
+                        });
+                    }
                     
                     return {
-                        term: (term.name || term.code || 'فصل').substring(0, 12),
-                        enrollments: termStudents,
+                        term: (term.nameAr || term.name || term.code || 'فصل').substring(0, 12),
+                        enrollments: termEnrollments,
                     };
                 });
+                
+                console.log('📊 Enrollment Trends:', enrollmentsByTerm);
             }
 
-            // Calculate student growth by batch with strong validation
+            // Calculate student growth by batch - REAL DATA
             let studentsByBatch: any[] = [];
             if (batches.length > 0) {
-                const sortedBatches = [...batches]
-                    .filter((b: any) => b.year || b.name)
-                    .sort((a: any, b: any) => (a.year || 0) - (b.year || 0))
-                    .slice(-5); // Last 5 batches
-
-                studentsByBatch = sortedBatches.map((batch: any) => {
+                // Group batches by year to aggregate students
+                const batchesByYear = batches.reduce((acc: any, batch: any) => {
+                    const year = batch.year || 2024;
+                    if (!acc[year]) {
+                        acc[year] = { year, students: 0, name: `دفعة ${year}` };
+                    }
                     const batchStudents = students.filter((s: any) => s.batchId === batch.id);
-                    return {
-                        batch: (batch.name || `دفعة ${batch.year || ''}`).substring(0, 12),
-                        students: batchStudents.length,
-                    };
-                });
+                    acc[year].students += batchStudents.length;
+                    return acc;
+                }, {});
+
+                // Convert to array and sort by year
+                studentsByBatch = Object.values(batchesByYear)
+                    .sort((a: any, b: any) => a.year - b.year)
+                    .slice(-5) // Last 5 years
+                    .map((item: any) => ({
+                        batch: item.name.substring(0, 12),
+                        students: item.students,
+                    }));
+                
+                // If no students found, show batch structure anyway
+                if (studentsByBatch.every((b: any) => b.students === 0) && batches.length > 0) {
+                    const yearGroups = [...new Set(batches.map((b: any) => b.year))].sort().slice(-5);
+                    studentsByBatch = yearGroups.map(year => ({
+                        batch: `دفعة ${year}`,
+                        students: 0,
+                    }));
+                }
+                
+                console.log('📊 Student Growth by Batch:', studentsByBatch);
             }
 
             console.log('Chart Data:', {
@@ -208,6 +270,7 @@ export default function DashboardPage() {
                 studentsByBatch: studentsByBatch.length
             });
 
+            // Update stats with real counts
             setStats({
                 departments: departments.length,
                 courses: courses.length,
@@ -216,14 +279,17 @@ export default function DashboardPage() {
                 terms: terms.length,
             });
 
+            // Update chart data with real data
             setChartData({
                 studentsByDepartment: studentsByDept,
                 coursesByDepartment: coursesByDept,
                 enrollmentTrends: enrollmentsByTerm,
                 studentGrowth: studentsByBatch,
             });
+
+            console.log('✅ Dashboard Updated with Real Data');
         } catch (error) {
-            console.error("Failed to fetch stats:", error);
+            console.error("❌ Failed to fetch dashboard stats:", error);
             // Set empty data on error
             setChartData({
                 studentsByDepartment: [],
