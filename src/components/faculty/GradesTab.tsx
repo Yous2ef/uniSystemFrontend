@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Upload, Download, Eye, Save, CheckCircle, AlertCircle, Star } from "lucide-react";
 import { toast } from "sonner";
+import { gradesService, enrollmentsService } from "@/services/api";
 
 interface GradeComponent {
     id: string;
@@ -52,14 +53,9 @@ interface StudentGrade {
 export default function GradesTab({ sectionId }: { sectionId: string }) {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("components");
-    const [components, setComponents] = useState<GradeComponent[]>([
-        { id: "1", name: "Quizzes", weight: 10, maxScore: 100 },
-        { id: "2", name: "Midterm", weight: 30, maxScore: 100 },
-        { id: "3", name: "Final", weight: 40, maxScore: 100 },
-        { id: "4", name: "Project", weight: 15, maxScore: 100 },
-        { id: "5", name: "Attendance", weight: 5, maxScore: 100 },
-    ]);
+    const [components, setComponents] = useState<GradeComponent[]>([]);
     const [students, setStudents] = useState<StudentGrade[]>([]);
+    const [loading, setLoading] = useState(true);
     const [newComponent, setNewComponent] = useState({ name: "", weight: 0, maxScore: 100 });
     const [componentDialogOpen, setComponentDialogOpen] = useState(false);
     const [bonusDialogOpen, setBonusDialogOpen] = useState(false);
@@ -70,35 +66,71 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
     const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
     useEffect(() => {
-        // Mock data - Replace with actual API call
-        const mockStudents: StudentGrade[] = [
-            {
-                studentId: "1",
-                studentCode: "20230001",
-                studentName: "أحمد حسن",
-                grades: { "1": 17, "2": 35, "3": 75, "4": 38, "5": 10 },
-                total: 87.5,
-                letterGrade: "A",
-            },
-            {
-                studentId: "2",
-                studentCode: "20230002",
-                studentName: "سارة علي",
-                grades: { "1": 19, "2": 38, "3": 80, "4": 40, "5": 10 },
-                total: 93.5,
-                letterGrade: "A+",
-            },
-            {
-                studentId: "3",
-                studentCode: "20230003",
-                studentName: "محمد خالد",
-                grades: { "1": 14, "2": 28, "3": 55, "4": 30, "5": 6 },
-                total: 66.5,
-                letterGrade: "D+",
-            },
-        ];
-        setStudents(mockStudents);
+        fetchGradeData();
     }, [sectionId]);
+
+    const fetchGradeData = async () => {
+        try {
+            setLoading(true);
+            // Fetch grade components
+            try {
+                const componentsData = await gradesService.getSectionComponents(sectionId);
+                if (componentsData.success && componentsData.data) {
+                    setComponents(componentsData.data.map((c: any) => ({
+                        id: c.id,
+                        name: c.name,
+                        weight: c.weight,
+                        maxScore: c.maxScore || 100,
+                    })));
+                }
+            } catch (compError: any) {
+                console.log("No grade components found yet (this is normal for new sections)");
+                // If 404, it just means no components have been created yet
+                if (compError?.response?.status !== 404) {
+                    console.error("Error fetching components:", compError);
+                }
+            }
+
+            // Fetch students and their grades
+            const enrollmentsData = await enrollmentsService.getBySectionId(sectionId);
+            if (enrollmentsData.success && enrollmentsData.data) {
+                const studentsGrades: StudentGrade[] = enrollmentsData.data.map((enrollment: any) => {
+                    const studentGrades: { [key: string]: number } = {};
+                    let total = 0;
+                    
+                    // Map grades if available
+                    if (enrollment.grades && Array.isArray(enrollment.grades)) {
+                        enrollment.grades.forEach((grade: any) => {
+                            studentGrades[grade.componentId] = grade.score || 0;
+                        });
+                    }
+
+                    // Calculate total
+                    if (enrollment.finalGrade !== null && enrollment.finalGrade !== undefined) {
+                        total = enrollment.finalGrade;
+                    }
+
+                    return {
+                        studentId: enrollment.student.id,
+                        studentCode: enrollment.student.studentCode,
+                        studentName: enrollment.student.nameAr || enrollment.student.nameEn,
+                        grades: studentGrades,
+                        total,
+                        letterGrade: calculateLetterGrade(total),
+                    };
+                });
+                setStudents(studentsGrades);
+            }
+        } catch (error: any) {
+            console.error("Error fetching grade data:", error);
+            // Only show error toast if it's not a 404 (which is expected for new sections)
+            if (error?.response?.status !== 404) {
+                toast.error(t('gradesTab.errors.loadFailed'));
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const addComponent = () => {
         if (!newComponent.name || newComponent.weight <= 0) {
@@ -177,8 +209,19 @@ export default function GradesTab({ sectionId }: { sectionId: string }) {
     };
 
     const totalWeight = components.reduce((sum, c) => sum + c.weight, 0);
-    const passRate = students.filter((s) => s.total >= 60).length / students.length * 100;
-    const average = students.reduce((sum, s) => sum + s.total, 0) / students.length;
+    const passRate = students.length > 0 ? (students.filter((s) => s.total >= 60).length / students.length * 100) : 0;
+    const average = students.length > 0 ? (students.reduce((sum, s) => sum + s.total, 0) / students.length) : 0;
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">

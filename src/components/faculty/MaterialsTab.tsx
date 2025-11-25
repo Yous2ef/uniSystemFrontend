@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,35 +44,14 @@ interface Material {
 
 export default function MaterialsTab({ sectionId }: { sectionId: string }) {
     const { t } = useTranslation();
-    const [materials, setMaterials] = useState<Material[]>([
-        {
-            id: "1",
-            weekNumber: 1,
-            title: "مقدمة",
-            type: "pdf",
-            fileName: "Lecture_1.pdf",
-            fileSize: "2.5 MB",
-            status: "published",
-        },
-        {
-            id: "2",
-            weekNumber: 1,
-            title: "فيديو تعريفي",
-            type: "video",
-            fileName: "Video_Intro.mp4",
-            fileSize: "45 MB",
-            status: "published",
-        },
-        {
-            id: "3",
-            weekNumber: 2,
-            title: "Arrays & Linked Lists",
-            type: "pdf",
-            fileName: "Lecture_2.pdf",
-            fileSize: "3.1 MB",
-            status: "published",
-        },
-    ]);
+    const [materials, setMaterials] = useState<Material[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Materials will be loaded from API when backend endpoint is ready
+        // For now keeping empty until API is implemented
+        setLoading(false);
+    }, [sectionId]);
     const [uploadDialog, setUploadDialog] = useState(false);
     const [newMaterial, setNewMaterial] = useState({
         weekNumber: 1,

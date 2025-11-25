@@ -120,16 +120,23 @@ export default function DepartmentApplicationsPage() {
         application: ApplicationData,
         action: "APPROVED" | "REJECTED"
     ) => {
+        console.log("🔘 Button clicked!", { applicationId: application.id, action });
         setSelectedApplication(application);
         setProcessAction(action);
         setRejectionReason("");
         setIsProcessDialogOpen(true);
+        console.log("✅ Dialog should open now");
     };
 
     const handleProcessApplication = async () => {
-        if (!selectedApplication) return;
+        console.log("🚀 Process application called", { selectedApplication, processAction });
+        if (!selectedApplication) {
+            console.error("❌ No selected application!");
+            return;
+        }
 
         if (processAction === "REJECTED" && !rejectionReason.trim()) {
+            console.error("❌ Rejection reason required!");
             alert(t("pages.departmentApplications.rejectionReasonRequired"));
             return;
         }
@@ -140,17 +147,24 @@ export default function DepartmentApplicationsPage() {
                 `🔄 Processing application ${selectedApplication.id} as ${processAction}`
             );
 
+            // Prepare payload - only include rejectionReason when rejecting
+            const payload: { status: string; rejectionReason?: string } = {
+                status: processAction,
+            };
+            
+            if (processAction === "REJECTED" && rejectionReason) {
+                payload.rejectionReason = rejectionReason;
+            }
+
+            console.log("📦 Payload being sent:", payload);
+
             const response =
                 await departmentSelectionService.processApplication(
                     selectedApplication.id,
-                    {
-                        status: processAction,
-                        rejectionReason:
-                            processAction === "REJECTED"
-                                ? rejectionReason
-                                : undefined,
-                    }
+                    payload
                 );
+
+            console.log("✅ Response received:", response);
 
             if (response.success) {
                 alert(

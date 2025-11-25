@@ -15,7 +15,7 @@ import {
     TrendingUp,
     Settings,
 } from "lucide-react";
-import { sectionsService } from "@/services/api";
+import { sectionsService, enrollmentsService, attendanceService } from "@/services/api";
 import StudentsTab from "@/components/faculty/StudentsTab";
 import GradesTab from "@/components/faculty/GradesTab";
 import AttendanceTab from "@/components/faculty/AttendanceTab";
@@ -31,6 +31,11 @@ export default function FacultyCourseManagement() {
     const [loading, setLoading] = useState(true);
     const [section, setSection] = useState<any>(null);
     const [activeTab, setActiveTab] = useState("students");
+    const [stats, setStats] = useState({
+        averageGrade: 0,
+        attendanceRate: 0,
+        materialsCount: 0,
+    });
 
     console.log("🔍 FacultyCourseManagement loaded with sectionId:", sectionId);
 
@@ -49,8 +54,20 @@ export default function FacultyCourseManagement() {
             console.log("Section response:", data);
 
             if (data) {
-                setSection(data);
-                console.log("✅ Section data set successfully");
+                // Backend returns enrolledCount directly, normalize to _count structure
+                const sectionWithCount = {
+                    ...data,
+                    _count: {
+                        enrollments: data.enrolledCount || 0,
+                        materials: 0 // Will be updated when materials API is ready
+                    }
+                };
+
+                setSection(sectionWithCount);
+                console.log("✅ Section data set successfully with", data.enrolledCount || 0, "students");
+
+                // Fetch additional stats
+                await fetchSectionStats();
             } else {
                 console.error("❌ No section data returned");
             }
@@ -58,6 +75,57 @@ export default function FacultyCourseManagement() {
             console.error("❌ Error fetching section:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchSectionStats = async () => {
+        try {
+            // Fetch enrollments to calculate stats
+            const enrollmentsData = await enrollmentsService.getBySectionId(sectionId!);
+            if (enrollmentsData.success && enrollmentsData.data) {
+                const enrollments = enrollmentsData.data;
+                
+                // Calculate average grade
+                const gradesWithValues = enrollments
+                    .map((e: any) => e.finalGrade)
+                    .filter((g: any) => g !== null && g !== undefined && g > 0);
+                
+                const avgGrade = gradesWithValues.length > 0
+                    ? gradesWithValues.reduce((a: number, b: number) => a + b, 0) / gradesWithValues.length
+                    : 0;
+
+                // Calculate attendance rate
+                let totalAttendanceRate = 0;
+                let studentsWithAttendance = 0;
+
+                for (const enrollment of enrollments) {
+                    try {
+                        const attendanceStats = await attendanceService.getStats(enrollment.id);
+                        if (attendanceStats.success && attendanceStats.data) {
+                            const { presentCount = 0, absentCount = 0 } = attendanceStats.data;
+                            const total = presentCount + absentCount;
+                            if (total > 0) {
+                                totalAttendanceRate += (presentCount / total) * 100;
+                                studentsWithAttendance++;
+                            }
+                        }
+                    } catch (err) {
+                        // Skip if error fetching attendance for a student
+                    }
+                }
+
+                const avgAttendance = studentsWithAttendance > 0
+                    ? totalAttendanceRate / studentsWithAttendance
+                    : 0;
+
+                setStats({
+                    averageGrade: Math.round(avgGrade),
+                    attendanceRate: Math.round(avgAttendance),
+                    materialsCount: 0, // Will be updated when materials API is ready
+                });
+            }
+        } catch (error) {
+            console.error("Error fetching section stats:", error);
         }
     };
 
@@ -127,7 +195,7 @@ export default function FacultyCourseManagement() {
                                         {t('courseManagement.stats.averageGrades')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                        --
+                                        {stats.averageGrade > 0 ? `${stats.averageGrade}%` : "0%"}
                                     </p>
                                 </div>
                                 <TrendingUp className="w-8 h-8 text-green-500" />
@@ -143,7 +211,7 @@ export default function FacultyCourseManagement() {
                                         {t('courseManagement.stats.attendanceRate')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                        --
+                                        {stats.attendanceRate > 0 ? `${stats.attendanceRate}%` : "0%"}
                                     </p>
                                 </div>
                                 <Calendar className="w-8 h-8 text-purple-500" />
@@ -159,7 +227,7 @@ export default function FacultyCourseManagement() {
                                         {t('courseManagement.stats.uploadedMaterials')}
                                     </p>
                                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                        {section._count?.materials || 0}
+                                        {section._count?.materials || stats.materialsCount || 0}
                                     </p>
                                 </div>
                                 <FileText className="w-8 h-8 text-orange-500" />

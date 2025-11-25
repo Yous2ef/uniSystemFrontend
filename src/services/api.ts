@@ -445,7 +445,7 @@ export const gradesService = {
         return data;
     },
     getSectionComponents: async (sectionId: string) => {
-        const { data } = await api.get(`/grades/components/${sectionId}`);
+        const { data } = await api.get(`/grades/components/section/${sectionId}`);
         return data;
     },
     recordGrade: async (payload: any) => {

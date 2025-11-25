@@ -23,6 +23,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar, CheckCircle, XCircle, AlertTriangle, FileText, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { attendanceService, enrollmentsService } from "@/services/api";
 
 interface AttendanceRecord {
     id: string;
@@ -66,73 +67,73 @@ export default function AttendanceTab({ sectionId }: { sectionId: string }) {
     const [excuseResponse, setExcuseResponse] = useState("");
 
     useEffect(() => {
-        // Mock data
-        const mockRecords: AttendanceRecord[] = [
-            { id: "1", date: "2025-11-10", weekNumber: 1, present: 42, absent: 3, total: 45 },
-            { id: "2", date: "2025-11-13", weekNumber: 2, present: 40, absent: 5, total: 45 },
-            { id: "3", date: "2025-11-17", weekNumber: 3, present: 43, absent: 2, total: 45 },
-        ];
-
-        const mockStudents: StudentAttendance[] = [
-            {
-                studentId: "1",
-                studentCode: "20230001",
-                studentName: "أحمد حسن",
-                present: 17,
-                absent: 3,
-                percentage: 85,
-                status: "good",
-            },
-            {
-                studentId: "2",
-                studentCode: "20230002",
-                studentName: "سارة علي",
-                present: 19,
-                absent: 1,
-                percentage: 95,
-                status: "good",
-            },
-            {
-                studentId: "3",
-                studentCode: "20230003",
-                studentName: "محمد خالد",
-                present: 13,
-                absent: 7,
-                percentage: 65,
-                status: "danger",
-            },
-        ];
-
-        const mockExcuses: ExcuseRequest[] = [
-            {
-                id: "1",
-                studentCode: "20230003",
-                studentName: "محمد خالد",
-                date: "2025-11-15",
-                reason: "ظروف صحية",
-                document: "medical-certificate.pdf",
-                status: "pending",
-            },
-        ];
-
-        const mockMarkingStudents = mockStudents.map((s) => ({
-            id: s.studentId,
-            code: s.studentCode,
-            name: s.studentName,
-        }));
-
-        setRecords(mockRecords);
-        setStudents(mockStudents);
-        setExcuses(mockExcuses);
-        setMarkingStudents(mockMarkingStudents);
-
-        // Initialize attendance state
-        const initialAttendance: { [key: string]: boolean } = {};
-        mockMarkingStudents.forEach((s) => {
-            initialAttendance[s.id] = true;
-        });
-        setAttendance(initialAttendance);
+        fetchAttendanceData();
     }, [sectionId]);
+
+    const fetchAttendanceData = async () => {
+        try {
+            // Fetch students enrolled in section
+            const enrollmentsData = await enrollmentsService.getBySectionId(sectionId);
+            if (enrollmentsData.success && enrollmentsData.data) {
+                const enrolledStudents = enrollmentsData.data.map((enrollment: any) => ({
+                    id: enrollment.student.id,
+                    code: enrollment.student.studentCode,
+                    name: enrollment.student.nameAr || enrollment.student.nameEn,
+                }));
+                setMarkingStudents(enrolledStudents);
+
+                // Initialize attendance state
+                const initialAttendance: { [key: string]: boolean } = {};
+                enrolledStudents.forEach((s: any) => {
+                    initialAttendance[s.id] = true;
+                });
+                setAttendance(initialAttendance);
+
+                // Fetch attendance stats for each student
+                const studentsAttendance: StudentAttendance[] = await Promise.all(
+                    enrollmentsData.data.map(async (enrollment: any) => {
+                        try {
+                            const statsData = await attendanceService.getStats(enrollment.id);
+                            const stats = statsData.success ? statsData.data : null;
+                            
+                            const present = stats?.presentCount || 0;
+                            const absent = stats?.absentCount || 0;
+                            const total = present + absent;
+                            const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+                            
+                            return {
+                                studentId: enrollment.student.id,
+                                studentCode: enrollment.student.studentCode,
+                                studentName: enrollment.student.nameAr || enrollment.student.nameEn,
+                                present,
+                                absent,
+                                percentage,
+                                status: percentage >= 90 ? "good" : percentage >= 75 ? "warning" : "danger",
+                            };
+                        } catch (error) {
+                            return {
+                                studentId: enrollment.student.id,
+                                studentCode: enrollment.student.studentCode,
+                                studentName: enrollment.student.nameAr || enrollment.student.nameEn,
+                                present: 0,
+                                absent: 0,
+                                percentage: 0,
+                                status: "good" as const,
+                            };
+                        }
+                    })
+                );
+                setStudents(studentsAttendance);
+            }
+
+            // Fetch attendance records (if available from API)
+            // For now using empty array, can be populated from backend
+            setRecords([]);
+            setExcuses([]);
+        } catch (error) {
+            console.error("Error fetching attendance data:", error);
+        }
+    };
 
     const saveAttendance = () => {
         const present = Object.values(attendance).filter((v) => v).length;

@@ -13,7 +13,7 @@ import {
     CheckCircle,
     ArrowLeft,
 } from "lucide-react";
-import { facultyService } from "@/services/api";
+import { facultyService, enrollmentsService } from "@/services/api";
 import { useAuthStore } from "@/store/auth";
 
 interface Section {
@@ -85,11 +85,41 @@ export default function FacultyDashboard() {
 
                     if (sectionsResponse.success) {
                         const facultySections = sectionsResponse.data?.sections || sectionsResponse.data || [];
-                        setSections(facultySections);
-                        console.log("✅ Sections loaded:", facultySections.length);
+                        
+                        // Fetch enrollment count for each section
+                        const sectionsWithEnrollments = await Promise.all(
+                            facultySections.map(async (section: any) => {
+                                try {
+                                    const enrollmentsData = await enrollmentsService.getBySectionId(section.id);
+                                    const enrollmentCount = enrollmentsData.success && enrollmentsData.data 
+                                        ? enrollmentsData.data.length 
+                                        : 0;
+                                    return {
+                                        ...section,
+                                        _count: {
+                                            ...section._count,
+                                            enrollments: enrollmentCount
+                                        }
+                                    };
+                                } catch (err) {
+                                    console.error(`Error fetching enrollments for section ${section.id}:`, err);
+                                    return {
+                                        ...section,
+                                        _count: {
+                                            ...section._count,
+                                            enrollments: 0
+                                        }
+                                    };
+                                }
+                            })
+                        );
+
+                        setSections(sectionsWithEnrollments);
+                        console.log("✅ Sections loaded:", sectionsWithEnrollments.length);
+                        console.log("📊 Total students:", sectionsWithEnrollments.reduce((sum, s) => sum + (s._count?.enrollments || 0), 0));
 
                         // Generate pending tasks based on sections
-                        generatePendingTasks(facultySections);
+                        generatePendingTasks(sectionsWithEnrollments);
                     }
                 } else {
                     console.warn("⚠️ No faculty record found for this user");

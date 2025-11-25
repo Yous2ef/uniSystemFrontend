@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -30,20 +30,13 @@ interface Appeal {
 
 export default function AppealsTab({ sectionId }: { sectionId: string }) {
     const { t } = useTranslation();
-    const [appeals, setAppeals] = useState<Appeal[]>([
-        {
-            id: "1",
-            studentCode: "20230001",
-            studentName: "أحمد حسن",
-            component: "Midterm",
-            currentGrade: 35,
-            maxGrade: 40,
-            reason: "أعتقد أن هناك خطأ في تصحيح السؤال الثالث. الإجابة صحيحة لكن تم خصم 3 درجات.",
-            attachments: ["exam_paper_photo.jpg"],
-            date: "2025-11-20",
-            status: "pending",
-        },
-    ]);
+    const [appeals, setAppeals] = useState<Appeal[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Appeals will be loaded from API when backend endpoint is ready
+        setLoading(false);
+    }, [sectionId]);
     const [selectedAppeal, setSelectedAppeal] = useState<Appeal | null>(null);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [response, setResponse] = useState("");

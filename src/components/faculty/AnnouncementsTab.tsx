@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -27,16 +27,13 @@ interface Announcement {
 
 export default function AnnouncementsTab({ sectionId }: { sectionId: string }) {
     const { t } = useTranslation();
-    const [announcements, setAnnouncements] = useState<Announcement[]>([
-        {
-            id: "1",
-            title: "إلغاء محاضرة الغد",
-            content: "عزيزي الطالب، نعتذر عن إلغاء محاضرة الغد لظروف طارئة. سيتم تعويضها يوم الخميس في نفس الموعد.",
-            date: "2025-11-20",
-            sendNotification: true,
-            sendEmail: true,
-        },
-    ]);
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Announcements will be loaded from API when backend endpoint is ready
+        setLoading(false);
+    }, [sectionId]);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [newAnnouncement, setNewAnnouncement] = useState({
         title: "",

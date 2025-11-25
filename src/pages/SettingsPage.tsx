@@ -1099,22 +1099,25 @@ export default function SettingsPage() {
                                     <h3 className="font-semibold">
                                         {t("pages.settings.databaseOperations")}
                                     </h3>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                         <Button
                                             onClick={handleBackupDatabase}
-                                            variant="outline">
+                                            variant="outline"
+                                            className="w-full bg-blue-50 hover:bg-blue-100 dark:bg-blue-950 dark:hover:bg-blue-900 border-blue-200 dark:border-blue-800">
                                             <Download className="h-4 w-4 mr-2" />
                                             {t("pages.settings.createBackup")}
                                         </Button>
                                         <Button
                                             onClick={handleRestoreDatabase}
-                                            variant="outline">
+                                            variant="outline"
+                                            className="w-full bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800">
                                             <Upload className="h-4 w-4 mr-2" />
                                             {t("pages.settings.restoreBackup")}
                                         </Button>
                                         <Button
                                             onClick={handleClearCache}
-                                            variant="outline">
+                                            variant="outline"
+                                            className="w-full bg-orange-50 hover:bg-orange-100 dark:bg-orange-950 dark:hover:bg-orange-900 border-orange-200 dark:border-orange-800">
                                             <RefreshCw className="h-4 w-4 mr-2" />
                                             {t("pages.settings.clearCache")}
                                         </Button>
@@ -1313,7 +1316,8 @@ export default function SettingsPage() {
 
                         <Card className="border-destructive">
                             <CardHeader>
-                                <CardTitle className="text-destructive">
+                                <CardTitle className="text-destructive flex items-center gap-2">
+                                    <AlertCircle className="h-5 w-5" />
                                     {t("pages.settings.dangerZone")}
                                 </CardTitle>
                                 <CardDescription>
@@ -1323,14 +1327,18 @@ export default function SettingsPage() {
                             <CardContent className="space-y-3">
                                 <Button
                                     variant="destructive"
-                                    className="w-full"
+                                    size="lg"
+                                    className="w-full font-semibold"
                                     onClick={handleDeleteAllData}>
-                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    <Trash2 className="h-5 w-5 mr-2" />
                                     {t("pages.settings.deleteAllData")}
                                 </Button>
-                                <p className="text-xs text-muted-foreground text-center">
-                                    {t("pages.settings.deleteAllDataWarning")}
-                                </p>
+                                <Alert variant="destructive">
+                                    <AlertCircle className="h-4 w-4" />
+                                    <AlertDescription className="text-xs">
+                                        {t("pages.settings.deleteAllDataWarning")}
+                                    </AlertDescription>
+                                </Alert>
                             </CardContent>
                         </Card>
                     </TabsContent>
