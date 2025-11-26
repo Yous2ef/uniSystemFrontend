@@ -101,6 +101,7 @@
             "completed": "مكتمل",
             "noTasks": "لا توجد مهام معلقة في الوقت الحالي"
         },
+        "viewSections": "عرض الشعب",
         "course": {
             "students": "الطلاب",
             "grades": "الدرجات",
@@ -277,6 +278,7 @@
         "registrationEnd": "نهاية التسجيل",
         "sectionsCount": "عدد الشعب",
         "statistics": "الإحصائيات",
+        "selectTerm": "اختر الفصل الدراسي",
         "deleteConfirm": "هل أنت متأكد من حذف هذا الفصل الدراسي؟",
         "types": {
             "FALL": "خريف",
@@ -289,6 +291,7 @@
         "create": "إنشاء شعبة جديدة",
         "edit": "تعديل الشعبة",
         "delete": "حذف الشعبة",
+        "code": "رمز الشعبة",
         "course": "المادة",
         "term": "الفصل الدراسي",
         "sectionCode": "رمز الشعبة",
@@ -324,6 +327,17 @@
         "needSchedules": "تحتاج إلى مواعيد",
         "searchAndFilter": "بحث وتصفية",
         "searchPlaceholder": "بحث برمز الشعبة أو المادة...",
+        "sectionsAndSchedules": "الشعب والمواعيد",
+        "course": "المادة",
+        "term": "الفصل",
+        "instructor": "المدرس",
+        "schedules": "المواعيد",
+        "notSpecified": "غير محدد",
+        "noSections": "لا توجد شعب",
+        "noSchedules": "لا توجد مواعيد",
+        "complete": "مكتمل",
+        "incomplete": "غير مكتمل",
+        "addSchedule": "إضافة موعد",
         "deleteConfirm": "هل أنت متأكد من حذف هذا الموعد؟",
         "deleteFailed": "فشل حذف الموعد",
         "days": {

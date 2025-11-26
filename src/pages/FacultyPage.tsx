@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { Plus, Pencil, Trash2, BookOpen } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,7 @@ interface Faculty {
 
 export default function FacultyPage() {
     const { t } = useTranslation();
+    const navigate = useNavigate();
     const [faculty, setFaculty] = useState<Faculty[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -173,9 +175,9 @@ export default function FacultyPage() {
                                                         variant="ghost"
                                                         size="icon"
                                                         className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        title="عرض الشعب"
+                                                        title={t("faculty.viewSections")}
                                                         onClick={() => {
-                                                            // TODO: Navigate to faculty sections
+                                                            navigate(`/sections?facultyId=${member.id}`);
                                                         }}>
                                                         <BookOpen className="w-4 h-4" />
                                                     </Button>
