@@ -3,6 +3,7 @@ import { z } from "zod";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authService } from "@/services/api";
@@ -97,6 +98,11 @@ export default function LoginPage() {
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
                     {/* Header */}
                     <div className="text-center mb-8">
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                                <GraduationCap className="w-10 h-10 text-primary" />
+                            </div>
+                        </div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                             {t("auth.welcome")}
                         </h1>
