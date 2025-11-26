@@ -1,5 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
+import { Moon, Sun, Globe } from "lucide-react";
+import { useState, useEffect } from "react";
 import {
     GraduationCap,
     BookOpen,
@@ -11,60 +14,176 @@ import {
     ArrowRight,
     Mail,
     Headphones,
+    Menu,
+    X,
 } from "lucide-react";
 import "../animations.css";
 
 export default function LandingPage() {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
+    const [isDark, setIsDark] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    useEffect(() => {
+        const darkMode = localStorage.getItem("darkMode") === "true";
+        setIsDark(darkMode);
+        if (darkMode) {
+            document.documentElement.classList.add("dark");
+        }
+    }, []);
+
+    const toggleDarkMode = () => {
+        const newDarkMode = !isDark;
+        setIsDark(newDarkMode);
+        localStorage.setItem("darkMode", String(newDarkMode));
+        if (newDarkMode) {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    };
+
+    const toggleLanguage = () => {
+        const newLang = i18n.language === "en" ? "ar" : "en";
+        i18n.changeLanguage(newLang);
+        document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+    };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-colors duration-300">
             {/* Navigation */}
-            <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 fixed w-full top-0 z-50">
+            <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 fixed w-full top-0 z-50 transition-colors duration-300">
                 <div className="container mx-auto px-6 py-4">
-                    <div className="flex items-center justify-center">
-                        <div className="flex items-center space-x-3">
-                            <GraduationCap className="w-8 h-8 text-blue-600" />
-                            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                UniSystem
+                    <div className="flex items-center justify-between">
+                        {/* Logo */}
+                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                            <GraduationCap className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                                {t("landing.appName")}
                             </span>
                         </div>
+
+                        {/* Desktop Navigation */}
+                        <div className="hidden md:flex items-center gap-8">
+                            <a href="#home" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                {t("landing.nav.home")}
+                            </a>
+                            <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                {t("landing.nav.features")}
+                            </a>
+                            <button onClick={() => navigate("/about")} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                {t("landing.nav.about")}
+                            </button>
+                            <button onClick={() => navigate("/vision")} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                {t("landing.nav.vision")}
+                            </button>
+                            <button onClick={() => navigate("/contact")} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">
+                                {t("landing.nav.contact")}
+                            </button>
+                        </div>
+
+                        {/* Right Side Actions */}
+                        <div className="flex items-center gap-3">
+                            {/* Language Toggle */}
+                            <button
+                                onClick={toggleLanguage}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                aria-label="Toggle language"
+                            >
+                                <Globe className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                            </button>
+
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                aria-label="Toggle dark mode"
+                            >
+                                {isDark ? (
+                                    <Sun className="w-5 h-5 text-yellow-500" />
+                                ) : (
+                                    <Moon className="w-5 h-5 text-gray-700" />
+                                )}
+                            </button>
+
+                            {/* Mobile Menu Toggle */}
+                            <button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            >
+                                {mobileMenuOpen ? (
+                                    <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                                ) : (
+                                    <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+                                )}
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Mobile Menu */}
+                    {mobileMenuOpen && (
+                        <div className="md:hidden pt-4 pb-3 border-t border-gray-200 dark:border-gray-700 mt-4 animate-fade-in-up">
+                            <div className="flex flex-col gap-3">
+                                <a href="#home" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium py-2">
+                                    {t("landing.nav.home")}
+                                </a>
+                                <a href="#features" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium py-2">
+                                    {t("landing.nav.features")}
+                                </a>
+                                <button onClick={() => navigate("/about")} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium py-2 text-start">
+                                    {t("landing.nav.about")}
+                                </button>
+                                <button onClick={() => navigate("/vision")} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium py-2 text-start">
+                                    {t("landing.nav.vision")}
+                                </button>
+                                <button onClick={() => navigate("/contact")} className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium py-2 text-start">
+                                    {t("landing.nav.contact")}
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </nav>
 
             {/* Hero Section */}
-            <section className="pt-32 pb-20 px-6 overflow-hidden">
+            <section id="home" className="pt-32 pb-20 px-6 overflow-hidden">
                 <div className="container mx-auto max-w-6xl">
                     <div className="text-center space-y-8 relative">
                         {/* Floating decorative elements */}
-                        <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob"></div>
-                        <div className="absolute top-0 right-1/4 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000"></div>
-                        <div className="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000"></div>
+                        <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-300 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-20 dark:opacity-10 animate-blob"></div>
+                        <div className="absolute top-0 right-1/4 w-72 h-72 bg-purple-300 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-20 dark:opacity-10 animate-blob animation-delay-2000"></div>
+                        <div className="absolute -bottom-8 left-1/3 w-72 h-72 bg-pink-300 dark:bg-pink-900 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-xl opacity-20 dark:opacity-10 animate-blob animation-delay-4000"></div>
                         
                         <div className="relative z-10">
                             <h1 className="text-5xl md:text-7xl font-bold leading-tight animate-fade-in-up">
-                                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent inline-block animate-gradient">
-                                    Modern Education
+                                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 dark:from-blue-400 dark:via-purple-400 dark:to-pink-400 bg-clip-text text-transparent inline-block animate-gradient">
+                                    {t("landing.hero.title")}
                                 </span>
                                 <br />
-                                <span className="text-gray-800">
-                                    Management System
+                                <span className="text-gray-800 dark:text-gray-100">
+                                    {t("landing.hero.subtitle")}
                                 </span>
                             </h1>
-                            <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto animate-fade-in-up animation-delay-200">
-                                Streamline your academic operations with our
-                                comprehensive university management platform.
-                                Empowering students, faculty, and administrators.
+                            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-fade-in-up animation-delay-200">
+                                {t("landing.hero.description")}
                             </p>
-                            <div className="flex justify-center items-center pt-4 animate-fade-in-up animation-delay-400">
+                            <div className="flex justify-center items-center gap-4 pt-4 animate-fade-in-up animation-delay-400">
                                 <Button
                                     onClick={() => navigate("/login")}
                                     size="lg"
                                     className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1"
                                 >
-                                    Get Started
-                                    <ArrowRight className="ml-2 w-5 h-5" />
+                                    {t("landing.hero.getStarted")}
+                                    <ArrowRight className="ms-2 w-5 h-5" />
+                                </Button>
+                                <Button
+                                    onClick={() => navigate("/about")}
+                                    size="lg"
+                                    variant="outline"
+                                    className="border-2 border-purple-600 dark:border-purple-400 text-purple-600 dark:text-purple-400 hover:bg-purple-600 dark:hover:bg-purple-400 hover:text-white dark:hover:text-gray-900 px-8 py-6 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 hover:-translate-y-1"
+                                >
+                                    {t("landing.hero.learnMore")}
                                 </Button>
                             </div>
                         </div>
@@ -73,14 +192,13 @@ export default function LandingPage() {
             </section>
 
             {/* Features Grid */}
-            <section className="py-20 px-6 bg-white/50">
+            <section id="features" className="py-20 px-6 bg-white/50 dark:bg-gray-800/50 transition-colors duration-300">
                 <div className="container mx-auto max-w-6xl">
-                    <h2 className="text-4xl font-bold text-center mb-4 text-gray-800">
-                        Powerful Features
+                    <h2 className="text-4xl font-bold text-center mb-4 text-gray-800 dark:text-gray-100">
+                        {t("landing.features.title")}
                     </h2>
-                    <p className="text-center text-gray-600 mb-16 text-lg">
-                        Everything you need to manage your academic institution
-                        efficiently
+                    <p className="text-center text-gray-600 dark:text-gray-300 mb-16 text-lg">
+                        {t("landing.features.subtitle")}
                     </p>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -88,48 +206,48 @@ export default function LandingPage() {
                         <div className="animate-fade-in-up animation-delay-100">
                             <FeatureCard
                                 icon={<Users className="w-10 h-10" />}
-                                title="Student Management"
-                                description="Efficiently manage student records, enrollment, and academic progress in one centralized system."
+                                title={t("landing.features.cards.studentManagement.title")}
+                                description={t("landing.features.cards.studentManagement.description")}
                                 gradient="from-blue-500 to-cyan-500"
                             />
                         </div>
                         <div className="animate-fade-in-up animation-delay-200">
                             <FeatureCard
                                 icon={<BookOpen className="w-10 h-10" />}
-                                title="Course Administration"
-                                description="Create and manage courses, curricula, and academic programs with ease."
+                                title={t("landing.features.cards.courseAdmin.title")}
+                                description={t("landing.features.cards.courseAdmin.description")}
                                 gradient="from-purple-500 to-pink-500"
                             />
                         </div>
                         <div className="animate-fade-in-up animation-delay-300">
                             <FeatureCard
                                 icon={<Calendar className="w-10 h-10" />}
-                                title="Schedule Management"
-                                description="Organize classes, exams, and academic events with intelligent scheduling tools."
+                                title={t("landing.features.cards.scheduleManagement.title")}
+                                description={t("landing.features.cards.scheduleManagement.description")}
                                 gradient="from-green-500 to-emerald-500"
                             />
                         </div>
                         <div className="animate-fade-in-up animation-delay-400">
                             <FeatureCard
                                 icon={<Award className="w-10 h-10" />}
-                                title="Grades & Assessment"
-                                description="Track student performance, manage grades, and generate comprehensive reports."
+                                title={t("landing.features.cards.gradesAssessment.title")}
+                                description={t("landing.features.cards.gradesAssessment.description")}
                                 gradient="from-orange-500 to-red-500"
                             />
                         </div>
                         <div className="animate-fade-in-up animation-delay-500">
                             <FeatureCard
                                 icon={<TrendingUp className="w-10 h-10" />}
-                                title="Analytics & Reports"
-                                description="Make data-driven decisions with powerful analytics and detailed reporting."
+                                title={t("landing.features.cards.analytics.title")}
+                                description={t("landing.features.cards.analytics.description")}
                                 gradient="from-indigo-500 to-purple-500"
                             />
                         </div>
                         <div className="animate-fade-in-up animation-delay-600">
                             <FeatureCard
                                 icon={<CheckCircle className="w-10 h-10" />}
-                                title="Attendance Tracking"
-                                description="Monitor attendance in real-time and maintain accurate attendance records."
+                                title={t("landing.features.cards.attendance.title")}
+                                description={t("landing.features.cards.attendance.description")}
                                 gradient="from-teal-500 to-cyan-500"
                             />
                         </div>
@@ -142,49 +260,45 @@ export default function LandingPage() {
                 <div className="container mx-auto max-w-6xl">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <div>
-                            <h2 className="text-4xl font-bold mb-6 text-gray-800">
-                                Built for{" "}
-                                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                    Everyone
+                            <h2 className="text-4xl font-bold mb-6 text-gray-800 dark:text-gray-100">
+                                {t("landing.benefits.title")}{" "}
+                                <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
+                                    {t("landing.benefits.titleHighlight")}
                                 </span>
                             </h2>
                             <div className="space-y-6">
                                 <BenefitItem
-                                    title="For Students"
-                                    description="Access courses, grades, schedules, and manage department selections effortlessly."
+                                    title={t("landing.benefits.students.title")}
+                                    description={t("landing.benefits.students.description")}
                                 />
                                 <BenefitItem
-                                    title="For Faculty"
-                                    description="Manage courses, track attendance, grade assignments, and communicate with students."
+                                    title={t("landing.benefits.faculty.title")}
+                                    description={t("landing.benefits.faculty.description")}
                                 />
                                 <BenefitItem
-                                    title="For Administrators"
-                                    description="Oversee all academic operations, generate reports, and make informed decisions."
+                                    title={t("landing.benefits.administrators.title")}
+                                    description={t("landing.benefits.administrators.description")}
                                 />
                             </div>
                         </div>
-                        <div className="bg-gradient-to-br from-blue-100 to-purple-100 rounded-3xl p-8 shadow-xl">
-                            <div className="bg-white rounded-2xl p-8 space-y-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                        <GraduationCap className="w-6 h-6 text-blue-600" />
+                        <div className="bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl p-8 shadow-xl">
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 space-y-4">
+                                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                                        <GraduationCap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-gray-800">
-                                            Comprehensive Platform
+                                        <p className="font-semibold text-gray-800 dark:text-gray-100">
+                                            {t("landing.benefits.platformTitle")}
                                         </p>
-                                        <p className="text-sm text-gray-600">
-                                            All-in-one solution
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            {t("landing.benefits.platformSubtitle")}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="h-px bg-gray-200"></div>
-                                <p className="text-gray-600 leading-relaxed">
-                                    UniSystem provides a unified platform for
-                                    managing all aspects of academic life, from
-                                    enrollment to graduation, with intuitive
-                                    tools designed for the modern educational
-                                    environment.
+                                <div className="h-px bg-gray-200 dark:bg-gray-700"></div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    {t("landing.benefits.platformDescription")}
                                 </p>
                             </div>
                         </div>
@@ -193,14 +307,13 @@ export default function LandingPage() {
             </section>
 
             {/* CTA Section */}
-            <section className="py-20 px-6 bg-gradient-to-r from-blue-600 to-purple-600">
+            <section className="py-20 px-6 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-800 dark:to-purple-800">
                 <div className="container mx-auto max-w-4xl text-center text-white">
                     <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                        Ready to Get Started?
+                        {t("landing.cta.title")}
                     </h2>
-                    <p className="text-xl text-blue-100">
-                        Join thousands of institutions transforming education
-                        with UniSystem
+                    <p className="text-xl text-blue-100 dark:text-blue-200">
+                        {t("landing.cta.subtitle")}
                     </p>
                 </div>
             </section>
@@ -216,17 +329,15 @@ export default function LandingPage() {
                                     <GraduationCap className="w-8 h-8 text-white" />
                                 </div>
                                 <span className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                                    UniSystem
+                                    {t("landing.appName")}
                                 </span>
                             </div>
                             <p className="text-gray-400 leading-relaxed text-base mb-6 max-w-sm">
-                                Transforming education through innovative technology. 
-                                Empowering students, faculty, and administrators to achieve 
-                                academic excellence in the digital age.
+                                {t("landing.footer.description")}
                             </p>
-                            <div className="flex items-center space-x-2 text-sm text-gray-500">
+                            <div className="flex items-center space-x-2 rtl:space-x-reverse text-sm text-gray-500">
                                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span>System Active</span>
+                                <span>{t("landing.footer.systemActive")}</span>
                             </div>
                         </div>
 

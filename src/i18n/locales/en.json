@@ -1,4 +1,79 @@
 {
+    "landing": {
+        "appName": "UniSystem",
+        "nav": {
+            "home": "Home",
+            "features": "Features",
+            "about": "About",
+            "vision": "Vision",
+            "contact": "Contact",
+            "login": "Login"
+        },
+        "hero": {
+            "title": "Revolutionize Your University Management",
+            "subtitle": "Welcome to UniSystem",
+            "description": "Streamline academic operations, enhance student experience, and empower educators with our comprehensive university management platform.",
+            "getStarted": "Get Started",
+            "learnMore": "Learn More"
+        },
+        "features": {
+            "title": "Powerful Features",
+            "subtitle": "Everything you need to manage your academic institution effectively",
+            "cards": {
+                "studentManagement": {
+                    "title": "Student Management",
+                    "description": "Efficiently manage student records, enrollment, and academic progress in one centralized system."
+                },
+                "courseAdmin": {
+                    "title": "Course Administration",
+                    "description": "Create and manage courses, curricula, and academic programs with ease."
+                },
+                "scheduleManagement": {
+                    "title": "Schedule Management",
+                    "description": "Organize classes, exams, and academic events with intelligent scheduling tools."
+                },
+                "gradesAssessment": {
+                    "title": "Grades & Assessment",
+                    "description": "Track student performance, manage grades, and generate comprehensive reports."
+                },
+                "analytics": {
+                    "title": "Analytics & Reports",
+                    "description": "Make data-driven decisions with powerful analytics and detailed reporting."
+                },
+                "attendance": {
+                    "title": "Attendance Tracking",
+                    "description": "Monitor attendance in real-time and maintain accurate attendance records."
+                }
+            }
+        },
+        "benefits": {
+            "title": "Built for",
+            "titleHighlight": "Everyone",
+            "students": {
+                "title": "For Students",
+                "description": "Access courses, grades, schedules, and manage department selections effortlessly."
+            },
+            "faculty": {
+                "title": "For Faculty",
+                "description": "Manage courses, track attendance, grade assignments, and communicate with students."
+            },
+            "administrators": {
+                "title": "For Administrators",
+                "description": "Oversee all academic operations, generate reports, and make informed decisions."
+            },
+            "platformTitle": "Comprehensive Platform",
+            "platformSubtitle": "All-in-one solution",
+            "platformDescription": "UniSystem provides a unified platform for managing all aspects of academic life, from enrollment to graduation, with intuitive tools designed for the modern educational environment."
+        },
+        "cta": {
+            "title": "Ready to Get Started?",
+            "subtitle": "Join thousands of institutions transforming education with UniSystem"
+        },
+        "footer": {
+            "description": "Transforming education through innovative technology. Empowering students, faculty, and administrators to achieve academic excellence in the digital age.",
+            "systemActive": "System Active"
+        }
+    },
     "common": {
         "appName": "My University",
         "login": "Login",
@@ -1602,6 +1677,192 @@
             "operationCancelled": "Operation cancelled",
             "deleteAllDataSuccess": "All data deleted successfully (except admin account)",
             "deleteAllDataFailed": "Failed to delete data"
+        }
+    },
+    "about": {
+        "header": {
+            "title": "About Us",
+            "subtitle": "Transforming education through innovative technology and dedicated service"
+        },
+        "mission": {
+            "title": "Our Mission",
+            "description": "At UniSystem, we're on a mission to revolutionize university management by providing intuitive, powerful tools that streamline operations and enhance the educational experience for students, faculty, and administrators alike.",
+            "details": "We believe that technology should empower education, not complicate it. That's why we've built a platform that's both comprehensive and easy to use, helping institutions focus on what matters most: education."
+        },
+        "highlights": {
+            "efficiency": {
+                "title": "Maximum Efficiency",
+                "description": "Streamline all academic operations with automated workflows and intelligent scheduling"
+            },
+            "userCentric": {
+                "title": "User-Centric Design",
+                "description": "Intuitive interface designed with feedback from students, faculty, and administrators"
+            },
+            "security": {
+                "title": "Enterprise Security",
+                "description": "Bank-level security with encrypted data and role-based access control"
+            }
+        },
+        "values": {
+            "title": "Our Core Values",
+            "subtitle": "The principles that guide everything we do",
+            "excellence": {
+                "title": "Excellence",
+                "description": "We strive for excellence in every feature, ensuring top-quality solutions that exceed expectations"
+            },
+            "innovation": {
+                "title": "Innovation",
+                "description": "Continuously improving and adapting to the evolving needs of modern education"
+            },
+            "collaboration": {
+                "title": "Collaboration",
+                "description": "Building bridges between students, faculty, and administration for seamless communication"
+            },
+            "accessibility": {
+                "title": "Accessibility",
+                "description": "Making powerful educational tools available to institutions of all sizes worldwide"
+            }
+        },
+        "stats": {
+            "users": "Active Users",
+            "courses": "Courses Managed",
+            "departments": "Departments",
+            "uptime": "System Uptime"
+        },
+        "team": {
+            "title": "Meet Our Team",
+            "description": "Behind UniSystem is a passionate team of educators, developers, and designers committed to transforming education",
+            "details": "Our diverse team brings together expertise in education technology, software development, and user experience design. We work closely with educational institutions to understand their needs and deliver solutions that make a real difference."
+        }
+    },
+    "vision": {
+        "header": {
+            "title": "Our Vision",
+            "subtitle": "Building the future of education management, one institution at a time"
+        },
+        "statement": {
+            "title": "The Future We're Building",
+            "description": "We envision a world where technology seamlessly supports education, where administrative tasks are automated, and where students, faculty, and staff can focus on learning and innovation rather than paperwork."
+        },
+        "goals": {
+            "smart": {
+                "title": "Smart Systems",
+                "description": "AI-powered insights and automated workflows"
+            },
+            "seamless": {
+                "title": "Seamless Experience",
+                "description": "Unified platform for all academic needs"
+            },
+            "scalable": {
+                "title": "Scalable Growth",
+                "description": "Solutions that grow with your institution"
+            }
+        },
+        "pillars": {
+            "title": "Our Strategic Pillars",
+            "subtitle": "The foundation of our long-term vision",
+            "innovation": {
+                "title": "Continuous Innovation",
+                "description": "Leveraging cutting-edge technology like AI and machine learning to provide predictive analytics, personalized learning paths, and intelligent automation that anticipates institutional needs"
+            },
+            "empowerment": {
+                "title": "Student Empowerment",
+                "description": "Putting powerful tools in students' hands to manage their academic journey, access resources, track progress, and engage with their educational community in meaningful ways"
+            },
+            "accessibility": {
+                "title": "Global Accessibility",
+                "description": "Breaking down barriers with multilingual support, cloud-based architecture, and mobile-first design to make quality education management available anywhere, anytime"
+            },
+            "growth": {
+                "title": "Sustainable Growth",
+                "description": "Building scalable solutions that grow with institutions, from small colleges to large universities, ensuring long-term success and adaptability to changing educational landscapes"
+            }
+        },
+        "roadmap": {
+            "title": "Our Roadmap",
+            "subtitle": "The journey ahead to transform education",
+            "2024": {
+                "title": "Foundation Phase",
+                "item1": "Launch core platform with essential management features",
+                "item2": "Integrate AI-powered analytics and insights",
+                "item3": "Expand mobile app capabilities for iOS and Android"
+            },
+            "2025": {
+                "title": "Growth Phase",
+                "item1": "Introduce advanced learning management features",
+                "item2": "Global expansion with multi-region support",
+                "item3": "Partnership with leading educational institutions"
+            },
+            "2026": {
+                "title": "Innovation Phase",
+                "item1": "Launch predictive analytics for student success",
+                "item2": "Integration with emerging educational technologies",
+                "item3": "Open API platform for third-party integrations"
+            }
+        },
+        "impact": {
+            "title": "The Impact We Aspire To Create",
+            "description": "By 2030, we aim to be the leading university management platform globally, serving millions of students and educators, reducing administrative overhead by 70%, and enabling institutions to focus on what truly matters: delivering exceptional education and fostering innovation."
+        }
+    },
+    "contact": {
+        "header": {
+            "title": "Contact Us",
+            "subtitle": "We'd love to hear from you. Get in touch with our team."
+        },
+        "methods": {
+            "email": {
+                "title": "Email Us",
+                "description": "Send us an email anytime"
+            },
+            "phone": {
+                "title": "Call Us",
+                "description": "Mon-Fri, 9am-6pm EST"
+            },
+            "location": {
+                "title": "Visit Us",
+                "value": "123 Education St, Tech City, TC 12345",
+                "description": "Our headquarters"
+            },
+            "hours": {
+                "title": "Business Hours",
+                "value": "Mon-Fri: 9:00 AM - 6:00 PM",
+                "description": "We're here to help"
+            }
+        },
+        "form": {
+            "title": "Send us a Message",
+            "name": "Full Name",
+            "namePlaceholder": "Enter your name",
+            "email": "Email Address",
+            "emailPlaceholder": "Enter your email",
+            "subject": "Subject",
+            "selectSubject": "Select a subject",
+            "subjects": {
+                "general": "General Inquiry",
+                "support": "Technical Support",
+                "demo": "Request Demo",
+                "partnership": "Partnership Opportunities"
+            },
+            "message": "Message",
+            "messagePlaceholder": "Tell us how we can help you...",
+            "submit": "Send Message",
+            "successTitle": "Message Sent Successfully!",
+            "successMessage": "Thank you for contacting us. We'll get back to you within 24 hours."
+        },
+        "info": {
+            "global": {
+                "title": "Global Presence",
+                "description": "With offices and partners worldwide, we provide local support with global expertise to serve educational institutions across all continents."
+            },
+            "support": {
+                "title": "24/7 Support",
+                "description": "Our dedicated support team is always ready to assist you with any questions or technical issues.",
+                "available": "Support team available now"
+            }
+        },
+        "map": {
+            "placeholder": "Interactive Map Coming Soon"
         }
     }
 }

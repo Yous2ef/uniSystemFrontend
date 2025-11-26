@@ -37,6 +37,9 @@ import SettingsPage from "@/pages/SettingsPage";
 import FacultyDashboard from "@/pages/faculty/FacultyDashboard";
 import FacultyCourseManagement from "@/pages/faculty/FacultyCourseManagement";
 import FacultyReportsPage from "@/pages/faculty/FacultyReportsPage";
+import AboutPage from "@/pages/AboutPage";
+import VisionPage from "@/pages/VisionPage";
+import ContactPage from "@/pages/ContactPage";
 import "./i18n/config";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -387,6 +390,9 @@ function App() {
                     path="/"
                     element={<LandingPage />}
                 />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/vision" element={<VisionPage />} />
+                <Route path="/contact" element={<ContactPage />} />
                 <Route path="*" element={<NotFoundPage />} />
             </Routes>
         </BrowserRouter>
