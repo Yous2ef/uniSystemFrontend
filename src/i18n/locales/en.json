@@ -1719,7 +1719,19 @@
             "deleteAllDataConfirm": "Are you absolutely sure? This action cannot be undone!",
             "operationCancelled": "Operation cancelled",
             "deleteAllDataSuccess": "All data deleted successfully (except admin account)",
-            "deleteAllDataFailed": "Failed to delete data"
+            "deleteAllDataFailed": "Failed to delete data",
+            "backupProgress": {
+                "title": "Creating Backup",
+                "description": "Creating backup of the database, please wait...",
+                "warning": "Do not close this window or refresh the page until the process is complete",
+                "creatingInProgress": "Creating backup..."
+            },
+            "restoreProgress": {
+                "title": "Restoring Backup",
+                "description": "Restoring data from backup, please wait...",
+                "warning": "Do not close this window or refresh the page until the process is complete",
+                "restoringInProgress": "Restoring..."
+            }
         }
     },
     "about": {

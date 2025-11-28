@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -41,6 +42,14 @@ import {
     CheckCircle2,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { backupService } from "@/services/api";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 
@@ -122,6 +131,16 @@ export default function SettingsPage() {
         type: "success" | "error";
         text: string;
     } | null>(null);
+    const [isCreatingBackup, setIsCreatingBackup] = useState(false);
+    const [backupProgress, setBackupProgress] = useState({
+        message: "",
+        percent: 0,
+    });
+    const [isRestoring, setIsRestoring] = useState(false);
+    const [restoreProgress, setRestoreProgress] = useState({
+        message: "",
+        percent: 0,
+    });
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalStudents: 0,
@@ -178,10 +197,16 @@ export default function SettingsPage() {
             // TODO: Replace with actual API call
             // await api.put("/settings", settings);
             await new Promise((resolve) => setTimeout(resolve, 1000));
-            setSaveMessage({ type: "success", text: t("pages.settings.saveSuccess") });
+            setSaveMessage({
+                type: "success",
+                text: t("pages.settings.saveSuccess"),
+            });
         } catch (error) {
             console.error("Error saving settings:", error);
-            setSaveMessage({ type: "error", text: t("pages.settings.saveFailed") });
+            setSaveMessage({
+                type: "error",
+                text: t("pages.settings.saveFailed"),
+            });
         } finally {
             setIsSaving(false);
         }
@@ -189,34 +214,91 @@ export default function SettingsPage() {
 
     const handleBackupDatabase = async () => {
         try {
-            const result = await backupService.createBackup();
-            if (result.success) {
-                // Download the backup file automatically
-                const response = await backupService.downloadBackup(
-                    result.data.filename
-                );
+            setIsCreatingBackup(true);
+            setBackupProgress({
+                message: t("pages.settings.backupProgress.creatingInProgress"),
+                percent: 0,
+            });
 
-                // Create download link
-                const blob = new Blob([response.data], {
+            const { accessToken } = useAuthStore.getState();
+            const response = await fetch(
+                "http://localhost:5000/api/backup/create",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to create backup");
+            }
+
+            const reader = response.body?.getReader();
+            const decoder = new TextDecoder();
+            let filename = "";
+
+            if (reader) {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split("\n");
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            const data = JSON.parse(line.slice(6));
+
+                            if (data.error) {
+                                throw new Error(
+                                    data.message || "Backup failed"
+                                );
+                            }
+
+                            if (data.done) {
+                                filename = data.filename;
+                                break;
+                            }
+
+                            setBackupProgress({
+                                message: data.message || "",
+                                percent: data.percent || 0,
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Download the backup file
+            if (filename) {
+                const downloadResponse = await backupService.downloadBackup(
+                    filename
+                );
+                const blob = new Blob([downloadResponse.data], {
                     type: "application/sql",
                 });
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
                 a.href = url;
-                a.download = result.data.filename;
+                a.download = filename;
                 document.body.appendChild(a);
                 a.click();
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(a);
 
-                alert(
-                    t("pages.settings.backupSuccess") + ": " + result.data.filename
-                );
-                loadStats();
+                alert(t("pages.settings.backupSuccess") + ": " + filename);
             }
+
+            loadStats();
         } catch (error) {
             console.error("Error backing up database:", error);
             alert(t("pages.settings.backupFailed"));
+        } finally {
+            setIsCreatingBackup(false);
+            setBackupProgress({ message: "", percent: 0 });
         }
     };
 
@@ -242,19 +324,81 @@ export default function SettingsPage() {
                 return;
             }
 
+            setIsRestoring(true);
+            setRestoreProgress({ message: "جاري تحميل الملف...", percent: 0 });
+
             try {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                const response = await backupService.uploadAndRestore(formData);
+                // Use EventSource for SSE
+                const { accessToken } = useAuthStore.getState();
+                const response = await fetch(
+                    "http://localhost:5000/api/backup/upload-restore",
+                    {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
 
-                if (response.success) {
-                    alert(t("pages.settings.restoreSuccess"));
-                    loadStats();
+                if (!response.body) {
+                    throw new Error("No response body");
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split("\n");
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+
+                                if (data.error) {
+                                    throw new Error(data.message);
+                                }
+
+                                if (data.done) {
+                                    setRestoreProgress({
+                                        message: data.message,
+                                        percent: 100,
+                                    });
+                                    setTimeout(() => {
+                                        alert(
+                                            t("pages.settings.restoreSuccess")
+                                        );
+                                        loadStats();
+                                        setIsRestoring(false);
+                                    }, 1000);
+                                    return;
+                                }
+
+                                setRestoreProgress({
+                                    message: data.message,
+                                    percent: data.percent,
+                                });
+                            } catch (parseError) {
+                                console.error(
+                                    "Error parsing SSE data:",
+                                    parseError
+                                );
+                            }
+                        }
+                    }
                 }
             } catch (error) {
                 console.error("Error restoring database:", error);
                 alert(t("pages.settings.restoreFailed"));
+                setIsRestoring(false);
             }
         };
 
@@ -298,9 +442,7 @@ export default function SettingsPage() {
     };
 
     const handleDeleteAllData = async () => {
-        const confirmation = prompt(
-            t("pages.settings.deleteAllDataPrompt")
-        );
+        const confirmation = prompt(t("pages.settings.deleteAllDataPrompt"));
 
         if (confirmation !== t("pages.settings.deleteKeyword")) {
             alert(t("pages.settings.operationCancelled"));
@@ -343,7 +485,9 @@ export default function SettingsPage() {
                         size="lg"
                         className="w-full sm:w-auto">
                         <Save className="h-4 w-4 mr-2" />
-                        {isSaving ? t("pages.settings.saving") : t("pages.settings.saveSettings")}
+                        {isSaving
+                            ? t("pages.settings.saving")
+                            : t("pages.settings.saveSettings")}
                     </Button>
                 </div>
 
@@ -365,27 +509,39 @@ export default function SettingsPage() {
 
                 <Tabs defaultValue="general" className="space-y-6">
                     <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                        <TabsTrigger value="general" className="text-xs sm:text-sm flex items-center justify-center">
+                        <TabsTrigger
+                            value="general"
+                            className="text-xs sm:text-sm flex items-center justify-center">
                             <Globe className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             {t("pages.settings.tabs.general")}
                         </TabsTrigger>
-                        <TabsTrigger value="academic" className="text-xs sm:text-sm flex items-center justify-center">
+                        <TabsTrigger
+                            value="academic"
+                            className="text-xs sm:text-sm flex items-center justify-center">
                             <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             {t("pages.settings.tabs.academic")}
                         </TabsTrigger>
-                        <TabsTrigger value="security" className="text-xs sm:text-sm flex items-center justify-center">
+                        <TabsTrigger
+                            value="security"
+                            className="text-xs sm:text-sm flex items-center justify-center">
                             <Shield className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             {t("pages.settings.tabs.security")}
                         </TabsTrigger>
-                        <TabsTrigger value="notifications" className="text-xs sm:text-sm flex items-center justify-center">
+                        <TabsTrigger
+                            value="notifications"
+                            className="text-xs sm:text-sm flex items-center justify-center">
                             <Bell className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             {t("pages.settings.tabs.notifications")}
                         </TabsTrigger>
-                        <TabsTrigger value="database" className="text-xs sm:text-sm flex items-center justify-center">
+                        <TabsTrigger
+                            value="database"
+                            className="text-xs sm:text-sm flex items-center justify-center">
                             <Database className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             {t("pages.settings.tabs.database")}
                         </TabsTrigger>
-                        <TabsTrigger value="system" className="text-xs sm:text-sm flex items-center justify-center">
+                        <TabsTrigger
+                            value="system"
+                            className="text-xs sm:text-sm flex items-center justify-center">
                             <Settings className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                             {t("pages.settings.tabs.system")}
                         </TabsTrigger>
@@ -395,7 +551,9 @@ export default function SettingsPage() {
                     <TabsContent value="general" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.generalSettings")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.generalSettings")}
+                                </CardTitle>
                                 <CardDescription>
                                     {t("pages.settings.generalSettingsDesc")}
                                 </CardDescription>
@@ -420,7 +578,9 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="universityNameEn">
-                                            {t("pages.settings.universityNameEn")}
+                                            {t(
+                                                "pages.settings.universityNameEn"
+                                            )}
                                         </Label>
                                         <Input
                                             id="universityNameEn"
@@ -455,7 +615,9 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="defaultLanguage">
-                                            {t("pages.settings.defaultLanguage")}
+                                            {t(
+                                                "pages.settings.defaultLanguage"
+                                            )}
                                         </Label>
                                         <Select
                                             value={settings.defaultLanguage}
@@ -470,10 +632,14 @@ export default function SettingsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="ar">
-                                                    {t("pages.settings.languages.arabic")}
+                                                    {t(
+                                                        "pages.settings.languages.arabic"
+                                                    )}
                                                 </SelectItem>
                                                 <SelectItem value="en">
-                                                    {t("pages.settings.languages.english")}
+                                                    {t(
+                                                        "pages.settings.languages.english"
+                                                    )}
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -497,16 +663,24 @@ export default function SettingsPage() {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="Asia/Riyadh">
-                                                {t("pages.settings.timezones.riyadh")}
+                                                {t(
+                                                    "pages.settings.timezones.riyadh"
+                                                )}
                                             </SelectItem>
                                             <SelectItem value="Asia/Dubai">
-                                                {t("pages.settings.timezones.dubai")}
+                                                {t(
+                                                    "pages.settings.timezones.dubai"
+                                                )}
                                             </SelectItem>
                                             <SelectItem value="Asia/Cairo">
-                                                {t("pages.settings.timezones.cairo")}
+                                                {t(
+                                                    "pages.settings.timezones.cairo"
+                                                )}
                                             </SelectItem>
                                             <SelectItem value="UTC">
-                                                {t("pages.settings.timezones.utc")}
+                                                {t(
+                                                    "pages.settings.timezones.utc"
+                                                )}
                                             </SelectItem>
                                         </SelectContent>
                                     </Select>
@@ -516,7 +690,9 @@ export default function SettingsPage() {
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.systemStats")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.systemStats")}
+                                </CardTitle>
                                 <CardDescription>
                                     {t("pages.settings.systemStatsDesc")}
                                 </CardDescription>
@@ -529,7 +705,9 @@ export default function SettingsPage() {
                                             {stats.totalUsers}
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            {t("pages.settings.stats.totalUsers")}
+                                            {t(
+                                                "pages.settings.stats.totalUsers"
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex flex-col items-center p-4 border rounded-lg">
@@ -568,7 +746,9 @@ export default function SettingsPage() {
                     <TabsContent value="academic" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.academicSettings")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.academicSettings")}
+                                </CardTitle>
                                 <CardDescription>
                                     {t("pages.settings.academicSettingsDesc")}
                                 </CardDescription>
@@ -577,7 +757,9 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="maxCredits">
-                                            {t("pages.settings.maxCreditsPerTerm")}
+                                            {t(
+                                                "pages.settings.maxCreditsPerTerm"
+                                            )}
                                         </Label>
                                         <Input
                                             id="maxCredits"
@@ -595,7 +777,9 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="minCredits">
-                                            {t("pages.settings.minCreditsFullTime")}
+                                            {t(
+                                                "pages.settings.minCreditsFullTime"
+                                            )}
                                         </Label>
                                         <Input
                                             id="minCredits"
@@ -652,13 +836,19 @@ export default function SettingsPage() {
                                             </SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="percentage">
-                                                    {t("pages.settings.gradingScales.percentage")}
+                                                    {t(
+                                                        "pages.settings.gradingScales.percentage"
+                                                    )}
                                                 </SelectItem>
                                                 <SelectItem value="gpa">
-                                                    {t("pages.settings.gradingScales.gpa")}
+                                                    {t(
+                                                        "pages.settings.gradingScales.gpa"
+                                                    )}
                                                 </SelectItem>
                                                 <SelectItem value="letters">
-                                                    {t("pages.settings.gradingScales.letters")}
+                                                    {t(
+                                                        "pages.settings.gradingScales.letters"
+                                                    )}
                                                 </SelectItem>
                                             </SelectContent>
                                         </Select>
@@ -670,9 +860,15 @@ export default function SettingsPage() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
-                                            <Label>{t("pages.settings.attendanceRequired")}</Label>
+                                            <Label>
+                                                {t(
+                                                    "pages.settings.attendanceRequired"
+                                                )}
+                                            </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.attendanceRequiredDesc")}
+                                                {t(
+                                                    "pages.settings.attendanceRequiredDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -691,7 +887,9 @@ export default function SettingsPage() {
                                     {settings.attendanceRequired && (
                                         <div className="space-y-2 mr-6">
                                             <Label htmlFor="minAttendance">
-                                                {t("pages.settings.minAttendancePercentage")}
+                                                {t(
+                                                    "pages.settings.minAttendancePercentage"
+                                                )}
                                             </Label>
                                             <Input
                                                 id="minAttendance"
@@ -720,7 +918,9 @@ export default function SettingsPage() {
                     <TabsContent value="security" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.securitySettings")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.securitySettings")}
+                                </CardTitle>
                                 <CardDescription>
                                     {t("pages.settings.securitySettingsDesc")}
                                 </CardDescription>
@@ -730,10 +930,14 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                {t("pages.settings.allowSelfRegistration")}
+                                                {t(
+                                                    "pages.settings.allowSelfRegistration"
+                                                )}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.allowSelfRegistrationDesc")}
+                                                {t(
+                                                    "pages.settings.allowSelfRegistrationDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -753,10 +957,14 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                {t("pages.settings.requireEmailVerification")}
+                                                {t(
+                                                    "pages.settings.requireEmailVerification"
+                                                )}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.requireEmailVerificationDesc")}
+                                                {t(
+                                                    "pages.settings.requireEmailVerificationDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -779,7 +987,9 @@ export default function SettingsPage() {
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <Label htmlFor="minPassword">
-                                            {t("pages.settings.minPasswordLength")}
+                                            {t(
+                                                "pages.settings.minPasswordLength"
+                                            )}
                                         </Label>
                                         <Input
                                             id="minPassword"
@@ -797,7 +1007,9 @@ export default function SettingsPage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="maxAttempts">
-                                            {t("pages.settings.maxLoginAttempts")}
+                                            {t(
+                                                "pages.settings.maxLoginAttempts"
+                                            )}
                                         </Label>
                                         <Input
                                             id="maxAttempts"
@@ -841,9 +1053,13 @@ export default function SettingsPage() {
 
                                 <div className="flex items-center justify-between">
                                     <div className="space-y-0.5">
-                                        <Label>{t("pages.settings.enableAuditLog")}</Label>
+                                        <Label>
+                                            {t("pages.settings.enableAuditLog")}
+                                        </Label>
                                         <p className="text-sm text-muted-foreground">
-                                            {t("pages.settings.enableAuditLogDesc")}
+                                            {t(
+                                                "pages.settings.enableAuditLogDesc"
+                                            )}
                                         </p>
                                     </div>
                                     <Switch
@@ -864,9 +1080,13 @@ export default function SettingsPage() {
                     <TabsContent value="notifications" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.notificationsSettings")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.notificationsSettings")}
+                                </CardTitle>
                                 <CardDescription>
-                                    {t("pages.settings.notificationsSettingsDesc")}
+                                    {t(
+                                        "pages.settings.notificationsSettingsDesc"
+                                    )}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -875,10 +1095,14 @@ export default function SettingsPage() {
                                         <div className="space-y-0.5">
                                             <Label className="flex items-center gap-2">
                                                 <Mail className="h-4 w-4" />
-                                                {t("pages.settings.emailNotifications")}
+                                                {t(
+                                                    "pages.settings.emailNotifications"
+                                                )}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.emailNotificationsDesc")}
+                                                {t(
+                                                    "pages.settings.emailNotificationsDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -897,10 +1121,14 @@ export default function SettingsPage() {
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
                                             <Label>
-                                                {t("pages.settings.smsNotifications")}
+                                                {t(
+                                                    "pages.settings.smsNotifications"
+                                                )}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.smsNotificationsDesc")}
+                                                {t(
+                                                    "pages.settings.smsNotificationsDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -916,9 +1144,15 @@ export default function SettingsPage() {
 
                                     <div className="flex items-center justify-between">
                                         <div className="space-y-0.5">
-                                            <Label>{t("pages.settings.pushNotifications")}</Label>
+                                            <Label>
+                                                {t(
+                                                    "pages.settings.pushNotifications"
+                                                )}
+                                            </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.pushNotificationsDesc")}
+                                                {t(
+                                                    "pages.settings.pushNotificationsDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -940,13 +1174,19 @@ export default function SettingsPage() {
                                         {t("pages.settings.notificationTypes")}
                                     </h3>
                                     <p className="text-sm text-muted-foreground">
-                                        {t("pages.settings.notificationTypesDesc")}
+                                        {t(
+                                            "pages.settings.notificationTypesDesc"
+                                        )}
                                     </p>
                                 </div>
 
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
-                                        <Label>{t("pages.settings.notifyOnEnrollment")}</Label>
+                                        <Label>
+                                            {t(
+                                                "pages.settings.notifyOnEnrollment"
+                                            )}
+                                        </Label>
                                         <Switch
                                             checked={
                                                 settings.notifyOnEnrollment
@@ -961,7 +1201,11 @@ export default function SettingsPage() {
                                     </div>
 
                                     <div className="flex items-center justify-between">
-                                        <Label>{t("pages.settings.notifyOnGradePosted")}</Label>
+                                        <Label>
+                                            {t(
+                                                "pages.settings.notifyOnGradePosted"
+                                            )}
+                                        </Label>
                                         <Switch
                                             checked={
                                                 settings.notifyOnGradePosted
@@ -978,7 +1222,9 @@ export default function SettingsPage() {
 
                                     <div className="flex items-center justify-between">
                                         <Label>
-                                            {t("pages.settings.notifyOnDropDeadline")}
+                                            {t(
+                                                "pages.settings.notifyOnDropDeadline"
+                                            )}
                                         </Label>
                                         <Switch
                                             checked={
@@ -1002,7 +1248,9 @@ export default function SettingsPage() {
                     <TabsContent value="database" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.databaseInfo")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.databaseInfo")}
+                                </CardTitle>
                                 <CardDescription>
                                     {t("pages.settings.databaseInfoDesc")}
                                 </CardDescription>
@@ -1030,7 +1278,8 @@ export default function SettingsPage() {
                                             {t("pages.settings.lastBackup")}
                                         </div>
                                         <div className="text-sm font-medium">
-                                            {stats.lastBackup || t("pages.settings.noBackup")}
+                                            {stats.lastBackup ||
+                                                t("pages.settings.noBackup")}
                                         </div>
                                     </div>
                                 </div>
@@ -1044,7 +1293,9 @@ export default function SettingsPage() {
                                                 {t("pages.settings.autoBackup")}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.autoBackupDesc")}
+                                                {t(
+                                                    "pages.settings.autoBackupDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -1061,7 +1312,9 @@ export default function SettingsPage() {
                                     {settings.autoBackup && (
                                         <div className="space-y-2 mr-6">
                                             <Label htmlFor="backupFrequency">
-                                                {t("pages.settings.backupFrequency")}
+                                                {t(
+                                                    "pages.settings.backupFrequency"
+                                                )}
                                             </Label>
                                             <Select
                                                 value={settings.backupFrequency}
@@ -1076,16 +1329,24 @@ export default function SettingsPage() {
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="hourly">
-                                                        {t("pages.settings.frequencies.hourly")}
+                                                        {t(
+                                                            "pages.settings.frequencies.hourly"
+                                                        )}
                                                     </SelectItem>
                                                     <SelectItem value="daily">
-                                                        {t("pages.settings.frequencies.daily")}
+                                                        {t(
+                                                            "pages.settings.frequencies.daily"
+                                                        )}
                                                     </SelectItem>
                                                     <SelectItem value="weekly">
-                                                        {t("pages.settings.frequencies.weekly")}
+                                                        {t(
+                                                            "pages.settings.frequencies.weekly"
+                                                        )}
                                                     </SelectItem>
                                                     <SelectItem value="monthly">
-                                                        {t("pages.settings.frequencies.monthly")}
+                                                        {t(
+                                                            "pages.settings.frequencies.monthly"
+                                                        )}
                                                     </SelectItem>
                                                 </SelectContent>
                                             </Select>
@@ -1109,10 +1370,17 @@ export default function SettingsPage() {
                                         </Button>
                                         <Button
                                             onClick={handleRestoreDatabase}
+                                            disabled={isRestoring}
                                             variant="outline"
                                             className="w-full bg-green-50 hover:bg-green-100 dark:bg-green-950 dark:hover:bg-green-900 border-green-200 dark:border-green-800">
                                             <Upload className="h-4 w-4 mr-2" />
-                                            {t("pages.settings.restoreBackup")}
+                                            {isRestoring
+                                                ? t(
+                                                      "pages.settings.restoreProgress.restoringInProgress"
+                                                  )
+                                                : t(
+                                                      "pages.settings.restoreBackup"
+                                                  )}
                                         </Button>
                                         <Button
                                             onClick={handleClearCache}
@@ -1122,13 +1390,119 @@ export default function SettingsPage() {
                                             {t("pages.settings.clearCache")}
                                         </Button>
                                     </div>
+
+                                    {/* Backup Progress Dialog */}
+                                    <Dialog
+                                        open={isCreatingBackup}
+                                        onOpenChange={() => {}}>
+                                        <DialogContent className="sm:max-w-md">
+                                            <DialogHeader>
+                                                <DialogTitle className="flex items-center gap-2">
+                                                    <Database className="h-5 w-5" />
+                                                    {t(
+                                                        "pages.settings.backupProgress.title"
+                                                    )}
+                                                </DialogTitle>
+                                                <DialogDescription>
+                                                    {t(
+                                                        "pages.settings.backupProgress.description"
+                                                    )}
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="space-y-4  p-4">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-muted-foreground">
+                                                            {
+                                                                backupProgress.message
+                                                            }
+                                                        </span>
+                                                        <span className="font-medium">
+                                                            {
+                                                                backupProgress.percent
+                                                            }
+                                                            %
+                                                        </span>
+                                                    </div>
+                                                    <Progress
+                                                        value={
+                                                            backupProgress.percent
+                                                        }
+                                                        className="h-2"
+                                                    />
+                                                </div>
+                                                <Alert>
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertDescription>
+                                                        {t(
+                                                            "pages.settings.backupProgress.warning"
+                                                        )}
+                                                    </AlertDescription>
+                                                </Alert>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+
+                                    {/* Restore Progress Dialog */}
+                                    <Dialog
+                                        open={isRestoring}
+                                        onOpenChange={() => {}}>
+                                        <DialogContent className="sm:max-w-md">
+                                            <DialogHeader>
+                                                <DialogTitle className="flex items-center gap-2">
+                                                    <Upload className="h-5 w-5" />
+                                                    {t(
+                                                        "pages.settings.restoreProgress.title"
+                                                    )}
+                                                </DialogTitle>
+                                                <DialogDescription>
+                                                    {t(
+                                                        "pages.settings.restoreProgress.description"
+                                                    )}
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="space-y-4 p-4">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-sm">
+                                                        <span className="text-muted-foreground">
+                                                            {
+                                                                restoreProgress.message
+                                                            }
+                                                        </span>
+                                                        <span className="font-medium">
+                                                            {
+                                                                restoreProgress.percent
+                                                            }
+                                                            %
+                                                        </span>
+                                                    </div>
+                                                    <Progress
+                                                        value={
+                                                            restoreProgress.percent
+                                                        }
+                                                        className="h-2"
+                                                    />
+                                                </div>
+                                                <Alert>
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <AlertDescription>
+                                                        {t(
+                                                            "pages.settings.restoreProgress.warning"
+                                                        )}
+                                                    </AlertDescription>
+                                                </Alert>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                             </CardContent>
                         </Card>
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.exportData")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.exportData")}
+                                </CardTitle>
                                 <CardDescription>
                                     {t("pages.settings.exportDataDesc")}
                                 </CardDescription>
@@ -1136,9 +1510,15 @@ export default function SettingsPage() {
                             <CardContent>
                                 <div className="flex items-center justify-between mb-4">
                                     <div className="space-y-0.5">
-                                        <Label>{t("pages.settings.allowDataExport")}</Label>
+                                        <Label>
+                                            {t(
+                                                "pages.settings.allowDataExport"
+                                            )}
+                                        </Label>
                                         <p className="text-sm text-muted-foreground">
-                                            {t("pages.settings.allowDataExportDesc")}
+                                            {t(
+                                                "pages.settings.allowDataExportDesc"
+                                            )}
                                         </p>
                                     </div>
                                     <Switch
@@ -1157,7 +1537,9 @@ export default function SettingsPage() {
                                         <Separator className="my-4" />
                                         <div className="space-y-3">
                                             <h4 className="font-medium">
-                                                {t("pages.settings.exportReports")}
+                                                {t(
+                                                    "pages.settings.exportReports"
+                                                )}
                                             </h4>
                                             <div className="flex flex-wrap gap-2">
                                                 <Button
@@ -1169,7 +1551,9 @@ export default function SettingsPage() {
                                                     variant="outline"
                                                     size="sm">
                                                     <Download className="h-4 w-4 mr-2" />
-                                                    {t("pages.settings.exportStudents")}
+                                                    {t(
+                                                        "pages.settings.exportStudents"
+                                                    )}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1180,7 +1564,9 @@ export default function SettingsPage() {
                                                     variant="outline"
                                                     size="sm">
                                                     <Download className="h-4 w-4 mr-2" />
-                                                    {t("pages.settings.exportFaculty")}
+                                                    {t(
+                                                        "pages.settings.exportFaculty"
+                                                    )}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1191,7 +1577,9 @@ export default function SettingsPage() {
                                                     variant="outline"
                                                     size="sm">
                                                     <Download className="h-4 w-4 mr-2" />
-                                                    {t("pages.settings.exportCourses")}
+                                                    {t(
+                                                        "pages.settings.exportCourses"
+                                                    )}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1202,7 +1590,9 @@ export default function SettingsPage() {
                                                     variant="outline"
                                                     size="sm">
                                                     <Download className="h-4 w-4 mr-2" />
-                                                    {t("pages.settings.exportGrades")}
+                                                    {t(
+                                                        "pages.settings.exportGrades"
+                                                    )}
                                                 </Button>
                                                 <Button
                                                     onClick={() =>
@@ -1213,7 +1603,9 @@ export default function SettingsPage() {
                                                     variant="outline"
                                                     size="sm">
                                                     <Download className="h-4 w-4 mr-2" />
-                                                    {t("pages.settings.exportAttendance")}
+                                                    {t(
+                                                        "pages.settings.exportAttendance"
+                                                    )}
                                                 </Button>
                                             </div>
                                         </div>
@@ -1227,9 +1619,13 @@ export default function SettingsPage() {
                     <TabsContent value="system" className="space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle>{t("pages.settings.advancedSystemSettings")}</CardTitle>
+                                <CardTitle>
+                                    {t("pages.settings.advancedSystemSettings")}
+                                </CardTitle>
                                 <CardDescription>
-                                    {t("pages.settings.advancedSystemSettingsDesc")}
+                                    {t(
+                                        "pages.settings.advancedSystemSettingsDesc"
+                                    )}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
@@ -1245,10 +1641,14 @@ export default function SettingsPage() {
                                         <div className="space-y-0.5">
                                             <Label className="flex items-center gap-2">
                                                 <Lock className="h-4 w-4" />
-                                                {t("pages.settings.maintenanceMode")}
+                                                {t(
+                                                    "pages.settings.maintenanceMode"
+                                                )}
                                             </Label>
                                             <p className="text-sm text-muted-foreground">
-                                                {t("pages.settings.maintenanceModeDesc")}
+                                                {t(
+                                                    "pages.settings.maintenanceModeDesc"
+                                                )}
                                             </p>
                                         </div>
                                         <Switch
@@ -1266,7 +1666,9 @@ export default function SettingsPage() {
                                         <Alert>
                                             <AlertCircle className="h-4 w-4" />
                                             <AlertDescription>
-                                                {t("pages.settings.maintenanceModeActive")}
+                                                {t(
+                                                    "pages.settings.maintenanceModeActive"
+                                                )}
                                             </AlertDescription>
                                         </Alert>
                                     )}
@@ -1281,7 +1683,9 @@ export default function SettingsPage() {
                                     <div className="space-y-2 text-sm">
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                {t("pages.settings.systemVersion")}
+                                                {t(
+                                                    "pages.settings.systemVersion"
+                                                )}
                                             </span>
                                             <Badge variant="outline">
                                                 v2.0.0
@@ -1289,25 +1693,35 @@ export default function SettingsPage() {
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                {t("pages.settings.lastUpdateDate")}
+                                                {t(
+                                                    "pages.settings.lastUpdateDate"
+                                                )}
                                             </span>
                                             <span>2025-11-15</span>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
-                                                {t("pages.settings.systemStatus")}
+                                                {t(
+                                                    "pages.settings.systemStatus"
+                                                )}
                                             </span>
                                             <Badge
                                                 variant="default"
                                                 className="bg-green-500">
-                                                {t("pages.settings.statusActive")}
+                                                {t(
+                                                    "pages.settings.statusActive"
+                                                )}
                                             </Badge>
                                         </div>
                                         <div className="flex justify-between">
                                             <span className="text-muted-foreground">
                                                 {t("pages.settings.uptime")}
                                             </span>
-                                            <span>{t("pages.settings.uptimeValue")}</span>
+                                            <span>
+                                                {t(
+                                                    "pages.settings.uptimeValue"
+                                                )}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -1336,7 +1750,9 @@ export default function SettingsPage() {
                                 <Alert variant="destructive">
                                     <AlertCircle className="h-4 w-4" />
                                     <AlertDescription className="text-xs">
-                                        {t("pages.settings.deleteAllDataWarning")}
+                                        {t(
+                                            "pages.settings.deleteAllDataWarning"
+                                        )}
                                     </AlertDescription>
                                 </Alert>
                             </CardContent>
