@@ -297,10 +297,10 @@ export default function LandingPage() {
                                 <a
                                     href="mailto:info@unisystem.edu"
                                     className="flex items-center group cursor-pointer">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg flex items-center justify-center ml-2 group-hover:from-blue-500/30 group-hover:to-blue-600/30 transition-all border border-blue-500/30">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-lg flex items-center justify-center  group-hover:from-blue-500/30 group-hover:to-blue-600/30 transition-all border border-blue-500/30">
                                         <Mail className="w-5 h-5 text-blue-400" />
                                     </div>
-                                    <div>
+                                    <div className="mx-2">
                                         <p className="text-gray-500 text-xs mb-0.5 uppercase tracking-wide">
                                             General Inquiries
                                         </p>
@@ -312,11 +312,11 @@ export default function LandingPage() {
                                 <a
                                     href="mailto:support@unisystem.edu"
                                     className="flex items-center group cursor-pointer">
-                                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-lg flex items-center justify-center ml-2 group-hover:from-cyan-500/30 group-hover:to-cyan-600/30 transition-all border border-cyan-500/30">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-lg flex items-center justify-center group-hover:from-cyan-500/30 group-hover:to-cyan-600/30 transition-all border border-cyan-500/30">
                                         <Headphones className="w-5 h-5 text-cyan-400" />
                                     </div>
-                                    <div>
-                                        <p className="text-gray-500 text-xs mb-0.5 uppercase tracking-wide">
+                                    <div className="mx-2">
+                                        <p className="text-gray-500 text-xs mb-0.5 uppercase tracking-wide ">
                                             Technical Support
                                         </p>
                                         <p className="text-gray-300 text-sm font-medium group-hover:text-cyan-400 transition-colors">
