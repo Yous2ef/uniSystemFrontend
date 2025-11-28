@@ -49,33 +49,33 @@ export default function StudentRequestsPage() {
     const REQUEST_TYPES = [
         {
             id: "enrollment_certificate",
-            name: t("student.requests.types.enrollment_certificate"),
+            name: "شهادة قيد",
             icon: FileText,
-            description: t("student.requests.types.enrollment_certificate_desc"),
+            description: "طلب شهادة قيد للجهات الرسمية أو السفارات",
         },
         {
             id: "transcript",
-            name: t("student.requests.types.transcript"),
+            name: "كشف درجات",
             icon: GraduationCap,
-            description: t("student.requests.types.transcript_desc"),
+            description: "طلب كشف درجات رسمي معتمد",
         },
         {
             id: "course_withdrawal",
-            name: t("student.requests.types.course_withdrawal"),
+            name: "انسحاب من مادة",
             icon: XCircle,
-            description: t("student.requests.types.course_withdrawal_desc"),
+            description: "طلب انسحاب من مادة دراسية",
         },
         {
             id: "study_deferment",
-            name: t("student.requests.types.study_deferment"),
+            name: "تأجيل الدراسة",
             icon: Clock,
-            description: t("student.requests.types.study_deferment_desc"),
+            description: "طلب تأجيل الدراسة لفصل دراسي أو أكثر",
         },
         {
             id: "grade_appeal",
-            name: t("student.requests.types.grade_appeal"),
+            name: "اعتراض على درجة",
             icon: AlertTriangle,
-            description: t("student.requests.types.grade_appeal_desc"),
+            description: "طلب مراجعة درجة امتحان أو تقييم",
         },
     ];
     const [requests, setRequests] = useState<Request[]>([]);
@@ -154,14 +154,14 @@ export default function StudentRequestsPage() {
                 return (
                     <Badge className="bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
                         <CheckCircle className="w-3 h-3 ml-1" />
-                        {t("student.requests.status.approved")}
+                        مقبول
                     </Badge>
                 );
             case "rejected":
                 return (
                     <Badge variant="destructive">
                         <XCircle className="w-3 h-3 ml-1" />
-                        {t("student.requests.status.rejected")}
+                        مرفوض
                     </Badge>
                 );
             case "pending":
@@ -170,7 +170,7 @@ export default function StudentRequestsPage() {
                         variant="outline"
                         className="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800">
                         <Clock className="w-3 h-3 ml-1" />
-                        {t("student.requests.status.pending")}
+                        قيد المراجعة
                     </Badge>
                 );
             default:
@@ -185,7 +185,7 @@ export default function StudentRequestsPage() {
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            {t("student.requests.loadingRequests")}
+                            جاري تحميل الطلبات...
                         </p>
                     </div>
                 </div>
@@ -196,18 +196,18 @@ export default function StudentRequestsPage() {
     return (
         <DashboardLayout>
             <div className="space-y-6">
-                <div className="flex items-center justify-between">
+                <div>
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                            📝 {t("student.requests.title")}
+                            📝 طلبي
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            {t("student.requests.subtitle")}
+                            إدارة طلباتك وتقديم طلبات جديدة
                         </p>
                     </div>
                     <Button onClick={() => setIsDialogOpen(true)}>
                         <Plus className="w-4 h-4 ml-2" />
-                        {t("student.requests.newRequest")}
+                        طلب جديد
                     </Button>
                 </div>
 
@@ -246,14 +246,14 @@ export default function StudentRequestsPage() {
                 {/* Requests List */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t("student.requests.myRequests")}</CardTitle>
+                        <CardTitle>طلباتي</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {requests.length === 0 ? (
                             <div className="text-center py-12">
                                 <FileText className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
                                 <p className="text-gray-500 dark:text-gray-400">
-                                    {t("student.requests.noRequests")}
+                                    لم تقم بتقديم أي طلبات بعد
                                 </p>
                             </div>
                         ) : (
@@ -277,7 +277,7 @@ export default function StudentRequestsPage() {
                                                 </p>
                                                 <div className="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
                                                     <span>
-                                                        {t("student.requests.submittedAt")}:{" "}
+                                                        تاريخ التقديم:{" "}
                                                         {new Date(
                                                             request.submittedAt
                                                         ).toLocaleDateString(
@@ -286,7 +286,7 @@ export default function StudentRequestsPage() {
                                                     </span>
                                                     {request.processedAt && (
                                                         <span>
-                                                            {t("student.requests.processedAt")}:{" "}
+                                                            تاريخ المعالجة:{" "}
                                                             {new Date(
                                                                 request.processedAt
                                                             ).toLocaleDateString(
@@ -299,7 +299,7 @@ export default function StudentRequestsPage() {
                                                     <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                                                         <p className="text-sm text-gray-700 dark:text-gray-300">
                                                             <strong>
-                                                                {t("student.requests.adminNotes")}:
+                                                                ملاحظات الإدارة:
                                                             </strong>{" "}
                                                             {request.adminNotes}
                                                         </p>
@@ -318,16 +318,16 @@ export default function StudentRequestsPage() {
                 <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
                     <CardContent className="p-6">
                         <h3 className="font-medium text-blue-900 dark:text-blue-300 mb-2">
-                            💡 {t("student.requests.guidelines")}
+                            💡 إرشادات تقديم الطلبات
                         </h3>
                         <ul className="space-y-2 text-sm text-blue-800 dark:text-blue-300">
-                            <li>• {t("student.requests.info1")}</li>
-                            <li>• {t("student.requests.info2")}</li>
+                            <li>• يتم مراجعة الطلبات خلال 3-5 أيام عمل</li>
+                            <li>• تأكد من إدخال جميع التفاصيل المطلوبة بدقة</li>
                             <li>
-                                • {t("student.requests.info3")}
+                                • يمكنك متابعة حالة طلبك من خلال هذه الصفحة
                             </li>
                             <li>
-                                • {t("student.requests.info4")}
+                                • في حالة الرفض، يمكنك التواصل مع شؤون الطلاب للاستفسار
                             </li>
                         </ul>
                     </CardContent>
@@ -338,19 +338,19 @@ export default function StudentRequestsPage() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="sm:max-w-[500px]">
                     <DialogHeader>
-                        <DialogTitle>{t("student.requests.newRequest")}</DialogTitle>
+                        <DialogTitle>طلب جديد</DialogTitle>
                         <DialogDescription>
-                            {t("student.requests.dialogDescription")}
+                            اختر نوع الطلب وأدخل التفاصيل المطلوبة
                         </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="requestType">{t("student.requests.requestType")}</Label>
+                            <Label htmlFor="requestType">نوع الطلب</Label>
                             <Select
                                 value={selectedType}
                                 onValueChange={setSelectedType}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder={t("student.requests.selectType")} />
+                                    <SelectValue placeholder="اختر نوع الطلب" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {REQUEST_TYPES.map((type) => (
@@ -364,10 +364,10 @@ export default function StudentRequestsPage() {
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="description">{t("student.requests.description")}</Label>
+                            <Label htmlFor="description">التفاصيل</Label>
                             <Textarea
                                 id="description"
-                                placeholder={t("student.requests.descriptionPlaceholder")}
+                                placeholder="أدخل تفاصيل الطلب..."
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 rows={4}
@@ -378,12 +378,12 @@ export default function StudentRequestsPage() {
                         <Button
                             variant="outline"
                             onClick={() => setIsDialogOpen(false)}>
-                            {t("student.requests.cancel")}
+                            إلغاء
                         </Button>
                         <Button
                             onClick={handleSubmitRequest}
                             disabled={!selectedType || !description}>
-                            {t("student.requests.submit")}
+                            تقديم الطلب
                         </Button>
                     </DialogFooter>
                 </DialogContent>
