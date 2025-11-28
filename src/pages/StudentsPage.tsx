@@ -171,113 +171,119 @@ export default function StudentsPage() {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>
-                                            {t("students.studentCode")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("students.nameAr")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("students.nameEn")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("students.email")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("students.batch")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("students.department")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("students.gpa")}
-                                        </TableHead>
-                                        <TableHead>{t("students.earnedCredits")}</TableHead>
-                                        <TableHead>
-                                            {t("students.status")}
-                                        </TableHead>
-                                        <TableHead className="text-end">
-                                            {t("common.actions")}
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredStudents.map((student) => (
-                                        <TableRow
-                                            key={student.id}
-                                            className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
-                                            onClick={() => {
-                                                navigate(
-                                                    `/students/${student.id}`
-                                                );
-                                            }}>
-                                            <TableCell className="font-medium">
-                                                {student.studentCode}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.nameAr}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.nameEn}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.user.email}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.batch.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.department?.nameAr ||
-                                                    "-"}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.cumulativeGpa?.cgpa.toFixed(
-                                                    2
-                                                ) || "-"}
-                                            </TableCell>
-                                            <TableCell>
-                                                {student.cumulativeGpa
-                                                    ?.totalCredits || "-"}
-                                            </TableCell>
-                                            <TableCell>
-                                                {getStatusBadge(student.status)}
-                                            </TableCell>
-                                            <TableCell className="text-end">
-                                                <div className="flex items-center justify-end gap-1 sm:gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            setSelectedStudent(
-                                                                student
-                                                            );
-                                                            setModalOpen(true);
-                                                        }}>
-                                                        <Pencil className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            handleDelete(
-                                                                student.id
-                                                            );
-                                                        }}>
-                                                        <Trash2 className="w-4 h-4 text-red-600" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>
+                                                {t("students.studentCode")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.nameAr")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.nameEn")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.email")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.batch")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.department")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.gpa")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.earnedCredits")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("students.status")}
+                                            </TableHead>
+                                            <TableHead className="text-end">
+                                                {t("common.actions")}
+                                            </TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredStudents.map((student) => (
+                                            <TableRow
+                                                key={student.id}
+                                                className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                onClick={() => {
+                                                    navigate(
+                                                        `/students/${student.id}`
+                                                    );
+                                                }}>
+                                                <TableCell className="font-medium">
+                                                    {student.studentCode}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.nameAr}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.nameEn}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.user.email}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.batch.name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.department
+                                                        ?.nameAr || "-"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.cumulativeGpa?.cgpa.toFixed(
+                                                        2
+                                                    ) || "-"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {student.cumulativeGpa
+                                                        ?.totalCredits || "-"}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getStatusBadge(
+                                                        student.status
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-end">
+                                                    <div className="flex items-center justify-end gap-1 sm:gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                setSelectedStudent(
+                                                                    student
+                                                                );
+                                                                setModalOpen(
+                                                                    true
+                                                                );
+                                                            }}>
+                                                            <Pencil className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleDelete(
+                                                                    student.id
+                                                                );
+                                                            }}>
+                                                            <Trash2 className="w-4 h-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </div>
                         )}
                     </CardContent>
@@ -287,7 +293,7 @@ export default function StudentsPage() {
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onSuccess={fetchStudents}
-                student={selectedStudent}
+                student={selectedStudent as any}
             />
             <ImportStudentsModal
                 open={importModalOpen}

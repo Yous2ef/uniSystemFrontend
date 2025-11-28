@@ -23,6 +23,20 @@ import {
 } from "@/components/ui/select";
 import { sectionsService } from "@/services/api";
 
+interface AddScheduleModalProps {
+    open: boolean;
+    onClose: () => void;
+    onSuccess: () => void;
+    section: { id: string; code: string; course: { nameAr: string } };
+}
+
+interface ScheduleFormData {
+    day: string;
+    startTime: string;
+    endTime: string;
+    room?: string;
+}
+
 export default function AddScheduleModal({
     open,
     onClose,
@@ -31,7 +45,7 @@ export default function AddScheduleModal({
 }: AddScheduleModalProps) {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
-    
+
     const scheduleSchema = z
         .object({
             day: z.string().min(1, t("schedules.modal.dayRequired")),
@@ -53,7 +67,7 @@ export default function AddScheduleModal({
             message: t("schedules.modal.startBeforeEnd"),
             path: ["endTime"],
         });
-    
+
     const daysOptions = [
         { value: "0", label: t("schedules.days.sunday") },
         { value: "1", label: t("schedules.days.monday") },
@@ -63,7 +77,7 @@ export default function AddScheduleModal({
         { value: "5", label: t("schedules.days.friday") },
         { value: "6", label: t("schedules.days.saturday") },
     ];
-    
+
     const {
         register,
         handleSubmit,
@@ -121,14 +135,20 @@ export default function AddScheduleModal({
 
                         {/* Day */}
                         <div>
-                            <Label htmlFor="day">{t("schedules.modal.day")} *</Label>
+                            <Label htmlFor="day">
+                                {t("schedules.modal.day")} *
+                            </Label>
                             <Select
                                 value={selectedDay}
                                 onValueChange={(value) =>
                                     setValue("day", value)
                                 }>
                                 <SelectTrigger>
-                                    <SelectValue placeholder={t("schedules.modal.selectDay")} />
+                                    <SelectValue
+                                        placeholder={t(
+                                            "schedules.modal.selectDay"
+                                        )}
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {daysOptions.map((day) => (
@@ -149,7 +169,9 @@ export default function AddScheduleModal({
 
                         {/* Start Time */}
                         <div>
-                            <Label htmlFor="startTime">{t("schedules.modal.startTime")} *</Label>
+                            <Label htmlFor="startTime">
+                                {t("schedules.modal.startTime")} *
+                            </Label>
                             <Input
                                 id="startTime"
                                 type="time"
@@ -165,7 +187,9 @@ export default function AddScheduleModal({
 
                         {/* End Time */}
                         <div>
-                            <Label htmlFor="endTime">{t("schedules.modal.endTime")} *</Label>
+                            <Label htmlFor="endTime">
+                                {t("schedules.modal.endTime")} *
+                            </Label>
                             <Input
                                 id="endTime"
                                 type="time"
@@ -181,11 +205,15 @@ export default function AddScheduleModal({
 
                         {/* Room */}
                         <div>
-                            <Label htmlFor="room">{t("schedules.modal.room")}</Label>
+                            <Label htmlFor="room">
+                                {t("schedules.modal.room")}
+                            </Label>
                             <Input
                                 id="room"
                                 {...register("room")}
-                                placeholder={t("schedules.modal.roomPlaceholder")}
+                                placeholder={t(
+                                    "schedules.modal.roomPlaceholder"
+                                )}
                             />
                             {errors.room && (
                                 <p className="text-sm text-red-600 mt-1">
@@ -204,7 +232,9 @@ export default function AddScheduleModal({
                             {t("common.cancel")}
                         </Button>
                         <Button type="submit" disabled={loading}>
-                            {loading ? t("schedules.modal.saving") : t("common.save")}
+                            {loading
+                                ? t("schedules.modal.saving")
+                                : t("common.save")}
                         </Button>
                     </DialogFooter>
                 </form>

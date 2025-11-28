@@ -82,7 +82,8 @@ export default function CurriculumPage() {
         } catch (error: any) {
             console.error("Error deleting curriculum:", error);
             const message =
-                error?.response?.data?.message || t("pages.curriculum.deleteFailed");
+                error?.response?.data?.message ||
+                t("pages.curriculum.deleteFailed");
             alert(message);
         }
     };
@@ -167,88 +168,91 @@ export default function CurriculumPage() {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>
-                                            {t("curriculum.name")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("curriculum.version")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("curriculum.specialization")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("curriculum.totalCredits")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("curriculum.courses")}
-                                        </TableHead>
-                                        <TableHead className="text-end">
-                                            {t("common.actions")}
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {curricula.map((curr) => (
-                                        <TableRow key={curr.id}>
-                                            <TableCell className="font-medium">
-                                                {curr.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {curr.version}
-                                            </TableCell>
-                                            <TableCell>
-                                                {curr.department.nameAr}
-                                            </TableCell>
-                                            <TableCell>
-                                                {curr.totalCredits}
-                                            </TableCell>
-                                            <TableCell>
-                                                {curr._count.curriculumCourses}{" "}
-                                                مادة
-                                            </TableCell>
-                                            <TableCell className="text-end">
-                                                <div className="flex items-center justify-end gap-1 sm:gap-2">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        title="إدارة المواد"
-                                                        onClick={() =>
-                                                            navigate(
-                                                                `/curriculum/${curr.id}`
-                                                            )
-                                                        }>
-                                                        <BookOpen className="w-4 h-4 text-blue-600" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        onClick={() =>
-                                                            handleEdit(curr)
-                                                        }>
-                                                        <Pencil className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                curr.id
-                                                            )
-                                                        }>
-                                                        <Trash2 className="w-4 h-4 text-red-600" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>
+                                                {t("curriculum.name")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("curriculum.version")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("curriculum.specialization")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("curriculum.totalCredits")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("curriculum.courses")}
+                                            </TableHead>
+                                            <TableHead className="text-end">
+                                                {t("common.actions")}
+                                            </TableHead>
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {curricula.map((curr) => (
+                                            <TableRow key={curr.id}>
+                                                <TableCell className="font-medium">
+                                                    {curr.name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {curr.version}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {curr.department.nameAr}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {curr.totalCredits}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {
+                                                        curr._count
+                                                            .curriculumCourses
+                                                    }{" "}
+                                                    مادة
+                                                </TableCell>
+                                                <TableCell className="text-end">
+                                                    <div className="flex items-center justify-end gap-1 sm:gap-2">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            title="إدارة المواد"
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    `/curriculum/${curr.id}`
+                                                                )
+                                                            }>
+                                                            <BookOpen className="w-4 h-4 text-blue-600" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            onClick={() =>
+                                                                handleEdit(curr)
+                                                            }>
+                                                            <Pencil className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    curr.id
+                                                                )
+                                                            }>
+                                                            <Trash2 className="w-4 h-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </div>
                         )}
                     </CardContent>
@@ -259,7 +263,7 @@ export default function CurriculumPage() {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={handleSubmit}
-                curriculum={selectedCurriculum}
+                curriculum={selectedCurriculum as any}
                 departments={departments}
             />
         </DashboardLayout>

@@ -312,7 +312,7 @@ export default function SectionsPage() {
             <SectionScheduleModal
                 open={scheduleModalOpen}
                 onClose={() => setScheduleModalOpen(false)}
-                section={selectedSection || null}
+                section={selectedSection as any}
             />
         </DashboardLayout>
     );

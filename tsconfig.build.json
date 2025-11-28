@@ -1,0 +1,11 @@
+{
+    "extends": "./tsconfig.app.json",
+    "compilerOptions": {
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "strict": false,
+        "verbatimModuleSyntax": false,
+        "noUncheckedSideEffectImports": false,
+        "skipLibCheck": true
+    }
+}

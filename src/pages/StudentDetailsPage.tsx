@@ -750,10 +750,10 @@ export default function StudentDetailsPage() {
                                                         }
                                                     </h4>
                                                     <Badge variant="secondary">
-                                                        {
+                                                        {(
                                                             enrollment.section
-                                                                .course.code
-                                                        }
+                                                                .course as any
+                                                        )?.code || "N/A"}
                                                     </Badge>
                                                 </div>
                                                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
