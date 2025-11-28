@@ -304,7 +304,7 @@ export default function StudentGradesPage() {
     const getGPATrendData = () => {
         return allGrades.map((term) => ({
             name: term.termName,
-            gpa: parseFloat(term.gpa.toFixed(2)),
+            gpa: parseFloat((term.gpa || 0).toFixed(2)),
         }));
     };
 
@@ -470,7 +470,7 @@ export default function StudentGradesPage() {
                         <CardContent>
                             <div className="text-3xl font-bold text-primary">
                                 {currentTerm
-                                    ? currentTerm.gpa.toFixed(2)
+                                    ? (currentTerm.gpa || 0).toFixed(2)
                                     : "0.00"}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -489,7 +489,7 @@ export default function StudentGradesPage() {
                         <CardContent>
                             <div className="text-3xl font-bold">
                                 {cumulativeGPA > 0
-                                    ? cumulativeGPA.toFixed(2)
+                                    ? (cumulativeGPA || 0).toFixed(2)
                                     : "0.00"}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
@@ -749,7 +749,7 @@ export default function StudentGradesPage() {
                                             )}
                                             <div className="flex-1"></div>
                                             <span className="text-sm text-gray-600 dark:text-gray-400">
-                                                المعدل: {term.gpa.toFixed(2)} |{" "}
+                                                المعدل: {(term.gpa || 0).toFixed(2)} |{" "}
                                                 {term.courses.length} مادة
                                             </span>
                                         </div>
@@ -817,7 +817,7 @@ export default function StudentGradesPage() {
                                                                     }
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    {course.total.toFixed(
+                                                                    {(course.total || 0).toFixed(
                                                                         1
                                                                     )}{" "}
                                                                     /{" "}
@@ -832,7 +832,7 @@ export default function StudentGradesPage() {
                                                                     )}
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    {course.total.toFixed(
+                                                                    {(course.total || 0).toFixed(
                                                                         2
                                                                     )}
                                                                     %
