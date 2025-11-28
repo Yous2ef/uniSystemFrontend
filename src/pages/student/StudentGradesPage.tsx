@@ -56,10 +56,10 @@ interface CourseGrade {
     termStatus: "ACTIVE" | "INACTIVE" | "COMPLETED";
     facultyName: string;
     grades: Grade[];
-    totalScore: number;
+    total: number;
     percentage: number;
     letterGrade: string;
-    gradePoint: number;
+    gpaPoints: number;
     isPublished: boolean;
 }
 
@@ -191,10 +191,10 @@ export default function StudentGradesPage() {
                 termStatus: gradeData.termStatus,
                 facultyName: gradeData.facultyName,
                 grades: gradeData.grades,
-                totalScore: gradeData.totalScore,
+                total: gradeData.total,
                 percentage: gradeData.percentage,
                 letterGrade: gradeData.letterGrade,
-                gradePoint: gradeData.gradePoint,
+                gpaPoints: gradeData.gpaPoints,
                 isPublished: gradeData.isPublished,
             };
 
@@ -205,7 +205,7 @@ export default function StudentGradesPage() {
         const termsArray = Array.from(termMap.values());
         termsArray.forEach((term) => {
             const totalPoints = term.courses.reduce(
-                (sum, c) => sum + c.gradePoint * c.credits,
+                (sum, c) => sum + c.gpaPoints * c.credits,
                 0
             );
             const totalCredits = term.courses.reduce(
@@ -246,7 +246,7 @@ export default function StudentGradesPage() {
             (sum, term) =>
                 sum +
                 term.courses.reduce(
-                    (tSum, course) => tSum + course.gradePoint * course.credits,
+                    (tSum, course) => tSum + course.gpaPoints * course.credits,
                     0
                 ),
             0
@@ -334,7 +334,7 @@ export default function StudentGradesPage() {
         const allCourses: CourseGrade[] = [];
         allGrades.forEach((term) => allCourses.push(...term.courses));
         return allCourses
-            .filter((c) => c.gradePoint < 2.5)
+            .filter((c) => c.gpaPoints < 2.5)
             .sort((a, b) => a.percentage - b.percentage);
     };
 
@@ -817,7 +817,7 @@ export default function StudentGradesPage() {
                                                                     }
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    {course.totalScore.toFixed(
+                                                                    {course.total.toFixed(
                                                                         1
                                                                     )}{" "}
                                                                     /{" "}
@@ -832,8 +832,8 @@ export default function StudentGradesPage() {
                                                                     )}
                                                                 </TableCell>
                                                                 <TableCell>
-                                                                    {course.percentage.toFixed(
-                                                                        1
+                                                                    {course.total.toFixed(
+                                                                        2
                                                                     )}
                                                                     %
                                                                 </TableCell>

@@ -15,7 +15,7 @@ interface ScheduleSlot {
     courseCode: string;
     facultyName: string;
     room: string;
-    sectionCode: string;
+    code: string;
 }
 
 const DAYS = [0, 1, 2, 3, 4]; // Sunday to Thursday
@@ -99,7 +99,7 @@ export default function StudentSchedulePage() {
                                         enrollment.section.faculty?.nameAr ||
                                         "غير محدد",
                                     room: schedule.room || "-",
-                                    sectionCode: enrollment.section.sectionCode,
+                                    code: enrollment.section.code,
                                 });
                             }
                         );
@@ -162,7 +162,9 @@ export default function StudentSchedulePage() {
                                                 <th
                                                     key={day}
                                                     className="p-4 text-center font-medium text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-800">
-                                                    {t(`student.schedule.days.${day}`)}
+                                                    {t(
+                                                        `student.schedule.days.${day}`
+                                                    )}
                                                 </th>
                                             ))}
                                         </tr>
@@ -280,8 +282,10 @@ export default function StudentSchedulePage() {
                                                         <Badge
                                                             variant="outline"
                                                             className="text-xs">
-                                                            {t("student.subjects.section")}{" "}
-                                                            {slot.sectionCode}
+                                                            {t(
+                                                                "student.subjects.section"
+                                                            )}{" "}
+                                                            {slot.code}
                                                         </Badge>
                                                     </div>
                                                     <p className="text-sm mt-1">

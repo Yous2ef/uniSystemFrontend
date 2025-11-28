@@ -41,7 +41,7 @@ interface Enrollment {
 
 interface SectionInfo {
     id: string;
-    sectionCode: string;
+    code: string;
     course: {
         code: string;
         nameAr: string;
@@ -183,9 +183,7 @@ export default function SectionStudentsPage() {
                                     - {sectionInfo.course.nameAr}
                                 </p>
                                 <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                    <span>
-                                        الشعبة: {sectionInfo.sectionCode}
-                                    </span>
+                                    <span>الشعبة: {sectionInfo.code}</span>
                                     <span>الفصل: {sectionInfo.term.name}</span>
                                     <span>
                                         المدرس: {sectionInfo.faculty.nameAr}

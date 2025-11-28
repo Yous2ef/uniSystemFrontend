@@ -15,7 +15,7 @@ interface CourseEnrollment {
     enrolledAt: string;
     section: {
         id: string;
-        sectionCode: string;
+        code: string;
         course: {
             id: string;
             code: string;
@@ -97,7 +97,11 @@ export default function StudentSubjectsPage() {
 
     const getTermStatusBadge = (status: string) => {
         if (status === "ACTIVE") {
-            return <Badge variant="default">{t("student.subjects.currentTerm")}</Badge>;
+            return (
+                <Badge variant="default">
+                    {t("student.subjects.currentTerm")}
+                </Badge>
+            );
         }
         return null;
     };
@@ -215,7 +219,8 @@ export default function StudentSubjectsPage() {
                             </h2>
                             {getTermStatusBadge(term.status)}
                             <Badge variant="outline">
-                                {termEnrollments.length} {t("student.subjects.courses")}
+                                {termEnrollments.length}{" "}
+                                {t("student.subjects.courses")}
                             </Badge>
                         </div>
 
@@ -245,7 +250,9 @@ export default function StudentSubjectsPage() {
                                                         <Badge
                                                             variant="outline"
                                                             className="bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800">
-                                                            {t("student.subjects.general")}
+                                                            {t(
+                                                                "student.subjects.general"
+                                                            )}
                                                         </Badge>
                                                     )}
                                                     {getStatusBadge(
@@ -289,14 +296,16 @@ export default function StudentSubjectsPage() {
                                                         enrollment.section
                                                             .course.credits
                                                     }{" "}
-                                                    {t("student.registration.credits")}
+                                                    {t(
+                                                        "student.registration.credits"
+                                                    )}
                                                 </span>
                                             </div>
                                             <Badge
                                                 variant="outline"
                                                 className="text-xs">
                                                 {t("student.subjects.section")}{" "}
-                                                {enrollment.section.sectionCode}
+                                                {enrollment.section.code}
                                             </Badge>
                                         </div>
 
@@ -319,7 +328,9 @@ export default function StudentSubjectsPage() {
                                                                             idx
                                                                         }
                                                                         className="text-gray-600 dark:text-gray-400">
-                                                                        {t(`student.subjects.days.${schedule.day}`)}{" "}
+                                                                        {t(
+                                                                            `student.subjects.days.${schedule.day}`
+                                                                        )}{" "}
                                                                         {
                                                                             schedule.startTime
                                                                         }{" "}
@@ -340,7 +351,9 @@ export default function StudentSubjectsPage() {
                                                                     .schedules
                                                                     .length -
                                                                     2}{" "}
-                                                                {t("student.subjects.more")}
+                                                                {t(
+                                                                    "student.subjects.more"
+                                                                )}
                                                             </span>
                                                         )}
                                                     </div>

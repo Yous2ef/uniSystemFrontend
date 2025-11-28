@@ -28,7 +28,7 @@ interface SubjectDetails {
     };
     section: {
         id: string;
-        sectionCode: string;
+        code: string;
         capacity: number;
         course: {
             id: string;
@@ -200,7 +200,7 @@ export default function SubjectDetailsPage() {
                                 {subject.section.course.nameEn}
                             </p>
                             <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                                <span>شعبة {subject.section.sectionCode}</span>
+                                <span>شعبة {subject.section.code}</span>
                                 <span>•</span>
                                 <span>{subject.section.term.name}</span>
                                 <span>•</span>
@@ -260,7 +260,7 @@ export default function SubjectDetailsPage() {
                                             الشعبة:
                                         </span>
                                         <span className="font-medium">
-                                            {subject.section.sectionCode}
+                                            {subject.section.code}
                                         </span>
                                     </div>
                                     <div className="flex justify-between">

@@ -20,7 +20,7 @@ import SectionScheduleModal from "@/components/modals/SectionScheduleModal";
 
 interface Section {
     id: string;
-    sectionCode: string;
+    code: string;
     capacity: number;
     courseId: string;
     termId: string;
@@ -123,7 +123,7 @@ export default function SectionsPage() {
                 .toLowerCase()
                 .includes(searchTerm.toLowerCase()) ||
             section.course.nameAr.includes(searchTerm) ||
-            section.sectionCode.toLowerCase().includes(searchTerm.toLowerCase())
+            section.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -173,123 +173,131 @@ export default function SectionsPage() {
                             </div>
                         ) : (
                             <div className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>
-                                            {t("sections.course")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("sections.sectionCode")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("sections.term")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("sections.faculty")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("sections.enrolled")} /{" "}
-                                            {t("sections.capacity")}
-                                        </TableHead>
-                                        <TableHead>
-                                            {t("sections.schedules")}
-                                        </TableHead>
-                                        <TableHead className="text-end">
-                                            {t("common.actions")}
-                                        </TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredSections.map((section) => (
-                                        <TableRow key={section.id}>
-                                            <TableCell className="font-medium">
-                                                <div>
-                                                    <div className="font-semibold">
-                                                        {section.course.code}
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>
+                                                {t("sections.course")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("sections.sectionCode")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("sections.term")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("sections.faculty")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("sections.enrolled")} /{" "}
+                                                {t("sections.capacity")}
+                                            </TableHead>
+                                            <TableHead>
+                                                {t("sections.schedules")}
+                                            </TableHead>
+                                            <TableHead className="text-end">
+                                                {t("common.actions")}
+                                            </TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredSections.map((section) => (
+                                            <TableRow key={section.id}>
+                                                <TableCell className="font-medium">
+                                                    <div>
+                                                        <div className="font-semibold">
+                                                            {
+                                                                section.course
+                                                                    .code
+                                                            }
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">
+                                                            {
+                                                                section.course
+                                                                    .nameAr
+                                                            }
+                                                        </div>
                                                     </div>
-                                                    <div className="text-sm text-gray-500">
-                                                        {section.course.nameAr}
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                {section.sectionCode}
-                                            </TableCell>
-                                            <TableCell>
-                                                {section.term.name}
-                                            </TableCell>
-                                            <TableCell>
-                                                {section.faculty.nameAr}
-                                            </TableCell>
-                                            <TableCell>
-                                                {getCapacityBadge(
-                                                    section._count
-                                                        ?.enrollments || 0,
-                                                    section.capacity
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="flex items-center gap-1"
-                                                    onClick={() => {
-                                                        setSelectedSection(
-                                                            section
-                                                        );
-                                                        setScheduleModalOpen(
-                                                            true
-                                                        );
-                                                    }}>
-                                                    <Calendar className="w-3 h-3" />
-                                                    {section.schedules
-                                                        ?.length || 0}
-                                                </Button>
-                                            </TableCell>
-                                            <TableCell className="text-end">
-                                                <div className="flex items-center justify-end gap-1 sm:gap-2 flex-wrap">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            navigate(
-                                                                `/sections/${section.id}/students`
-                                                            )
-                                                        }
-                                                        className="flex items-center gap-1 text-xs sm:text-sm">
-                                                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                                                        الطلاب
-                                                    </Button>
+                                                </TableCell>
+                                                <TableCell>
+                                                    {section.code}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {section.term.name}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {section.faculty.nameAr}
+                                                </TableCell>
+                                                <TableCell>
+                                                    {getCapacityBadge(
+                                                        section._count
+                                                            ?.enrollments || 0,
+                                                        section.capacity
+                                                    )}
+                                                </TableCell>
+                                                <TableCell>
                                                     <Button
                                                         variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
+                                                        size="sm"
+                                                        className="flex items-center gap-1"
                                                         onClick={() => {
                                                             setSelectedSection(
                                                                 section
                                                             );
-                                                            setModalOpen(true);
+                                                            setScheduleModalOpen(
+                                                                true
+                                                            );
                                                         }}>
-                                                        <Pencil className="w-4 h-4" />
+                                                        <Calendar className="w-3 h-3" />
+                                                        {section.schedules
+                                                            ?.length || 0}
                                                     </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 sm:h-10 sm:w-10"
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                section.id
-                                                            )
-                                                        }>
-                                                        <Trash2 className="w-4 h-4 text-red-600" />
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
+                                                </TableCell>
+                                                <TableCell className="text-end">
+                                                    <div className="flex items-center justify-end gap-1 sm:gap-2 flex-wrap">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                navigate(
+                                                                    `/sections/${section.id}/students`
+                                                                )
+                                                            }
+                                                            className="flex items-center gap-1 text-xs sm:text-sm">
+                                                            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                            الطلاب
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            onClick={() => {
+                                                                setSelectedSection(
+                                                                    section
+                                                                );
+                                                                setModalOpen(
+                                                                    true
+                                                                );
+                                                            }}>
+                                                            <Pencil className="w-4 h-4" />
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-8 w-8 sm:h-10 sm:w-10"
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    section.id
+                                                                )
+                                                            }>
+                                                            <Trash2 className="w-4 h-4 text-red-600" />
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
                             </div>
                         )}
                     </CardContent>
