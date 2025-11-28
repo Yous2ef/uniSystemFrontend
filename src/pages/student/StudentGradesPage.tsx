@@ -20,11 +20,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {
-    enrollmentsService,
-    studentsService,
-    gradesService,
-} from "@/services/api";
+import { studentsService, gradesService } from "@/services/api";
 import { useAuthStore } from "@/store/auth";
 import {
     LineChart,
@@ -77,11 +73,39 @@ interface TermGrades {
     credits: number;
 }
 
+interface StudentData {
+    id: string;
+    studentCode: string;
+    nameEn: string;
+    nameAr: string;
+    email: string;
+    batch?: {
+        id: string;
+        name: string;
+        year: number;
+        curriculum: {
+            id: string;
+            name: string;
+            totalCredits: number;
+        };
+    };
+    department?: {
+        id: string;
+        nameAr: string;
+    };
+    academicStanding?: {
+        cgpa: number;
+        totalCredits: number;
+        standing: string;
+    };
+}
+
 export default function StudentGradesPage() {
     const { t } = useTranslation();
     const { user } = useAuthStore();
-    const [loading, setLoading] = useState(true);
-    const [studentData, setStudentData] = useState<any>(null);
+    const [gradesLoading, setGradesLoading] = useState(true);
+    const [studentLoading, setStudentLoading] = useState(true);
+    const [studentData, setStudentData] = useState<StudentData | null>(null);
     const [allGrades, setAllGrades] = useState<TermGrades[]>([]);
     const [selectedFilter, setSelectedFilter] = useState<
         "current" | "all" | string
@@ -90,31 +114,39 @@ export default function StudentGradesPage() {
 
     useEffect(() => {
         fetchStudentGrades();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         applyFilter();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedFilter, allGrades]);
 
     const fetchStudentGrades = async () => {
         try {
-            setLoading(true);
+            setGradesLoading(true);
+            setStudentLoading(true);
             console.log("📚 Fetching student grades for user:", user?.id);
 
-            // Fetch student profile
+            // Fetch student profile by user ID
             const profileResponse = await studentsService.getByUserId(
                 user?.id || ""
             );
-            if (!profileResponse.success) {
+            if (!profileResponse.success || !profileResponse.data) {
+                console.error("❌ Failed to fetch student profile");
                 throw new Error("Failed to fetch student profile");
             }
-            setStudentData(profileResponse.data);
-            console.log("👤 Student data:", profileResponse.data);
+
+            const student = profileResponse.data;
+            setStudentData(student);
+            console.log("👤 Student data:", student);
+            setStudentLoading(false);
 
             // Fetch real grades from backend
             const gradesResponse = await gradesService.getMyGrades();
 
             if (!gradesResponse.success) {
+                console.error("❌ Failed to fetch grades");
                 throw new Error("Failed to fetch grades");
             }
 
@@ -125,12 +157,13 @@ export default function StudentGradesPage() {
             setAllGrades(gradesData);
         } catch (error) {
             console.error("❌ Error fetching grades:", error);
+            setStudentLoading(false);
         } finally {
-            setLoading(false);
+            setGradesLoading(false);
         }
     };
 
-    const processRealGradesData = (gradesData: any[]): TermGrades[] => {
+    const processRealGradesData = (gradesData: CourseGrade[]): TermGrades[] => {
         const termMap = new Map<string, TermGrades>();
 
         gradesData.forEach((gradeData) => {
@@ -192,123 +225,6 @@ export default function StudentGradesPage() {
                 return 1;
             return b.termName.localeCompare(a.termName);
         });
-    };
-
-    const processGradesData = (enrollments: any[]): TermGrades[] => {
-        const termMap = new Map<string, TermGrades>();
-
-        enrollments.forEach((enrollment) => {
-            const term = enrollment.section.term;
-            const course = enrollment.section.course;
-            const faculty = enrollment.section.faculty;
-
-            if (!termMap.has(term.id)) {
-                termMap.set(term.id, {
-                    termId: term.id,
-                    termName: term.name,
-                    termStatus: term.status,
-                    courses: [],
-                    gpa: 0,
-                    credits: 0,
-                });
-            }
-
-            // Mock grades for demonstration - In production, fetch from grades API
-            const mockGrades: Grade[] = [
-                {
-                    id: "1",
-                    componentId: "c1",
-                    componentName: "الواجبات",
-                    score: 18,
-                    maxScore: 20,
-                    weight: 20,
-                },
-                {
-                    id: "2",
-                    componentId: "c2",
-                    componentName: "الاختبار النصفي",
-                    score: 28,
-                    maxScore: 30,
-                    weight: 30,
-                },
-                {
-                    id: "3",
-                    componentId: "c3",
-                    componentName: "الاختبار النهائي",
-                    score: 44,
-                    maxScore: 50,
-                    weight: 50,
-                },
-            ];
-
-            const totalScore = mockGrades.reduce((sum, g) => sum + g.score, 0);
-            const maxTotalScore = mockGrades.reduce(
-                (sum, g) => sum + g.maxScore,
-                0
-            );
-            const percentage = (totalScore / maxTotalScore) * 100;
-            const { letterGrade, gradePoint } =
-                calculateLetterGrade(percentage);
-
-            const courseGrade: CourseGrade = {
-                enrollmentId: enrollment.id,
-                sectionId: enrollment.section.id,
-                courseCode: course.code,
-                courseNameAr: course.nameAr,
-                courseNameEn: course.nameEn,
-                credits: course.credits,
-                termId: term.id,
-                termName: term.name,
-                termStatus: term.status,
-                facultyName: faculty.nameAr,
-                grades: mockGrades,
-                totalScore,
-                percentage,
-                letterGrade,
-                gradePoint,
-                isPublished: true, // Mock value
-            };
-
-            termMap.get(term.id)!.courses.push(courseGrade);
-        });
-
-        // Calculate GPA for each term
-        const termsArray = Array.from(termMap.values());
-        termsArray.forEach((term) => {
-            const totalPoints = term.courses.reduce(
-                (sum, c) => sum + c.gradePoint * c.credits,
-                0
-            );
-            const totalCredits = term.courses.reduce(
-                (sum, c) => sum + c.credits,
-                0
-            );
-            term.gpa = totalCredits > 0 ? totalPoints / totalCredits : 0;
-            term.credits = totalCredits;
-        });
-
-        // Sort by term (active first, then by name)
-        return termsArray.sort((a, b) => {
-            if (a.termStatus === "ACTIVE" && b.termStatus !== "ACTIVE")
-                return -1;
-            if (a.termStatus !== "ACTIVE" && b.termStatus === "ACTIVE")
-                return 1;
-            return b.termName.localeCompare(a.termName);
-        });
-    };
-
-    const calculateLetterGrade = (
-        percentage: number
-    ): { letterGrade: string; gradePoint: number } => {
-        if (percentage >= 95) return { letterGrade: "A+", gradePoint: 4.0 };
-        if (percentage >= 90) return { letterGrade: "A", gradePoint: 3.75 };
-        if (percentage >= 85) return { letterGrade: "B+", gradePoint: 3.5 };
-        if (percentage >= 80) return { letterGrade: "B", gradePoint: 3.0 };
-        if (percentage >= 75) return { letterGrade: "C+", gradePoint: 2.5 };
-        if (percentage >= 70) return { letterGrade: "C", gradePoint: 2.0 };
-        if (percentage >= 65) return { letterGrade: "D+", gradePoint: 1.5 };
-        if (percentage >= 60) return { letterGrade: "D", gradePoint: 1.0 };
-        return { letterGrade: "F", gradePoint: 0.0 };
     };
 
     const applyFilter = () => {
@@ -432,19 +348,23 @@ export default function StudentGradesPage() {
         "#ec4899",
     ];
 
-    const cumulativeGPA = calculateCumulativeGPA();
-    const totalCredits = calculateTotalCredits();
+    // Use official CGPA from student's academic standing (includes all completed courses)
+    const cumulativeGPA =
+        studentData?.academicStanding?.cgpa || calculateCumulativeGPA();
+    // Use official total credits from student's academic standing
+    const totalCredits =
+        studentData?.academicStanding?.totalCredits || calculateTotalCredits();
     const standing = getAcademicStanding(cumulativeGPA);
     const currentTerm = allGrades.find((t) => t.termStatus === "ACTIVE");
 
-    if (loading) {
+    if (studentLoading && !studentData) {
         return (
             <DashboardLayout>
                 <div className="flex items-center justify-center h-96">
                     <div className="text-center">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                         <p className="mt-4 text-gray-600 dark:text-gray-400">
-                            جاري تحميل الدرجات...
+                            جاري تحميل بيانات الطالب...
                         </p>
                     </div>
                 </div>
@@ -461,9 +381,26 @@ export default function StudentGradesPage() {
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
                             📊 {t("student.grades.title")}
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">
-                            {t("student.grades.subtitle")}
-                        </p>
+                        {studentData && (
+                            <div className="flex items-center gap-2 mt-1">
+                                <p className="text-gray-500 dark:text-gray-400">
+                                    {studentData.nameAr} -{" "}
+                                    {studentData.studentCode}
+                                </p>
+                                {studentData.batch && (
+                                    <Badge
+                                        variant="outline"
+                                        className="text-xs">
+                                        {studentData.batch.name}
+                                    </Badge>
+                                )}
+                            </div>
+                        )}
+                        {!studentData && (
+                            <p className="text-gray-500 dark:text-gray-400 mt-1">
+                                {t("student.grades.subtitle")}
+                            </p>
+                        )}
                     </div>
                     <Button variant="outline">
                         <Download className="w-4 h-4 me-2" />
@@ -471,7 +408,7 @@ export default function StudentGradesPage() {
                     </Button>
                 </div>
 
-                {/* Filter Controls */}
+                {/* Filter Controls
                 <Card>
                     <CardContent className="pt-6">
                         <div className="flex items-center gap-3 flex-wrap">
@@ -504,8 +441,12 @@ export default function StudentGradesPage() {
                                     setSelectedFilter(e.target.value)
                                 }
                                 className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                                <option value="current">{t("student.grades.currentTerm")}</option>
-                                <option value="all">{t("student.grades.allTerms")}</option>
+                                <option value="current">
+                                    {t("student.grades.currentTerm")}
+                                </option>
+                                <option value="all">
+                                    {t("student.grades.allTerms")}
+                                </option>
                                 {allGrades.map((term) => (
                                     <option
                                         key={term.termId}
@@ -516,7 +457,7 @@ export default function StudentGradesPage() {
                             </select>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
 
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -548,10 +489,12 @@ export default function StudentGradesPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-3xl font-bold">
-                                {cumulativeGPA.toFixed(2)}
+                                {cumulativeGPA > 0
+                                    ? cumulativeGPA.toFixed(2)
+                                    : "0.00"}
                             </div>
                             <p className="text-xs text-muted-foreground mt-1">
-                                من 4.00
+                                من 4.00 (جميع المقررات المكتملة)
                             </p>
                         </CardContent>
                     </Card>
@@ -616,7 +559,9 @@ export default function StudentGradesPage() {
                     {/* GPA Trend Chart */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>{t("student.grades.gpaTrend")}</CardTitle>
+                            <CardTitle>
+                                {t("student.grades.gpaTrend")}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={250}>
@@ -641,7 +586,9 @@ export default function StudentGradesPage() {
                     {/* Grade Distribution Chart */}
                     <Card>
                         <CardHeader>
-                            <CardTitle>{t("student.grades.gradeDistribution")}</CardTitle>
+                            <CardTitle>
+                                {t("student.grades.gradeDistribution")}
+                            </CardTitle>
                         </CardHeader>
                         <CardContent>
                             <ResponsiveContainer width="100%" height={250}>
@@ -658,7 +605,7 @@ export default function StudentGradesPage() {
                                         fill="#8884d8"
                                         dataKey="value">
                                         {getGradeDistributionData().map(
-                                            (entry, index) => (
+                                            (_entry, index) => (
                                                 <Cell
                                                     key={`cell-${index}`}
                                                     fill={
@@ -764,10 +711,19 @@ export default function StudentGradesPage() {
                 {/* Detailed Grades Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t("student.grades.detailedGrades")}</CardTitle>
+                        <CardTitle>
+                            {t("student.grades.detailedGrades")}
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        {filteredGrades.length === 0 ? (
+                        {gradesLoading ? (
+                            <div className="text-center py-12">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                                    جاري تحميل الدرجات...
+                                </p>
+                            </div>
+                        ) : filteredGrades.length === 0 ? (
                             <div className="text-center py-12">
                                 <BookOpen className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
@@ -803,25 +759,39 @@ export default function StudentGradesPage() {
                                                 <TableHeader>
                                                     <TableRow>
                                                         <TableHead>
-                                                            {t("student.grades.courseCode")}
+                                                            {t(
+                                                                "student.grades.courseCode"
+                                                            )}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("student.grades.courseName")}
+                                                            {t(
+                                                                "student.grades.courseName"
+                                                            )}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("student.grades.credits")}
+                                                            {t(
+                                                                "student.grades.credits"
+                                                            )}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("student.grades.finalScore")}
+                                                            {t(
+                                                                "student.grades.finalScore"
+                                                            )}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("student.grades.percentage")}
+                                                            {t(
+                                                                "student.grades.percentage"
+                                                            )}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("student.grades.grade")}
+                                                            {t(
+                                                                "student.grades.grade"
+                                                            )}
                                                         </TableHead>
                                                         <TableHead>
-                                                            {t("student.grades.status")}
+                                                            {t(
+                                                                "student.grades.status"
+                                                            )}
                                                         </TableHead>
                                                     </TableRow>
                                                 </TableHeader>
