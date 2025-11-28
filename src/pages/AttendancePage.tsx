@@ -76,38 +76,52 @@ export default function AttendancePage() {
     }, [selectedTerm]);
 
     useEffect(() => {
-        if (!selectedSection) return;
+        if (!selectedSection || !selectedDate) return;
 
-        const fetchStudents = async () => {
+        const fetchStudentsAndAttendance = async () => {
             try {
-                // Mock data - would fetch enrollments for the section
-                setStudents([
-                    {
-                        id: "s1",
-                        studentCode: "2021001",
-                        nameAr: "أحمد محمد",
-                        enrollmentId: "e1",
-                    },
-                    {
-                        id: "s2",
-                        studentCode: "2021002",
-                        nameAr: "فاطمة علي",
-                        enrollmentId: "e2",
-                    },
-                    {
-                        id: "s3",
-                        studentCode: "2021003",
-                        nameAr: "محمد حسن",
-                        enrollmentId: "e3",
-                    },
-                ]);
+                setLoading(true);
+
+                // Fetch section attendance for the selected date
+                const response = await attendanceService.getSectionAttendance(
+                    selectedSection,
+                    selectedDate
+                );
+
+                console.log("Section attendance response:", response);
+
+                if (response.success) {
+                    const enrollmentsData = response.data || [];
+                    
+                    // Map the data to our Student interface
+                    const studentsData = enrollmentsData.map((item: any) => ({
+                        id: item.enrollment.student.id,
+                        studentCode: item.enrollment.student.studentCode,
+                        nameAr: item.enrollment.student.nameAr,
+                        enrollmentId: item.enrollment.id,
+                        attendance: item.attendance?.status,
+                    }));
+
+                    setStudents(studentsData);
+
+                    // Set existing attendance in state
+                    const existingAttendance: Record<string, "PRESENT" | "ABSENT" | "EXCUSED"> = {};
+                    enrollmentsData.forEach((item: any) => {
+                        if (item.attendance?.status) {
+                            existingAttendance[item.enrollment.id] = item.attendance.status;
+                        }
+                    });
+                    setAttendance(existingAttendance);
+                }
             } catch (error) {
-                console.error("Error fetching students:", error);
+                console.error("Error fetching students and attendance:", error);
+            } finally {
+                setLoading(false);
             }
         };
 
-        fetchStudents();
-    }, [selectedSection]);
+        fetchStudentsAndAttendance();
+    }, [selectedSection, selectedDate]);
 
     const handleMarkAttendance = (
         enrollmentId: string,

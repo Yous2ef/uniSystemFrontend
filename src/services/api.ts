@@ -430,7 +430,7 @@ export const attendanceService = {
         return data;
     },
     getSectionAttendance: async (sectionId: string, date?: string) => {
-        const params = date ? { date } : {};
+        const params = date ? { sessionDate: date } : {};
         const { data } = await api.get(`/attendance/section/${sectionId}`, {
             params,
         });

@@ -13,8 +13,10 @@ import {
     XCircle,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { enrollmentsService, attendanceService } from "@/services/api";
 
 interface CourseAttendance {
+    enrollmentId: string;
     courseCode: string;
     courseName: string;
     totalSessions: number;
@@ -27,9 +29,10 @@ interface CourseAttendance {
 }
 
 interface AttendanceRecord {
+    id: string;
     date: string;
     sessionNumber: number;
-    status: "present" | "absent" | "excused" | "late";
+    status: "PRESENT" | "ABSENT" | "EXCUSED";
     notes?: string;
 }
 
@@ -46,79 +49,135 @@ export default function StudentAttendancePage() {
         fetchAttendanceData();
     }, []);
 
+    useEffect(() => {
+        if (selectedCourse) {
+            fetchAttendanceRecords(selectedCourse);
+        }
+    }, [selectedCourse]);
+
+    const fetchAttendanceRecords = async (enrollmentId: string) => {
+        try {
+            console.log(`📋 Fetching attendance records for enrollment ${enrollmentId}...`);
+            
+            const response = await attendanceService.getAll({
+                enrollmentId,
+            });
+
+            console.log("✅ Attendance records response:", response);
+
+            if (response.success) {
+                const records = response.data?.attendances || [];
+                const formattedRecords: AttendanceRecord[] = records.map(
+                    (record: any, index: number) => ({
+                        id: record.id,
+                        date: new Date(record.sessionDate).toISOString().split('T')[0],
+                        sessionNumber: index + 1,
+                        status: record.status,
+                        notes: record.excuse || undefined,
+                    })
+                );
+                setAttendanceRecords(formattedRecords);
+            }
+        } catch (error) {
+            console.error("Error fetching attendance records:", error);
+            setAttendanceRecords([]);
+        }
+    };
+
     const fetchAttendanceData = async () => {
         try {
             setLoading(true);
-            // Mock attendance data
-            const mockCourses: CourseAttendance[] = [
-                {
-                    courseCode: "CS301",
-                    courseName: "هياكل البيانات",
-                    totalSessions: 28,
-                    attendedSessions: 26,
-                    absentSessions: 2,
-                    excusedAbsences: 0,
-                    attendancePercentage: 92.86,
-                    isWarning: false,
-                    isCritical: false,
-                },
-                {
-                    courseCode: "MATH202",
-                    courseName: "تفاضل وتكامل",
-                    totalSessions: 30,
-                    attendedSessions: 24,
-                    absentSessions: 6,
-                    excusedAbsences: 2,
-                    attendancePercentage: 80,
-                    isWarning: true,
-                    isCritical: false,
-                },
-                {
-                    courseCode: "ENG201",
-                    courseName: "كتابة تقنية",
-                    totalSessions: 26,
-                    attendedSessions: 18,
-                    absentSessions: 8,
-                    excusedAbsences: 1,
-                    attendancePercentage: 69.23,
-                    isWarning: true,
-                    isCritical: true,
-                },
-            ];
+            console.log("📊 Fetching student attendance data...");
 
-            const mockRecords: AttendanceRecord[] = [
-                {
-                    date: "2024-01-15",
-                    sessionNumber: 1,
-                    status: "present",
-                },
-                {
-                    date: "2024-01-17",
-                    sessionNumber: 2,
-                    status: "present",
-                },
-                {
-                    date: "2024-01-22",
-                    sessionNumber: 3,
-                    status: "absent",
-                    notes: "غياب بدون عذر",
-                },
-                {
-                    date: "2024-01-24",
-                    sessionNumber: 4,
-                    status: "excused",
-                    notes: "عذر طبي مقبول",
-                },
-                {
-                    date: "2024-01-29",
-                    sessionNumber: 5,
-                    status: "late",
-                    notes: "حضور متأخر 10 دقائق",
-                },
-            ];
+            // Get student's enrollments
+            const enrollmentsRes = await enrollmentsService.getMyEnrollments({
+                status: "ENROLLED",
+            });
 
-            setCourses(mockCourses);
-            setAttendanceRecords(mockRecords);
+            console.log("✅ Enrollments response:", enrollmentsRes);
+
+            if (enrollmentsRes.success) {
+                // The data is directly an array, not wrapped in enrollments
+                const enrollments = Array.isArray(enrollmentsRes.data) 
+                    ? enrollmentsRes.data 
+                    : enrollmentsRes.data?.enrollments || [];
+                console.log("📚 Processing enrollments:", enrollments);
+                console.log("📊 Total enrollments found:", enrollments.length);
+
+                if (enrollments.length === 0) {
+                    console.log("⚠️ No enrollments found for student");
+                    setCourses([]);
+                    setLoading(false);
+                    return;
+                }
+
+                // For each enrollment, get attendance stats
+                const coursesData: CourseAttendance[] = await Promise.all(
+                    enrollments.map(async (enrollment: any) => {
+                        try {
+                            const statsRes = await attendanceService.getStats(
+                                enrollment.id
+                            );
+
+                            const stats = statsRes.success
+                                ? statsRes.data
+                                : {
+                                      totalSessions: 0,
+                                      presentCount: 0,
+                                      absentCount: 0,
+                                      excusedCount: 0,
+                                      attendancePercentage: 0,
+                                  };
+
+                            const attendancePercentage =
+                                stats.attendancePercentage || 0;
+                            const isWarning = attendancePercentage < 85;
+                            const isCritical = attendancePercentage < 75;
+
+                            return {
+                                enrollmentId: enrollment.id,
+                                courseCode:
+                                    enrollment.section?.course?.code || "N/A",
+                                courseName:
+                                    enrollment.section?.course?.nameAr ||
+                                    enrollment.section?.course?.nameEn ||
+                                    "Unknown Course",
+                                totalSessions: stats.totalSessions || 0,
+                                attendedSessions: stats.presentCount || 0,
+                                absentSessions: stats.absentCount || 0,
+                                excusedAbsences: stats.excusedCount || 0,
+                                attendancePercentage,
+                                isWarning,
+                                isCritical,
+                            };
+                        } catch (error) {
+                            console.error(
+                                `Error fetching stats for enrollment ${enrollment.id}:`,
+                                error
+                            );
+                            return {
+                                enrollmentId: enrollment.id,
+                                courseCode:
+                                    enrollment.section?.course?.code || "N/A",
+                                courseName:
+                                    enrollment.section?.course?.nameAr ||
+                                    enrollment.section?.course?.nameEn ||
+                                    "Unknown Course",
+                                totalSessions: 0,
+                                attendedSessions: 0,
+                                absentSessions: 0,
+                                excusedAbsences: 0,
+                                attendancePercentage: 0,
+                                isWarning: false,
+                                isCritical: false,
+                            };
+                        }
+                    })
+                );
+
+                console.log("📈 Courses data with stats:", coursesData);
+                setCourses(coursesData);
+            }
         } catch (error) {
             console.error("Error fetching attendance:", error);
         } finally {
@@ -128,14 +187,12 @@ export default function StudentAttendancePage() {
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case "present":
+            case "PRESENT":
                 return <CheckCircle className="w-5 h-5 text-green-600" />;
-            case "absent":
+            case "ABSENT":
                 return <XCircle className="w-5 h-5 text-red-600" />;
-            case "excused":
+            case "EXCUSED":
                 return <FileText className="w-5 h-5 text-blue-600" />;
-            case "late":
-                return <AlertCircle className="w-5 h-5 text-yellow-600" />;
             default:
                 return null;
         }
@@ -191,17 +248,30 @@ export default function StudentAttendancePage() {
                 )}
 
                 {/* Attendance Cards */}
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {courses.map((course) => (
-                        <Card
-                            key={course.courseCode}
+                {courses.length === 0 ? (
+                    <Card className="p-12">
+                        <CardContent className="text-center">
+                            <Calendar className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                                لا توجد مقررات مسجلة
+                            </h3>
+                            <p className="text-gray-500 dark:text-gray-400">
+                                لم يتم العثور على أي مقررات مسجلة في الفصل الدراسي الحالي
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {courses.map((course) => (
+                            <Card
+                            key={course.enrollmentId}
                             className={`cursor-pointer transition-all hover:shadow-lg ${
-                                selectedCourse === course.courseCode
+                                selectedCourse === course.enrollmentId
                                     ? "ring-2 ring-blue-500"
                                     : ""
                             }`}
                             onClick={() =>
-                                setSelectedCourse(course.courseCode)
+                                setSelectedCourse(course.enrollmentId)
                             }>
                             <CardHeader>
                                 <div className="flex items-start justify-between">
@@ -302,7 +372,8 @@ export default function StudentAttendancePage() {
                             </CardContent>
                         </Card>
                     ))}
-                </div>
+                    </div>
+                )}
 
                 {/* Attendance Records for Selected Course */}
                 {selectedCourse && (
@@ -315,7 +386,7 @@ export default function StudentAttendancePage() {
                                         {
                                             courses.find(
                                                 (c) =>
-                                                    c.courseCode ===
+                                                    c.enrollmentId ===
                                                     selectedCourse
                                             )?.courseName
                                         }
@@ -364,19 +435,17 @@ export default function StudentAttendancePage() {
                                         </div>
                                         <Badge
                                             variant={
-                                                record.status === "present"
+                                                record.status === "PRESENT"
                                                     ? "default"
-                                                    : record.status === "absent"
+                                                    : record.status === "ABSENT"
                                                     ? "destructive"
                                                     : "outline"
                                             }>
-                                            {record.status === "present"
+                                            {record.status === "PRESENT"
                                                 ? t("student.attendance.present")
-                                                : record.status === "absent"
+                                                : record.status === "ABSENT"
                                                 ? t("student.attendance.absent")
-                                                : record.status === "excused"
-                                                ? t("student.attendance.excused")
-                                                : t("student.attendance.late")}
+                                                : t("student.attendance.excused")}
                                         </Badge>
                                     </div>
                                 ))}
